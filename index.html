@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>נתיבי סחר היסטוריים</title>
+    <!-- שילוב Tailwind CSS דרך CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* הגדרות גופן ועיצוב המותאמות לתצוגה חלקה במסכי פרימיום (Samsung S25 Ultra) */
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&display=swap');
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* עיצוב כרטיסיות עם אפקט זכוכית (Glassmorphism) למצב כהה */
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            border-color: rgba(96, 165, 250, 0.5);
+        }
+
+        /* התאמת פס הגלילה למצב כהה */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4B5563; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6B7280; 
+        }
+
+        /* אנימציות מעבר רכות */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen overflow-x-hidden selection:bg-blue-500 selection:text-white flex flex-col">
+
+    <!-- קונטיינר ראשי אליו יוזרק התוכן הדינמי -->
+    <div id="app-container" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-24 flex-grow w-full">
+        <!-- התוכן נטען באמצעות JavaScript -->
+    </div>
+
+    <!-- פוטר (Footer) -->
+    <footer class="mt-auto border-t border-gray-800 bg-gray-900/90 py-6 text-center z-10">
+        <p class="text-gray-500 text-sm font-semibold tracking-wide">
+            האתר נבנה על ידי ג'מיני ורם © 2026
+        </p>
+    </footer>
+
+    <script>
+        let currentLang = 'he';
+
+        // מילון נתונים עבור ממשק דף הבית
+        const uiTexts = {
+            he: {
+                langBtn: "English",
+                aboutBtn: "אודות",
+                timeline: "ציר זמן היסטורי עולמי",
+                title: "אנציקלופדיית נתיבי הסחר",
+                introTitle: "📚 מבוא לאנציקלופדיה",
+                introText: "ברוכים הבאים לאנציקלופדיה המקיפה של נתיבי הסחר ההיסטוריים. פרויקט זה ממפה את העורקים הכלכליים והתרבותיים שעיצבו את האנושות לאורך אלפי שנים. מעבר להעברת סחורות פיזיות, נתיבים אלו היוו את הצינורות דרכם זרמו רעיונות, דתות, טכנולוגיות ושפות. כאן תוכלו לחקור עשרה נתיבים מרכזיים, מוצגים בסדר כרונולוגי מתקופת הברונזה הקדומה ועד ימי הביניים. <strong>מעתה, לחיצה על כל כרטיסיה תוביל למחקר המלא בתיקייה הנפרדת שלו בשרת.</strong>",
+                readMore: "למחקר המלא",
+                footer: "האתר נבנה על ידי ג'מיני ורם © 2026",
+                dir: "rtl"
+            },
+            en: {
+                langBtn: "עברית",
+                aboutBtn: "About",
+                timeline: "World Historical Timeline",
+                title: "Trade Routes Encyclopedia",
+                introTitle: "📚 Encyclopedia Introduction",
+                introText: "Welcome to the comprehensive encyclopedia of historical trade routes. This project maps the economic and cultural arteries that shaped humanity over millennia. Beyond physical goods, these routes were the conduits through which ideas, religions, technologies, and languages flowed. Explore ten major routes chronologically, from the Early Bronze Age to the Middle Ages. <strong>Clicking each card will lead to the full research in its separate folder.</strong>",
+                readMore: "Full Research",
+                footer: "Site built by Gemini & Ram © 2026",
+                dir: "ltr"
+            }
+        };
+
+        // תרגום תקצירים עבור הכרטיסיות בדף הבית
+        const routeTranslations = {
+            'via-maris': { name: 'Via Maris (Way of the Sea)', year: 'c. 3000 BCE', desc: 'Transformed the land of Israel into the most important land bridge in the ancient world. Decisive battles occurred along it, and magnificent trade cities were built.' },
+            'spice-route': { name: 'Spice Route', year: 'c. 2000 BCE', desc: 'Fueled the "Age of Discovery". Established the first global trade empires (Portugal, Netherlands, Britain) and created the modern joint-stock companies.' },
+            'amber-road': { name: 'Amber Road', year: 'c. 1600 BCE', desc: 'Created the first significant economic and cultural connection between the "barbarians" of Northern Europe and the advanced civilizations of the Mediterranean.' },
+            'kings-highway': { name: "King's Highway", year: 'c. 1200 BCE', desc: 'Served as the central transport conduit enabling the prosperity of the Nabataean kingdom. Later paved by the Roman Emperor Trajan.' },
+            'persian-royal-road': { name: 'Persian Royal Road', year: 'c. 500 BCE', desc: 'Established the world\'s first fast courier and postal system. A royal messenger could cross the vast empire in just seven days.' },
+            'grand-trunk-road': { name: 'Grand Trunk Road', year: '3rd Century BCE', desc: 'The longest ancient road in South Asia. Enabled the flourishing of major cities along the Ganges and served as a melting pot for cultures.' },
+            'incense-route': { name: 'Incense Route', year: '3rd Century BCE', desc: 'Led to the establishment of magnificent desert cities like Petra. Developed advanced desert agriculture and water runoff technologies.' },
+            'silk-road': { name: 'Silk Road', year: 'c. 130 BCE', desc: 'An unprecedented connection between East and West. Facilitated the spread of China\'s four great inventions (paper, gunpowder, compass, printing).' },
+            'trans-saharan': { name: 'Trans-Saharan Trade', year: 'c. 4th Century CE', desc: 'Generated fantastic wealth for West African empires. Transformed isolated mud cities like Timbuktu into global academic centers.' },
+            'tea-horse-road': { name: 'Tea Horse Road', year: 'c. 6th Century CE', desc: 'An unparalleled high-altitude trade network. Solidified tea as the most popular drink in East Asia and deeply integrated the Chinese and Tibetan economies.' }
+        };
+
+        // פונקציית החלפת שפה
+        function toggleLanguage() {
+            currentLang = currentLang === 'he' ? 'en' : 'he';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = uiTexts[currentLang].dir;
+            
+            // עדכון הפוטר
+            const footerText = document.querySelector('footer p');
+            if (footerText) footerText.innerHTML = uiTexts[currentLang].footer;
+
+            renderHome();
+        }
+
+        /**
+         * מסד הנתונים: 10 נתיבי סחר היסטוריים מסודרים כרונולוגית (מהעתיק לחדש).
+         * תוקן באג הגרשיים (SyntaxError) כדי להבטיח רינדור תקין.
+         */
+        const tradeRoutes = [
+            {
+                id: 'via-maris',
+                name: 'ויה מאריס (דרך הים)',
+                icon: '🌊',
+                initiator: 'סוחרים כנענים ואימפריות מצרים העתיקה.',
+                creationYear: 'כ-3000 לפנה"ס (תקופת הברונזה הקדומה).',
+                activeYears: '3000 לפנה"ס – המאה ה-20 לספירה.',
+                creationReason: 'הצורך הגאופוליטי והכלכלי לחבר בין האימפריה המצרית מדרום לאימפריות של מסופוטמיה (אשור, בבל) ואנטוליה (החתים) מצפון, דרך הגשר היבשתי של ארץ ישראל.',
+                etymology: `
+                    <div class="space-y-4 text-gray-300">
+                        <p><strong class="text-blue-400">הוגה המונח:</strong> מקורו בתרגום הוולגטה ללטינית של ספר ישעיהו (ט', א').</p>
+                        <p><strong class="text-blue-400">מונח המקור:</strong> Via Maris (בלטינית) / דֶּרֶךְ הַיָּם (בעברית מקראית).</p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                            <ul class="space-y-3">
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-blue-800/50">חלק א' – Via (דרך)</span>
+                                    <span>מילה לטינית המתארת דרך סלולה או מסלול ראשי. במקור המקראי, "דרך" מתייחסת למסלול הליכה מרכזי.</span>
+                                </li>
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-emerald-900/50 text-emerald-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-emerald-800/50">חלק ב' – Maris (של הים)</span>
+                                    <span>נגזר מהמילה הלטינית "Mare" (ים). הנתיב נקרא כך משום שחלקו המשמעותי ביותר עבר במקביל לחוף הים התיכון, ממצרים ועד הכרמל ומשם פנה פנימה לכיוון סוריה.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                origins: 'החלה כרצף של שבילים מקומיים שחיברו ערי חוף כנעניות. עם עליית האימפריה המצרית, הפרעונים הפכו את הנתיב לעורק צבאי ומסחרי רשמי, עליו הקימו מצודות ותחנות משמר.',
+                ideology: 'אידאולוגיה של שליטה אימפריאלית ומונופול אסטרטגי. השליטה בדרך הים פירושה היה שליטה בכלכלת המזרח התיכון כולו. האימפריות נאבקו עליה ללא הרף כדי להבטיח מעבר בטוח של כוחות צבא וסחורות.',
+                achievements: 'הפכה את ארץ ישראל לגשר החשוב ביותר בעולם העתיק. לאורכה התרחשו קרבות היסטוריים מכריעים (כמו קרב מגידו), ולאורכה הוקמו ערים מפוארות שניזונו מהמסחר הבינלאומי.'
+            },
+            {
+                id: 'spice-route',
+                name: 'דרך התבלינים',
+                icon: '🌶️',
+                initiator: 'סוחרים אוסטרונזים, הודים וערבים (תחילת הסחר); פורטוגל (הנתיב האוקייני ב-1498).',
+                creationYear: 'כ-2000 לפנה"ס (רשתות סחר מוקדמות).',
+                activeYears: '2000 לפנה"ס – המאה ה-18 לספירה.',
+                creationReason: 'הצורך הקיומי לשמר מזון לפני המצאת הקירור, יחד עם שימושים רפואיים, קוסמטיים ופולחניים. אירופה חיפשה לעקוף את המונופול הערבי-ונציאני על התבלינים.',
+                etymology: `
+                    <div class="space-y-4 text-gray-300">
+                        <p><strong class="text-blue-400">הוגה המונח:</strong> מונח היסטוריוגרפי מודרני המתאר את הרשת הימית.</p>
+                        <p><strong class="text-blue-400">מונח המקור:</strong> Spice Route (באנגלית).</p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                            <ul class="space-y-3">
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-blue-800/50">חלק א' – Spice (תבלין)</span>
+                                    <span>מקור המילה מצרפתית עתיקה "espice", אשר נגזרה מהמילה הלטינית "species" (סוג, זן, או "סחורה מיוחדת"). בעברית, המקור הוא מהשורש ב.ל.ל שמשמעותו לערבב במזון.</span>
+                                </li>
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-emerald-900/50 text-emerald-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-emerald-800/50">חלק ב' – Route (נתיב)</span>
+                                    <span>מלטינית "rupta" (דרך שנפרצה). מדגישה את המסלול הימי הקבוע שניצל את רוחות המונסון באוקיינוס ההודי.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                origins: 'התחיל כסחר חופים מקומי באוקיינוס ההודי. עם הבנת משטר רוחות המונסון (שייט מערבה בחורף ומזרחה בקיץ), הפך לנתיב אוקייני פתוח שאפשר הובלת פלפל, קינמון וציפורן בכמויות אדירות.',
+                ideology: 'תודלקה על ידי מרקנטיליזם – התפיסה שעוצמתה של אומה נמדדת בכמות העושר שברשותה, ולכן יש לשלוט בנתיבי הסחר. שולבה גם אידאולוגיה נוצרית-מיסיונרית להפצת הדת באסיה.',
+                achievements: 'תדלקה את "עידן התגליות" (החיפוש אחר הודו הוביל לגילוי אמריקה). הקימה אימפריות סחר (פורטוגל, הולנד, בריטניה), יצרה את חברות המניות המודרניות הראשונות, וקישרה את הגלובוס ימית.'
+            },
+            {
+                id: 'amber-road',
+                name: 'דרך הענבר',
+                icon: '🟠',
+                initiator: 'שבטים באלטיים קדומים, ומאוחר יותר סוחרים רומים.',
+                creationYear: 'כ-1600 לפנה"ס (תקופת הברונזה האירופית).',
+                activeYears: '1600 לפנה"ס – המאה ה-5 לספירה (נפילת האימפריה הרומית).',
+                creationReason: 'הביקוש העצום במזרח התיכון ובאגן הים התיכון (כולל במצרים העתיקה) לענבר הבלטי – שרף עצים מאובן שנחשב לאבן חן בעלת תכונות מיסטיות ורפואיות.',
+                etymology: `
+                    <div class="space-y-4 text-gray-300">
+                        <p><strong class="text-blue-400">הוגה המונח:</strong> מונח היסטורי שהתקבע בשפות האירופיות לאורך מאות שנים.</p>
+                        <p><strong class="text-blue-400">מונח המקור:</strong> Amber Road (באנגלית) / Bernstein-Straße (בגרמנית).</p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                            <ul class="space-y-3">
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-blue-800/50">חלק א' – Amber (ענבר)</span>
+                                    <span>המקור האנגלי מגיע מהמילה הערבית "Anbar" (ענבר), שתיארה במקור את חומר הריח המופק מלווייתנים (Ambergris), ומאוחר יותר הושאלה לשרף המאובן. ביוונית נקרא "אלקטרון" (ממנו נגזרה המילה חשמל - אלקטרוניקה, בשל המטען הסטטי שהוא יוצר בשפשוף).</span>
+                                </li>
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-emerald-900/50 text-emerald-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-emerald-800/50">חלק ב' – Road (דרך)</span>
+                                    <span>רשת של נתיבי יבשה ונהרות שחצו את אירופה מצפון (הים הבלטי) לדרום (הים האדריאטי ואיטליה).</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                origins: 'התפתחה באופן טבעי כאשר תושבי החופים הבלטיים מצאו גושי ענבר שנפלטו מהים, והחלו לסחור בהם עם שבטים מדרום תמורת נחושת וזהב. הנתיב הפך מסודר יותר עם התפשטות האימפריה הרומית צפונה.',
+                ideology: 'אנימיזם קדום שהעניק לענבר מעמד קדוש ("דמעות השמש" או "אבן הצפון"). האידאולוגיה הרומית, לעומת זאת, ראתה בענבר סמל סטטוס אולטימטיבי לעושר ויוקרה של מעמד האצולה, ואמצעי להפגנת כוח קנייה.',
+                achievements: 'הנתיב יצר את הקשר הכלכלי והתרבותי הראשון והמשמעותי בין "הברברים" של צפון אירופה לבין הציביליזציות המתקדמות של אגן הים התיכון, הרבה לפני הכיבושים הצבאיים.'
+            },
+            {
+                id: 'kings-highway',
+                name: 'דרך המלך',
+                icon: '👑',
+                initiator: 'ממלכות עבר הירדן (אדום, מואב ועמון).',
+                creationYear: 'כ-1200 לפנה"ס (עיקר פעילותה, אף שקדומה מכך).',
+                activeYears: '1200 לפנה"ס – המאה ה-16 לספירה.',
+                creationReason: 'יצירת עורק סחר לאורך רמת עבר הירדן, המחבר את מפרץ אילת (עציון גבר) עם דמשק וסוריה, כדי לשנע סחורות ולגבות מיסי מעבר מהשיירות.',
+                etymology: `
+                    <div class="space-y-4 text-gray-300">
+                        <p><strong class="text-blue-400">הוגה המונח:</strong> מקור מקראי עתיק (בספר במדבר).</p>
+                        <p><strong class="text-blue-400">מונח המקור:</strong> דֶּרֶךְ הַמֶּלֶךְ (עברית מקראית) / King's Highway (אנגלית).</p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                            <ul class="space-y-3">
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-blue-800/50">חלק א' – דרך</span>
+                                    <span>מסלול יבשתי ראשי ומוסדר.</span>
+                                </li>
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-emerald-900/50 text-emerald-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-emerald-800/50">חלק ב' – המלך</span>
+                                    <span>מתייחס לכך שהדרך הייתה בבעלות ובתחזוקת השליט המקומי (מלך אדום, מואב וכו'). השליט הבטיח ביטחון לשיירות, ובתמורה דרש תשלום מכס. המונח הפך לביטוי שגור לפעולה ראשית ולגיטימית ("לעלות על דרך המלך").</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                origins: 'התפתחה על בסיס שבילי רועים וציידים לאורך קו פרשת המים המזרחי של בקע הירדן. מיקומה על הרמה הבטיח אקלים נוח יותר ומקורות מים זמינים לעומת המדבר העמוק.',
+                ideology: 'ריבונות ומשילות מקומית. בניגוד ל"ויה מאריס" שנשלטה על ידי אימפריות, דרך המלך הייתה עורק החיים של הממלכות המקומיות בעבר הירדן, ושליטה בה הייתה הבסיס לקיומן הפוליטי והכלכלי.',
+                achievements: 'שימשה כצינור התעבורה המרכזי שאיפשר את שגשוגה של ממלכת הנבטים בשלב מאוחר יותר. שופצה ורוצפה על ידי הקיסר הרומי טראיאנוס בשנת 106 לספירה תחת השם "ויה טראיאנה נובה" (Via Traiana Nova).'
+            },
+            {
+                id: 'persian-royal-road',
+                name: 'הדרך המלכותית הפרסית',
+                icon: '🐎',
+                initiator: 'דריווש הראשון, מלך האימפריה האחמנית.',
+                creationYear: 'כ-500 לפנה"ס.',
+                activeYears: '500 לפנה"ס – 330 לפנה"ס (נפלה עם כיבושי אלכסנדר מוקדון, אך התשתיות המשיכו לשמש).',
+                creationReason: 'הצורך לשלוט ולהעביר פקודות וידיעות מודיעיניות במהירות הבזק ברחבי האימפריה הגדולה ביותר בעולם דאז – מעיר הבירה שושן (איראן) ועד סרדיס (מערב טורקיה).',
+                etymology: `
+                    <div class="space-y-4 text-gray-300">
+                        <p><strong class="text-blue-400">הוגה המונח:</strong> הירודוטוס (היסטוריון יווני מן המאה ה-5 לפנה"ס).</p>
+                        <p><strong class="text-blue-400">מונח המקור:</strong> Persian Royal Road (באנגלית, מתורגם מיוונית עתיקה).</p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                            <ul class="space-y-3">
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-blue-800/50">חלק א' – המלכותית (Royal)</span>
+                                    <span>מציין שהדרך נועדה אך ורק לשליחי המלך הפרסי (האחמני). נוסעים רגילים לא הורשו להשתמש בתחנות הרענון ובסוסים של המדינה ללא הרשאה מלכותית מפורשת.</span>
+                                </li>
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-emerald-900/50 text-emerald-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-emerald-800/50">חלק ב' – הדרך הפרסית</span>
+                                    <span>מתאר את המפעל התשתיתי האדיר של האימפריה הפרסית, באורך של כ-2,699 קילומטרים.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                origins: 'דריווש הראשון לקח רשתות דרכים מקומיות קדומות מתקופת האימפריה האשורית, שיפץ, ריצף וחיבר אותן לכדי מערכת אחת רציפה. לאורך הדרך נבנו למעלה מ-100 תחנות פונדק ("קרוואנסראי").',
+                ideology: 'ריכוזיות כוח שלטונית ותקשורת רציפה. המשפט של הירודוטוס על שליחי המלך: "לא שלג, לא גשם, לא חום ולא חשכת הלילה יעכבו את השליחים מלהשלים את משימתם" – הפך למוטו המייצג נאמנות ויעילות ממשלתית (ומשמש עד היום כמוטו הדואר האמריקאי).',
+                achievements: 'הקמת מערכת ה"דואר" והשליחים המהירה הראשונה בעולם. שליח מלכותי, שהחליף סוס רענן בכל תחנה, יכול היה לחצות את המרחק העצום (2,699 ק"מ) בשבעה ימים בלבד, מסע שלקח לאדם רגיל כשלושה חודשים.'
+            },
+            {
+                id: 'grand-trunk-road',
+                name: 'דרך הגראנד טראנק',
+                icon: '🐘',
+                initiator: 'צ\'נדרגופטה מאוריה (מייסד האימפריה המאורית).',
+                creationYear: 'המאה ה-3 לפנה"ס.',
+                activeYears: 'המאה ה-3 לפנה"ס – פעילה עד היום (ככבישים לאומיים מודרניים בהודו ופקיסטן).',
+                creationReason: 'איחוד תת-היבשת ההודית מבחינה פוליטית וכלכלית. הדרך נועדה לחבר את מפרץ בנגל במזרח לפשוואר והגבול הצפון-מערבי, לאפשר תנועת צבא ולהקל על סחר היבשתי באסיה הדרומית.',
+                etymology: `
+                    <div class="space-y-4 text-gray-300">
+                        <p><strong class="text-blue-400">הוגה המונח:</strong> הבריטים, במהלך השלטון הקולוניאלי במאה ה-17.</p>
+                        <p><strong class="text-blue-400">מונח המקור:</strong> Grand Trunk Road. (בסנסקריט קדומה נקראה Uttarapatha - דרך הצפון).</p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                            <ul class="space-y-3">
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-blue-800/50">חלק א' – Grand (גדול/מפואר)</span>
+                                    <span>מדגיש את קנה המידה העצום של הפרויקט שחצה את כל תת היבשת ההודית לאורך אלפי קילומטרים.</span>
+                                </li>
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-emerald-900/50 text-emerald-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-emerald-800/50">חלק ב' – Trunk (גזע / עורק ראשי)</span>
+                                    <span>במונחי תשתיות בריטיים, "Trunk road" הוא העורק המרכזי והראשי שממנו מתפצלות כל שאר הדרכים והכבישים המשניים (בדומה לגזע עץ שממנו יוצאים הענפים).</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                origins: 'נבנתה על תוואי קדום אף יותר של ה"אוטרפאתה". השליט מאוריה הרחיב אותה. מאוחר יותר במאה ה-16, השליט האפגני שר שאה סורי שיקם את הדרך לחלוטין, נטע עצים לצל לאורכה, ובנה בארות ומסגדים לנוחות הנוסעים.',
+                ideology: 'האידאולוגיה המאורית ראתה בתשתיות כלי לאיחוד לאומי ושילוב של תרבויות ודתות שונות בתוך האימפריה ההודית. הדרך סימלה את האחריות של השלטון לרווחת האזרחים והסוחרים דרך אספקת צל ומים בסביבה קשה.',
+                achievements: 'הדרך העתיקה הארוכה ביותר (כ-2,400 ק"מ) באסיה הדרומית ששרדה ושודרגה ברציפות. הדרך אפשרה את פריחתן של הערים הגדולות לאורך נהר הגנגס והיוותה כור היתוך לתרבויות, דתות ולשפות במשך אלפיים שנה.'
+            },
+            {
+                id: 'incense-route',
+                name: 'דרך הבשמים (הקטורת)',
+                icon: '🏺',
+                initiator: 'ממלכת הנבטים (שבטים נוודים שהפכו לאימפריית סחר אדירה).',
+                creationYear: 'המאה ה-3 לפנה"ס.',
+                activeYears: 'המאה ה-3 לפנה"ס – המאה ה-2 לספירה.',
+                creationReason: 'הובלת שרפי עצים יקרים (בעיקר מור ולבונה) מדרום חצי האי ערב (תימן ועומאן) אל נמלי הים התיכון (כמו עזה) ומשם לרומא ויוון, לצורכי פולחן דתי, קוסמטיקה וקבורה.',
+                etymology: `
+                    <div class="space-y-4 text-gray-300">
+                        <p><strong class="text-blue-400">הוגה המונח:</strong> מונח ארכאולוגי-היסטורי מקובל.</p>
+                        <p><strong class="text-blue-400">מונח המקור:</strong> Incense Route / דרך הבשמים.</p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                            <ul class="space-y-3">
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-blue-800/50">חלק א' – הבשמים / הקטורת (Incense)</span>
+                                    <span>הקטורת בעברית באה מהשורש ק.ט.ר (העלאת עשן בריח ניחוח). באנגלית (Incense) המקור הוא מלטינית "incendere" שפירושו להבעיר. "בשמים" (ריח טוב) מדגיש את תכלית הסחורה.</span>
+                                </li>
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-emerald-900/50 text-emerald-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-emerald-800/50">חלק ב' – דרך (Route)</span>
+                                    <span>מסלול יבשתי מדברי קשוח, באורך של כ-2,000 ק"מ, שהצריך ידע בלעדי בניווט במדבר הערבי.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                origins: 'הנבטים החלו כשבטי נוודים. יתרונם העצום היה היכרותם עם המדבר ויכולתם יוצאת הדופן לאגור מים בבורות סתרים, מה שאפשר להם לחצות אזורים צחיחים שצבאות לא יכלו לשרוד בהם.',
+                ideology: 'שמירה קפדנית על סודיות ומונופול כבסיס לעוצמה פוליטית. הנבטים הפיצו שמועות אגדיות על מפלצות ונחשים מעופפים ששומרים על עצי הלבונה, כלוחמה פסיכולוגית למניעת הגעת מתחרים למקור העושר.',
+                achievements: 'הקמת ערי מדבר מפוארות ששימשו כתחנות סחר (פטרה, עבדת, שבטה). פיתוח טכנולוגיות חקלאות נגר והטיית מים מהמתקדמות בעולם העתיק, שאפשרו חיים בלב המדבר – ידע המשמש את החקלאות בנגב עד היום.'
+            },
+            {
+                id: 'silk-road',
+                name: 'דרך המשי',
+                icon: '🐪',
+                initiator: 'שושלת האן הסינית (הקיסר וו-די והשגריר ג\'אנג צ\'יאן).',
+                creationYear: 'כ-130 לפנה"ס.',
+                activeYears: '130 לפנה"ס – 1453 לספירה (נפילת קונסטנטינופול לידי העות\'מאנים).',
+                creationReason: 'חיפוש אחר בריתות צבאיות והשגת סוסי מלחמה מעולים ממרכז אסיה ("הסוסים השמימיים") לטובת חיל הפרשים הסיני נגד שבטי הנוודים בצפון.',
+                etymology: `
+                    <div class="space-y-4 text-gray-300">
+                        <p><strong class="text-blue-400">הוגה המונח:</strong> פרדיננד פון ריכטהופן (גיאוגרף גרמני, 1833–1905). טבע את המונח בשנת 1877.</p>
+                        <p><strong class="text-blue-400">מונח המקור:</strong> Seidenstraße (בגרמנית).</p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                            <ul class="space-y-3">
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-blue-800/50">חלק א' – Seiden (משי)</span>
+                                    <span>מתייחס לסחורה היקרה ביותר שעברה בנתיב. סין שמרה על סוד ייצור המשי בקנאות עונש מוות, מה שהפך אותו למוצר מותרות אולטימטיבי באימפריה הרומית.</span>
+                                </li>
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-emerald-900/50 text-emerald-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-emerald-800/50">חלק ב' – Straße (דרך)</span>
+                                    <span>מתייחס לרשת הנתיבים. לא הייתה "דרך" אחת בודדת, אלא מארג עצום של שבילים שחיברו נאות מדבר ומרכזי סחר בין אירופה ואסיה.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                origins: 'שורשיה במסע חקר דיפלומטי. השגריר ג\'אנג צ\'יאן נשלח מערבה. למרות שנשבה לשנים, דיווחיו לקיסר לאחר שובו על עושר התרבויות במערב הניעו את מיסוד קשרי המסחר.',
+                ideology: 'צינור האידאולוגיה המרכזי של העולם העתיק. הדרך קידמה קוסמופוליטיות, סובלנות דתית בתחנות המעבר, ואפשרה את הפצת הבודהיזם מהודו לסין ואת התפשטות האסלאם מזרחה.',
+                achievements: 'חיבור חסר תקדים של כלכלות המזרח והמערב. הפצת ארבע ההמצאות הגדולות של סין לאירופה (נייר, אבק שריפה, מצפן, ודפוס), אשר הובילו ישירות לרנסנס ולשינוי ההיסטוריה המערבית.'
+            },
+            {
+                id: 'trans-saharan',
+                name: 'נתיבי הסחר הטראנס-סהרייניים',
+                icon: '🐫',
+                initiator: 'שבטי הברברים בצפון אפריקה, ומאוחר יותר אימפריות מוסלמיות (כמו מאלי וסונגאי).',
+                creationYear: 'כ-המאה ה-4 לספירה (עם ביות הגמל הערבי בצפון אפריקה).',
+                activeYears: 'המאה ה-4 לספירה – סוף המאה ה-16 (דעך עקב סחר ימי אירופאי).',
+                creationReason: 'הצורך החיוני בהחלפת מלח (שנכרה בצפון ובמרכז הסהרה והיה קריטי באקלים חם לשימור מזון ומלחים בגוף) תמורת זהב, שנהב ועבדים ממערב אפריקה.',
+                etymology: `
+                    <div class="space-y-4 text-gray-300">
+                        <p><strong class="text-blue-400">הוגה המונח:</strong> מונח גאוגרפי-היסטורי מודרני.</p>
+                        <p><strong class="text-blue-400">מונח המקור:</strong> Trans-Saharan Trade.</p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                            <ul class="space-y-3">
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-blue-800/50">חלק א' – Trans (טראנס / חוצה)</span>
+                                    <span>קידומת לטינית שמשמעותה "מעבר ל-" או "חוצה". מתארת את הישג החצייה של מחסום טבעי עצום.</span>
+                                </li>
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-emerald-900/50 text-emerald-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-emerald-800/50">חלק ב' – Saharan (סהרייני)</span>
+                                    <span>נגזר מהמילה הערבית "צחראא" (صحراء), שפירושה הפשוט והמוחלט הוא "מדבר". המסלולים חצו את מדבר הסהרה – המדבר החם הגדול בעולם.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                origins: 'לפני עידן הגמלים, הסחר בסהרה היה זניח ומוגבל לדילוגים קצרים בין נאות מדבר באמצעות סוסים. הכנסת הגמל ("ספינת המדבר"), שיכול לשרוד ימים ללא מים, חוללה מהפכה תעבורתית ואפשרה הקמת שיירות ענק (לעתים אלפי גמלים).',
+                ideology: 'מעבר למניע הכלכלי, הנתיבים הפיצו את דת האסלאם, את השפה הערבית ואת תרבות הקריאה והכתיבה לדרום מערב אפריקה. האידאולוגיה הדתית יצרה רשת אמונית של סוחרים שבטחו זה בזה על בסיס דת משותפת (אומת האסלאם).',
+                achievements: 'יצר עושר פנטסטי לאימפריות של מערב אפריקה (למשל מנסה מוסא ממאלי, האיש העשיר בהיסטוריה). הפך ערי בוץ בודדות, כמו טימבוקטו, למרכזים אקדמיים עולמיים ללימוד מתמטיקה, אסטרונומיה ואסלאם.'
+            },
+            {
+                id: 'tea-horse-road',
+                name: 'דרך התה והסוסים',
+                icon: '🍵',
+                initiator: 'שושלת טאנג הסינית וממלכת טיבט.',
+                creationYear: 'כ-המאה ה-6 לספירה.',
+                activeYears: 'המאה ה-6 לספירה – אמצע המאה ה-20.',
+                creationReason: 'ברטר (סחר חליפין) אסטרטגי: לסין היו כמויות עצומות של תה (הכרחי לתזונתם של הטיבטים בגובה הרב), ולטיבט היו סוסי מלחמה חסונים ויציבים (הכרחיים לצבא הסיני מול איומי מונגוליה).',
+                etymology: `
+                    <div class="space-y-4 text-gray-300">
+                        <p><strong class="text-blue-400">הוגה המונח:</strong> היסטוריונים וסוחרים סינים לאורך הדורות.</p>
+                        <p><strong class="text-blue-400">מונח המקור:</strong> Chama Dao (במנדרינית: 茶马道).</p>
+                        <div class="bg-gray-800/80 p-5 rounded-xl border border-gray-700 shadow-inner">
+                            <ul class="space-y-3">
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-blue-800/50">חלק א' – Cha (תה) + Ma (סוס)</span>
+                                    <span>צמד מילים המתאר את אופיו המדויק של הסחר. הטיבטים היו זקוקים לתה כדי לקבל ויטמינים באזור בו חקלאות רגילה לא מתאפשרת, והסינים שילמו בלבני תה דחוסות תמורת כוח סוס צבאי.</span>
+                                </li>
+                                <li class="flex flex-col sm:flex-row gap-2">
+                                    <span class="bg-emerald-900/50 text-emerald-300 px-3 py-1 rounded-md font-bold text-sm whitespace-nowrap border border-emerald-800/50">חלק ב' – Dao (דרך)</span>
+                                    <span>מונח שפירושו שביל או דרך. המסלול עבר דרך ההרים והעמקים המסוכנים ביותר בעולם (מחוזות סצ'ואן ויונאן ועד להרי ההימלאיה של טיבט).</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                `,
+                origins: 'החלה עקב הקושי העצום של הצבא הסיני לגדל סוסי קרב איכותיים באדמות החקלאיות במרכז סין. סבלים אנושיים נשאו על גבם משקלי ענק של לבני תה (לעיתים מעל 70 ק"ג לאדם) בטיפוס לגבהים של למעלה מ-4,000 מטרים לחילופין.',
+                ideology: 'תלות הדדית וקשר של הישרדות. המיזוג בין תרבות ההאן הסינית למסורות הבודהיזם הטיבטי. סחר החליפין כפה שלום אסטרטגי לפרקים ארוכים בין שתי מעצמות אסייתיות שונות לחלוטין באופיין.',
+                achievements: 'יצירת רשת סחר בגבהים שאין לה אח ורע בעולם, ששרדה אלפי שנים למרות תנאי אקלים וטופוגרפיה אכזריים. קיבעה את התה כמשקה הפופולרי ביותר במזרח אסיה (וטיבט בפרט) ושילבה עמוקות את כלכלות סין וטיבט.'
+            }
+        ];
+
+        // פונקציות לתצוגה הדינמית
+        
+        /**
+         * מציג את דף הבית המרכזי - רשת של 10 הנתיבים מסודרת כרונולוגית
+         */
+        function renderHome() {
+            const container = document.getElementById('app-container');
+            const t = uiTexts[currentLang];
+            const isEn = currentLang === 'en';
+            
+            let html = `
+                <!-- סרגל ניווט עליון -->
+                <nav class="flex justify-between items-center mb-10 fade-in">
+                    <button onclick="toggleLanguage()" class="flex items-center gap-2 text-sm font-semibold text-gray-300 hover:text-white bg-gray-800/60 hover:bg-gray-700/60 px-4 py-2 rounded-xl border border-gray-700 transition-all shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg>
+                        ${t.langBtn}
+                    </button>
+                    <a href="./about/index.html" class="flex items-center gap-2 text-sm font-semibold text-blue-400 hover:text-blue-300 bg-blue-900/30 hover:bg-blue-800/40 px-5 py-2 rounded-xl border border-blue-800/50 transition-all shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        ${t.aboutBtn}
+                    </a>
+                </nav>
+
+                <div class="text-center mb-16 fade-in">
+                    <span class="inline-block py-1 px-4 rounded-full bg-blue-900/50 text-blue-400 border border-blue-700 font-semibold mb-4 text-sm tracking-widest">${t.timeline}</span>
+                    <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-emerald-400 tracking-tight mb-6">
+                        ${t.title}
+                    </h1>
+                    
+                    <!-- אזור המבוא -->
+                    <div class="max-w-4xl mx-auto bg-gray-800/40 p-6 sm:p-8 rounded-3xl border border-gray-700/50 mb-10 shadow-inner ${isEn ? 'text-left' : 'text-right'} relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1 h-full bg-blue-500"></div>
+                        <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-3">
+                            <span class="text-2xl">📚</span> ${t.introTitle}
+                        </h3>
+                        <p class="text-base sm:text-lg text-gray-300 leading-relaxed">
+                            ${t.introText}
+                        </p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+            `;
+
+            tradeRoutes.forEach((route, index) => {
+                const rName = isEn ? routeTranslations[route.id].name : route.name;
+                const rYear = isEn ? routeTranslations[route.id].year : route.creationYear.split('(')[0];
+                const rDesc = isEn ? routeTranslations[route.id].desc : route.achievements;
+                const linkPath = isEn ? `./en/${route.id}/index.html` : `./${route.id}/index.html`;
+
+                html += `
+                    <!-- הכרטיסיה הומרה לתגית A שמובילה לתיקייה נפרדת בגיטהאב -->
+                    <a href="${linkPath}" class="glass-card rounded-3xl p-6 cursor-pointer flex flex-col items-center text-center group fade-in hover:bg-gray-800/80 relative block no-underline transition-transform">
+                        <div class="absolute -top-4 -left-4 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg border-2 border-gray-900 z-10">
+                            ${index + 1}
+                        </div>
+                        <div class="text-6xl mb-5 group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300 drop-shadow-xl mt-2">${route.icon}</div>
+                        <h2 class="text-2xl font-bold text-white mb-2">${rName}</h2>
+                        <div class="bg-gray-800/80 px-3 py-1.5 rounded-lg border border-gray-700 w-full mb-3">
+                            <p class="text-xs text-blue-300 font-semibold text-center w-full" dir="${isEn ? 'ltr' : 'rtl'}">${rYear}</p>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed line-clamp-3 mb-5">${rDesc}</p>
+                        <div class="mt-auto w-full">
+                            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 group-hover:from-blue-500 group-hover:to-indigo-500 text-white font-bold py-2.5 px-4 rounded-xl transition-all shadow-md w-full flex items-center justify-center gap-2 text-sm">
+                                <span>${t.readMore}</span>
+                                <svg class="w-4 h-4 transform ${isEn ? '' : 'rotate-180'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /**
+         * מציג דף מידע מפורט עבור נתיב ספציפי (מבוסס על ה-ID שלו).
+         */
+        function renderRoute(routeId) {
+            const route = tradeRoutes.find(r => r.id === routeId);
+            if (!route) return;
+
+            const container = document.getElementById('app-container');
+            
+            const html = `
+                <div class="fade-in max-w-5xl mx-auto">
+                    <!-- כפתור חזרה לדף הבית -->
+                    <button onclick="renderHome()" class="mb-8 flex items-center text-gray-400 hover:text-white bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700 px-5 py-2.5 rounded-xl transition-all group w-fit">
+                        <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                        <span class="font-semibold">חזור למפת הנתיבים</span>
+                    </button>
+
+                    <!-- כותרת ראשית של הנתיב (Header) -->
+                    <div class="glass-card rounded-[2rem] p-8 sm:p-12 mb-10 text-center sm:text-right flex flex-col sm:flex-row items-center sm:items-start gap-8 relative overflow-hidden border-t-4 border-t-blue-500">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500 opacity-5 rounded-full blur-3xl -mr-32 -mt-32"></div>
+                        <div class="text-8xl sm:text-9xl drop-shadow-2xl z-10">${route.icon}</div>
+                        <div class="flex-1 z-10">
+                            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6">${route.name}</h1>
+                            <div class="flex flex-wrap gap-4 justify-center sm:justify-start">
+                                <span class="bg-indigo-900/50 text-indigo-300 px-5 py-2 rounded-xl text-sm font-semibold border border-indigo-800/50 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    פעילות: ${route.activeYears}
+                                </span>
+                                <span class="bg-emerald-900/50 text-emerald-300 px-5 py-2 rounded-xl text-sm font-semibold border border-emerald-800/50 flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    שנת ייסוד: ${route.creationYear}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- אזור התוכן המחקרי - חלוקה לעמודות (Grid) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10">
+                        
+                        <!-- עמודה ימנית (יוזמים ושורשים) -->
+                        <div class="space-y-8 sm:space-y-10">
+                            <!-- יזמים וסיבה -->
+                            <section class="glass-card p-6 sm:p-8 rounded-3xl relative overflow-hidden">
+                                <div class="absolute left-0 top-0 w-1 h-full bg-blue-500"></div>
+                                <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                                    <span class="text-3xl">🏛️</span> בוני ומייסדי הנתיב
+                                </h3>
+                                <div class="space-y-5">
+                                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
+                                        <strong class="text-blue-400 block mb-1 text-sm uppercase tracking-wider">יוזם / ממציא ראשי:</strong> 
+                                        <p class="text-gray-200 text-lg">${route.initiator}</p>
+                                    </div>
+                                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700/50">
+                                        <strong class="text-blue-400 block mb-1 text-sm uppercase tracking-wider">הסיבה ההיסטורית להקמה:</strong> 
+                                        <p class="text-gray-300 leading-relaxed">${route.creationReason}</p>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- רקע וילדות (שורשים) -->
+                            <section class="glass-card p-6 sm:p-8 rounded-3xl relative overflow-hidden">
+                                <div class="absolute left-0 top-0 w-1 h-full bg-green-500"></div>
+                                <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                                    <span class="text-3xl">🌱</span> שורשים ותחילת הדרך
+                                </h3>
+                                <p class="text-gray-300 leading-relaxed text-lg">${route.origins}</p>
+                            </section>
+                        </div>
+
+                        <!-- עמודה שמאלית (אטימולוגיה) -->
+                        <div class="space-y-8 sm:space-y-10 lg:h-full">
+                            <section class="glass-card p-6 sm:p-8 rounded-3xl h-full relative overflow-hidden">
+                                <div class="absolute left-0 top-0 w-1 h-full bg-indigo-500"></div>
+                                <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                                    <span class="text-3xl">📖</span> ניתוח אטימולוגי מלא
+                                </h3>
+                                <div class="text-lg">
+                                    ${route.etymology}
+                                </div>
+                            </section>
+                        </div>
+
+                        <!-- אזור רוחב מלא (אידאולוגיה והישגים) -->
+                        <div class="col-span-1 lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 mt-2">
+                            <!-- אידאולוגיה -->
+                            <section class="glass-card p-6 sm:p-8 rounded-3xl relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-1 bg-purple-500"></div>
+                                <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                                    <span class="text-3xl">💡</span> אידאולוגיה ומשמעות
+                                </h3>
+                                <p class="text-gray-300 leading-relaxed text-lg">${route.ideology}</p>
+                            </section>
+
+                            <!-- הישגים -->
+                            <section class="glass-card p-6 sm:p-8 rounded-3xl relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-1 bg-yellow-500"></div>
+                                <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                                    <span class="text-3xl">🏆</span> הישגים היסטוריים
+                                </h3>
+                                <p class="text-gray-300 leading-relaxed text-lg">${route.achievements}</p>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // אתחול האפליקציה וטעינת המסך הראשי
+        window.onload = renderHome;
+    </script>
+</body>
+</html>
