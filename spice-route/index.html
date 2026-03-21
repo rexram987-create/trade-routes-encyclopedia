@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>נתיב התבלינים - מחקר היסטורי מקיף</title>
+    <!-- שילוב Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* התאמת גופנים לקריאה מחקרית נוחה על מסכי Samsung S25 Ultra */
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Frank+Ruhl+Libre:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* עיצוב Glassmorphism לפרימיום Dark Mode */
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* עיצוב לתמונות עתידיות (Placeholders) */
+        .image-placeholder {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(31, 41, 55, 0.8),
+                rgba(31, 41, 55, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 20px
+            );
+            border: 2px dashed rgba(245, 158, 11, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .image-placeholder:hover {
+            border-color: rgba(245, 158, 11, 1);
+            color: #E5E7EB;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen selection:bg-orange-500 selection:text-white flex flex-col">
+
+    <!-- קונטיינר ראשי אליו יוזרק התוכן הדינמי -->
+    <div id="app-container" class="flex-grow w-full"></div>
+
+    <script>
+        let currentLang = 'he';
+
+        // מסד הנתונים הדו-לשוני של המחקר 
+        const content = {
+            he: {
+                dir: "rtl",
+                navBack: "חזור לאנציקלופדיה",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "English",
+                heroTitle: "נתיב התבלינים",
+                heroYears: "שנות פעילות: 2000 לפנה\"ס – המאה ה-18 לספירה",
+                heroLength: "אורך משוער: מעל 15,000 ק\"מ (רשת ימית ויבשתית)",
+                heroDesc: "עורק החיים המסחרי שהצית את 'עידן התגליות'. רשת ימית עצומה שחיברה את איי אינדונזיה והודו דרך האוקיינוס ההודי אל אירופה, ושינתה את מפת העולם לנצח.",
+                mapPlaceholder: "",
+                mapHint: "הכנס כאן את קובץ המפה (למשל: spice-route-map.jpg)",
+                
+                etyTitle: "ניתוח אטימולוגי מלא",
+                etyAuthor: "הוגה המונח:",
+                etyAuthorDesc: "מושג היסטוריוגרפי מודרני שהתקבע על ידי היסטוריונים אירופאים. הבולט שבהם, שהעמיק בחקר האוקיינוס ההודי והנתיבים הימיים, היה ההיסטוריון המאוריציאני-צרפתי אוגוסט טוסן (Auguste Toussaint).",
+                etyYears: "שנות חייו של ההיסטוריון (טוסן):",
+                etyYearsDesc: "1911 – 1987. <strong class='text-orange-400'>ארץ מוצא ומקום לידה:</strong> פורט-לואי, מאוריציוס (מדינת איים באוקיינוס ההודי, עובדה שהעניקה לו פרספקטיבה אותנטית לחקר נתיבי הסחר הימיים במזרח).",
+                etyContext: "בעת העתיקה לא היה שם כולל לרשת זו. המונח התגבש כדי לאגד תחת מטרייה אחת את הנתיבים הימיים הייעודיים שבהם הועברו סחורות התיבול, להבדיל מ'דרך המשי' היבשתית.",
+                etyOriginal: "מונח המקור:",
+                etyPart1Title: "חלק א' – Spice (תבלין)",
+                etyPart1Desc: "המקור באנגלית מגיע מצרפתית עתיקה \"espice\", אשר נגזרה מהמילה הלטינית \"species\" (שפירושה בעת העתיקה: סוג, זן, או \"סחורה מיוחדת במינה\"). התבלינים (פלפל, קינמון, מוסקט) נחשבו לסחורות בעלות ערך מיסטי ורפואי. בעברית, המקור הוא מהשורש ב.ל.ל (לערבב), שכן התבלין נבלל בתוך המזון.",
+                etyPart2Title: "חלק ב' – Route (נתיב)",
+                etyPart2Desc: "בניגוד ל\"Road\" (דרך יבשתית כמו בדרך המשי), המילה \"Route\" (מלטינית rupta - דרך שנפרצה) מתייחסת בדרך כלל למסלול הכולל וקטור אקלימי או כיוון שייט ברור, מה שמדגיש את האופי הימי והניווטי של רשת זו באוקיינוס ההודי.",
+
+                bioTitle: "מייסדי הנתיב והרקע ההיסטורי",
+                bioIntro: "הנתיב נוצר תחילה על ידי מלחים אוסטרונזים, הודים וערבים שפענחו את משטר רוחות המונסון. אולם, המיסוד הגלובלי שהפך אותו לעורק אימפריאלי בוצע על ידי האימפריה הפורטוגזית, בהובלת אישיות אחת שפרצה את הדרך לאירופה.",
+                
+                wuTitle: "ואסקו דה גאמה (Vasco da Gama)",
+                wuYears: "שנות חיים: 1460 – 1524 | שנת מסע התגלית: 1497-1499",
+                wuSub1: "ילדות, שורשים וחינוך צלבני:",
+                wuDesc1: "נולד בעיר החוף סינש (Sines) שבפורטוגל למשפחת אצולה זוטרה. בגיל צעיר הצטרף למסדר סנטיאגו (Order of Santiago), מסדר אבירים צבאי-נוצרי. הוא גדל על ברכי מורשת של ימאות ואתוס צלבני אנטי-מוסלמי של ה'רֶקוֹנְקִיסְטָה' (הכיבוש מחדש של חצי האי האיברי). אופיו תואר כקשוח, אכזר לעיתים, בעל עצבים מברזל, ונאמנות פנאטית לכתר הפורטוגזי ולכנסייה הקתולית.",
+                wuSub2: "אידאולוגיה ותפיסת עולם:",
+                wuDesc2: "דה גאמה לא היה רק סוחר או מגלה ארצות, אלא 'צלבן ימי'. האידאולוגיה שלו שילבה אימפריאליזם כלכלי קיצוני עם קנאות דתית. מטרת העל הייתה 'נוצרים ותבלינים' (Christians and Spices) – כלומר, למצוא בעלי ברית נוצרים אגדיים במזרח (כמו 'הכומר יוחנן') כדי לכתר את העולם המוסלמי, ובמקביל לשבור את ההגמוניה הכלכלית שלהם.",
+                wuReasonsTitle: "הסיבות המדויקות והאסטרטגיות לפריצת הנתיב הימי (1498):",
+                wuReason1Title: "שבירת המונופול הממלוכי-ונציאני:",
+                wuReason1Desc: "במשך מאות שנים, סוחרי ונציה והאימפריה הממלוכית (במצרים) החזיקו במונופול אימתני על התבלינים. פלפל שחור עבר מיד ליד והתייקר במאות אחוזים עד שהגיע לאירופה, שם נמכר במשקלו בזהב. מלך פורטוגל הבין שכדי שהמדינה הקטנה שלו תשרוד ותתעשר, חובה למצוא נתיב ימי עוקף שיבטל את הצורך במתווכים המוסלמים והאיטלקים.",
+                wuReason2Title: "אילוצי שימור מזון ובריאות:",
+                wuReason2Desc: "באירופה של ימי הביניים לא היו אמצעי קירור. בשר שנשחט בחורף החל להירקב. התבלינים (ובמיוחד פלפל, ציפורן וקינמון) היו קריטיים לא רק לתיבול והסוואת טעמי קלקול, אלא גם נחשבו לתרופות הכרחיות נגד מגפות ולחומרי גלם בקוסמטיקה. הביקוש הקשיח הפך אותם למוצר היקר והיציב ביותר בכלכלה העולמית.",
+                wuReason3Title: "התעוזה הניווטית (Volta do Mar):",
+                wuReason3Desc: "לאחר גילוי כף התקווה הטובה על ידי ברתולומיאו דיאס (1488), המשימה שהוטלה על דה גאמה הייתה לחצות את האוקיינוס ההודי הלא-מוכר לאירופאים. דה גאמה השתמש בטקטיקה חסרת תקדים: הוא שט מערבה עמוק אל תוך האוקיינוס האטלנטי כדי לתפוס רוחות שיידחפו אותו חזרה מזרחה סביב אפריקה – הימור נועז שהוכיח את עצמו והכניס את פורטוגל להיסטוריה.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "מסחר, אסטרטגיה וגיאופוליטיקה",
+                economyTitle: "חשיבות המסחר והכלכלה",
+                economyDesc: "נתיב התבלינים הניח את היסודות לכלכלה הקפיטליסטית המודרנית. הרווחים האדירים מהמסחר (מסעו הראשון של דה גאמה החזיר רווח של פי 60 מעלות המשלחת) הובילו להקמת 'חברות מניות' ראשונות בעולם, כגון חברת הודו המזרחית ההולנדית (VOC) והבריטית (EIC). חברות אלו גייסו הון מהציבור, הפעילו צבאות פרטיים, וניהלו כלכלות בקנה מידה של מדינות שלמות.",
+                milStrategyTitle: "חשיבות אסטרטגית - צווארי בקבוק (Chokepoints)",
+                milStrategyDesc: "האסטרטגיה בנתיב הימי התבססה על שליטה בנקודות מעבר גיאוגרפיות צרות. במקום לשלוט בשטחי יבשה עצומים (כמו בדרך המשי), הפורטוגזים וההולנדים כבשו 'צווארי בקבוק': מצר מלאקה (אינדונזיה/מלזיה), מצר הורמוז (המפרץ הפרסי), וגואה (הודו). מי ששלט במצרים אלו, שלט בפועל בסחר העולמי והטיל מכסים על כל ספינה עוברת.",
+                goodsOriginTitle: "ארץ המוצא של הסחורות המרכזיות",
+                chinaOrigin: "איי מאלוקו (איי התבלינים - אינדונזיה):",
+                chinaGoods: "<strong class='text-white'>אגוז מוסקט (Nutmeg) ומשיה (Mace):</strong> מקורם הבלעדי היה באיי בנדה הזעירים. נחשבו לתרופת פלא נגד מגפת הדבר (המוות השחור) באירופה ולסמל סטטוס. <strong class='text-white mt-2 block'>ציפורן (Cloves):</strong> מקורו באיי טרנאטה וטידורה. שימש להקלה על כאבי שיניים (בזכות החומר הפעיל אאוגנול), לבישום הגוף והפה, ולתיבול מנות יוקרה של אצולת אירופה. הסודיות סביב מיקומם המדויק הפכה אותם ליקרים מזהב טהור.",
+                indiaOrigin: "הודו (בייחוד חוף מלבר) וסרי לנקה:",
+                indiaGoods: "<strong class='text-white'>פלפל שחור (Black Pepper):</strong> כונה 'הזהב השחור' ומקורו בחוף מלבר שבדרום-מערב הודו. שימש כמטבע עובר לסוחר (שכירויות ומיסים שולמו בגרגרי פלפל!), לאיזון 'מזגים' ברפואה הגלנית, ולהסוואת טעמו העז של בשר מומלח לחורף. <strong class='text-white mt-2 block'>קינמון (Cinnamon):</strong> הגיע בעיקר מסרי לנקה (ציילון) השכנה. שימש לקטורת, טקסי קבורה יוקרתיים, בישום כנסיות, וכתבלין לאפייה בבתי המלוכה. בנוסף יובאו הל, ג'ינג'ר (זנגביל), ואריגי כותנה נחשקים (קליקו).",
+                persiaOrigin: "חצי האי ערב וקרן אפריקה:",
+                persiaGoods: "קפה (מתימן - מוקה), מור, לבונה (תבליני פולחן שהשתלבו בנתיב המוקדם), ופנינים מהמפרץ הפרסי.",
+                romeOrigin: "אירופה (הסחורות שיוצאו למזרח):",
+                romeGoods: "בניגוד לאסיה, לאירופה היו מעט סחורות שהמזרח רצה. לכן, התשלום עבור התבלינים נעשה בעיקר במטבעות כסף וזהב, נחושת, ותותחים או כלי נשק מערביים.",
+
+                ideologyTitle: "אידאולוגיה ורוח",
+                ideologyDesc: "הנתיב הונע על ידי <strong>המרקנטיליזם</strong> – הדוקטרינה הכלכלית שקבעה שעושר עולמי הוא מוגבל, ומדינה יכולה להתעשר רק על חשבון מדינה אחרת (צבירת זהב וכסף באמצעות עודף ייצוא ומונופול סחר). במקביל, הנתיב שימש כצינור מיסיונרי: נזירים ישועים (כמו פרנסיסקו חאווייר) רכבו על ספינות התבלינים במטרה להמיר את דתם של מיליוני אסייתים לנצרות הקתולית, מה שהוביל למפגשים תרבותיים (ולעימותים) חסרי תקדים.",
+                
+                techTitle: "הישגים טכנולוגיים וניווטיים",
+                techDesc: "פריצת הנתיב דרשה חדשנות טכנולוגית עצומה שהקדימה את זמנה:",
+                tech1: "מערכת רוחות המונסון: גילוי וניצול מחזור הרוחות באוקיינוס ההודי. <strong class='text-white'>ארץ מוצא/גילוי:</strong> נווטים ערבים והודים בעת העתיקה, כאשר התיעוד המערבי הראשון מיוחס לנווט היווני היפאלוס (מצרים התלמיית, המאה ה-1 לפנה\"ס).",
+                tech2: "הקרוולה והקראק: פיתוח ספינות בעלות שדרית עמוקה ומפרשים לטיניים (משולשים) שאפשרו שייט נגד כיוון הרוח וחציית אוקיינוסים. <strong class='text-white'>ארץ מוצא:</strong> האימפריה הפורטוגזית (המאה ה-15, תחת חסותו של הנסיך אנריקה הספן).",
+                tech3: "האצטרולב הימי: התאמת מכשיר ניווט אסטרונומי לשימוש על סיפון מתנדנד כדי לקבוע קו רוחב. <strong class='text-white'>ארץ מוצא (של ההתאמה הימית):</strong> פורטוגל (סוף המאה ה-15), מבוסס על אצטרולב קלאסי שמקורו ביוון ההלניסטית ושופר בקיסרויות האסלאם.",
+                tech4: "קרטוגרפיה: יצירת מפות הפורטולאן הראשונות של האוקיינוסים והחופים, שנשמרו כסודות מדינה.",
+                techSummary: "טכנולוגיות אלו חוללו את 'המהפכה המדעית' בתחום הניווט ואפשרו לאירופה לצאת מבידודה.",
+
+                declineTitle: "דעיכת הנתיב ההיסטורי",
+                declineDesc: "במאה ה-18, הנתיב במתכונתו הבלעדית החל לדעוך. ההולנדים והבריטים החלו לשתול עצי תבלין בקולוניות ברחבי העולם (כמו באיים הקריביים ובאפריקה), מה ששבר את המונופול הגיאוגרפי ההיסטורי של אינדונזיה והודו וגרם לצניחת מחירי התבלינים. בנוסף, המהפכה התעשייתית, המצאת הקירור המודרני, ועליית קרנם של סחורות חדשות כמו כותנה תעשייתית, תה וסוכר, דחקו את מעמדם של התבלינים כגורם המרכזי המניע את הכלכלה העולמית.",
+
+                footer: "המחקר נכתב וקודד על ידי ג'מיני ורם © 2026"
+            },
+            en: {
+                dir: "ltr",
+                navBack: "Back to Encyclopedia",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "עברית",
+                heroTitle: "The Spice Route",
+                heroYears: "Active Years: 2000 BCE – 18th Century CE",
+                heroLength: "Estimated Length: Over 15,000 km (Maritime network)",
+                heroDesc: "The commercial lifeline that ignited the 'Age of Discovery'. A vast maritime network connecting the Indonesian islands and India via the Indian Ocean to Europe, changing the map of the world forever.",
+                mapPlaceholder: "",
+                mapHint: "Insert your map file here (e.g., spice-route-map.jpg)",
+                
+                etyTitle: "Complete Etymological Analysis",
+                etyAuthor: "Term Coined By:",
+                etyAuthorDesc: "A modern historiographical concept solidified by European historians. Prominent among them, who delved deep into Indian Ocean maritime networks, was Mauritian-French historian Auguste Toussaint.",
+                etyYears: "Historian's Lifespan (Toussaint):",
+                etyYearsDesc: "1911 – 1987. <strong class='text-orange-400'>Country of Origin & Birthplace:</strong> Port Louis, Mauritius (an island nation in the Indian Ocean, which gave him an authentic perspective for researching maritime trade routes).",
+                etyContext: "In antiquity, there was no comprehensive name for this network. The term evolved to umbrella the specific maritime routes carrying seasoning commodities, distinguishing it from the overland 'Silk Road'.",
+                etyOriginal: "Original Term:",
+                etyPart1Title: "Part A – Spice",
+                etyPart1Desc: "The English word derives from Old French \"espice\", rooted in the Latin \"species\" (meaning: type, sort, or \"a special commodity\"). Spices (pepper, cinnamon, nutmeg) were considered goods of mystical and medicinal value.",
+                etyPart2Title: "Part B – Route",
+                etyPart2Desc: "Unlike \"Road\" (overland path), \"Route\" (from Latin 'rupta' - broken path) usually refers to a course involving a clear climatic vector or sailing direction, emphasizing the maritime and navigational nature of this network in the Indian Ocean.",
+
+                bioTitle: "Founders and Historical Background",
+                bioIntro: "The route was initially forged by Austronesian, Indian, and Arab sailors who deciphered the Monsoon winds. However, the global institutionalization that turned it into an imperial artery was executed by the Portuguese Empire, led by one figure who broke the path to Europe.",
+                
+                wuTitle: "Vasco da Gama",
+                wuYears: "Lifespan: 1460 – 1524 | Voyage of Discovery: 1497-1499",
+                wuSub1: "Childhood, Roots, and Crusader Education:",
+                wuDesc1: "Born in the coastal town of Sines, Portugal, to minor nobility. At a young age, he joined the Order of Santiago, a military-Christian knightly order. He was raised on a legacy of seamanship and the anti-Muslim crusader ethos of the 'Reconquista'. His character was described as tough, sometimes cruel, possessing nerves of steel, and fanatically loyal to the Portuguese Crown and Catholic Church.",
+                wuSub2: "Ideology and Worldview:",
+                wuDesc2: "Da Gama was not merely a merchant or explorer, but a 'maritime crusader'. His ideology blended extreme economic imperialism with religious zealotry. The ultimate goal was 'Christians and Spices' – finding mythical Christian allies in the East (like 'Prester John') to encircle the Muslim world, while simultaneously breaking their economic hegemony.",
+                wuReasonsTitle: "Exact Strategic Reasons for Breaking the Maritime Route (1498):",
+                wuReason1Title: "Breaking the Mamluk-Venetian Monopoly:",
+                wuReason1Desc: "For centuries, Venetian merchants and the Mamluk Empire (in Egypt) held a fearsome monopoly over spices. Black pepper changed hands and multiplied in price by hundreds of percents before reaching Europe, sold for its weight in gold. The Portuguese King realized that for his small country to survive and prosper, bypassing the Muslim and Italian middlemen via a sea route was mandatory.",
+                wuReason2Title: "Food Preservation and Health Constraints:",
+                wuReason2Desc: "Medieval Europe lacked refrigeration. Meat slaughtered in winter rotted. Spices (especially pepper, clove, and cinnamon) were critical not only for masking spoilage but were deemed essential medicines against plagues and raw materials for cosmetics. Inelastic demand made them the most stable, expensive commodity globally.",
+                wuReason3Title: "Navigational Audacity (Volta do Mar):",
+                wuReason3Desc: "Following Bartolomeu Dias's discovery of the Cape of Good Hope (1488), Da Gama was tasked with crossing the unmapped Indian Ocean. He utilized an unprecedented tactic: sailing deep westward into the Atlantic Ocean to catch winds that would slingshot him back east around Africa—a daring gamble that secured Portugal's place in history.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "Trade, Strategy, and Geopolitics",
+                economyTitle: "Importance of Trade and Economy",
+                economyDesc: "The Spice Route laid the foundations for modern capitalist economy. The astronomical profits (Da Gama's first voyage yielded a 60-fold return) led to the creation of the world's first 'joint-stock companies', like the Dutch (VOC) and British (EIC) East India Companies. These corporations raised public capital, operated private armies, and managed economies on the scale of entire nations.",
+                milStrategyTitle: "Strategic Importance - Chokepoints",
+                milStrategyDesc: "Maritime route strategy relied on controlling narrow geographical transit points. Instead of conquering vast landmasses (like the Silk Road), the Portuguese and Dutch seized 'Chokepoints': the Strait of Malacca, the Strait of Hormuz, and Goa. Whoever controlled these straits effectively controlled global trade and levied tolls on passing ships.",
+                goodsOriginTitle: "Origin of Key Commodities",
+                chinaOrigin: "Maluku Islands (Spice Islands - Indonesia):",
+                chinaGoods: "<strong class='text-white'>Nutmeg and Mace:</strong> Originated exclusively in the tiny Banda Islands. Considered a miracle cure against the Bubonic Plague (Black Death) in Europe and an ultimate status symbol. <strong class='text-white mt-2 block'>Cloves:</strong> Sourced from the islands of Ternate and Tidore. Used for toothache relief (due to the active compound eugenol), breath freshening, and seasoning elite aristocratic dishes. The extreme secrecy surrounding their exact location made them more valuable than pure gold.",
+                indiaOrigin: "India (Especially Malabar Coast) & Sri Lanka:",
+                indiaGoods: "<strong class='text-white'>Black Pepper:</strong> Dubbed 'Black Gold', originating from the Malabar Coast in southwestern India. It served as a universal currency (rents and taxes were paid in peppercorns!), used in Galenic medicine to balance 'humors', and to mask the harsh taste of heavily salted preserved meat. <strong class='text-white mt-2 block'>Cinnamon:</strong> Sourced primarily from neighboring Sri Lanka (Ceylon). Used for incense, prestigious burial rites, perfuming churches, and royal baking. Additionally, Cardamom, Ginger, and coveted cotton fabrics (Calico) were massively exported.",
+                persiaOrigin: "Arabian Peninsula & Horn of Africa:",
+                persiaGoods: "Coffee (from Yemen - Mocha), Myrrh, Frankincense (ritual spices integrated into the early route), and pearls from the Persian Gulf.",
+                romeOrigin: "Europe (Exports to the East):",
+                romeGoods: "Unlike Asia, Europe had few goods the East desired. Thus, payment for spices was predominantly made in silver and gold coins, copper, and Western cannons or firearms.",
+
+                ideologyTitle: "Ideology and Spirit",
+                ideologyDesc: "The route was driven by <strong>Mercantilism</strong> – the economic doctrine dictating global wealth is finite, and a nation can only enrich itself at another's expense (hoarding gold/silver via trade monopolies). Simultaneously, it acted as a missionary conduit: Jesuit monks (like Francis Xavier) rode spice galleons aiming to convert millions of Asians to Catholicism, leading to unprecedented cultural encounters (and clashes).",
+                
+                techTitle: "Technological and Navigational Achievements",
+                techDesc: "Breaking the route required immense technological innovation ahead of its time:",
+                tech1: "Monsoon Wind System: Discovering and exploiting the Indian Ocean wind cycle. <strong class='text-white'>Origin/Discovery:</strong> Ancient Arab and Indian navigators, with the first Western documentation attributed to the Greek navigator Hippalus (Ptolemaic Egypt, 1st Century BCE).",
+                tech2: "The Caravel and Carrack: Developing deep-keeled ships with Lateen (triangular) sails enabling sailing against the wind and crossing oceans. <strong class='text-white'>Country of Origin:</strong> The Portuguese Empire (15th Century, under the patronage of Prince Henry the Navigator).",
+                tech3: "Mariner's Astrolabe: Adapting an astronomical navigation tool for use on a rocking deck to determine latitude. <strong class='text-white'>Origin (of the maritime adaptation):</strong> Portugal (late 15th Century), based on the classical astrolabe originating in Hellenistic Greece and perfected in the Islamic world.",
+                tech4: "Cartography: Creating the first Portolan charts of oceans and coastlines, guarded as state secrets.",
+                techSummary: "These technologies sparked the 'Scientific Revolution' in navigation, allowing Europe to emerge from isolation.",
+
+                declineTitle: "Decline of the Historical Route",
+                declineDesc: "In the 18th century, the exclusive nature of the route began to wane. The Dutch and British began planting spice trees in colonies worldwide (like the Caribbean and Africa), breaking the historical geographic monopoly of Indonesia and India and causing spice prices to plummet. Furthermore, the Industrial Revolution, modern refrigeration, and the rise of new commodities like industrial cotton, tea, and sugar usurped spices from their position as the primary driver of the global economy.",
+
+                footer: "Research written and coded by Gemini & Ram © 2026"
+            }
+        };
+
+        // פונקציית החלפת השפה
+        function toggleLanguage() {
+            currentLang = currentLang === 'he' ? 'en' : 'he';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = content[currentLang].dir;
+            renderPage();
+        }
+
+        // רינדור התוכן למסך
+        function renderPage() {
+            const t = content[currentLang];
+            const isEn = currentLang === 'en';
+            
+            const html = `
+                <!-- סרגל ניווט עליון -->
+                <nav class="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                        <a href="../index.html" class="flex items-center gap-2 text-orange-400 hover:text-orange-300 transition-colors group">
+                            <svg class="w-5 h-5 transform ${isEn ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span class="font-bold tracking-wide text-sm sm:text-base">${t.navBack}</span>
+                        </a>
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleLanguage()" class="text-sm font-semibold text-gray-300 hover:text-white bg-gray-800/60 hover:bg-gray-700/60 px-3 py-1.5 rounded-lg border border-gray-700 transition-all">
+                                ${t.langBtn}
+                            </button>
+                            <div class="text-gray-400 font-semibold tracking-widest text-sm uppercase hidden sm:block">
+                                ${t.navTitle}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- תוכן המחקר -->
+                <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24 space-y-12">
+                    
+                    <!-- כותרת ראשית -->
+                    <header class="text-center space-y-6">
+                        <div class="inline-block p-6 rounded-full bg-gray-800 border-4 border-gray-700 shadow-2xl mb-4">
+                            <span class="text-7xl">🌶️</span>
+                        </div>
+                        <h1 class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-orange-500 to-red-600 tracking-tight">
+                            ${t.heroTitle}
+                        </h1>
+                        <div class="flex flex-wrap justify-center gap-3 text-sm sm:text-base font-semibold">
+                            <span class="bg-orange-900/40 text-orange-300 px-4 py-1.5 rounded-full border border-orange-800/50">${t.heroYears}</span>
+                            <span class="bg-teal-900/40 text-teal-300 px-4 py-1.5 rounded-full border border-teal-800/50">${t.heroLength}</span>
+                        </div>
+                        <p class="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mt-6">
+                            ${t.heroDesc}
+                        </p>
+                    </header>
+
+                    <!-- מפה Placeholder -->
+                    <div class="image-placeholder w-full h-64 sm:h-96 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-orange-400 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p>${t.mapPlaceholder}</p>
+                            <p class="text-sm font-normal text-gray-500">${t.mapHint}</p>
+                        </div>
+                    </div>
+
+                    <!-- אטימולוגיה -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-orange-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">📖</span> ${t.etyTitle}
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 space-y-5 shadow-inner">
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-orange-400 text-lg block mb-1">${t.etyAuthor}</strong>
+                                    <p class="text-gray-300 leading-relaxed">${t.etyAuthorDesc}</p>
+                                </div>
+                                
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-orange-400 text-lg block mb-1">${t.etyYears}</strong>
+                                    <p class="text-gray-300 leading-relaxed font-semibold">${t.etyYearsDesc}</p>
+                                </div>
+                                
+                                <div class="pb-2">
+                                    <p class="text-gray-300 leading-relaxed">${t.etyContext}</p>
+                                </div>
+                                
+                                <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50 inline-block w-full">
+                                    <strong class="text-orange-400">${t.etyOriginal}</strong> <span class="text-xl font-bold text-white tracking-widest font-mono mx-2">Spice Route</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-red-400">
+                                    <h4 class="text-red-400 font-bold text-lg mb-2">${t.etyPart1Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart1Desc}</p>
+                                </div>
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-blue-400">
+                                    <h4 class="text-blue-300 font-bold text-lg mb-2">${t.etyPart2Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart2Desc}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ביוגרפיה -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-blue-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🏛️</span> ${t.bioTitle}
+                        </h2>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8">${t.bioIntro}</p>
+
+                        <div class="space-y-10">
+                            <!-- ואסקו דה גאמה -->
+                            <div class="bg-gray-800/40 p-6 sm:p-8 rounded-2xl border border-gray-700/70 shadow-lg hover:border-blue-500/50 transition-colors relative overflow-hidden">
+                                <div class="absolute top-0 ${isEn ? 'left-0' : 'right-0'} w-full h-1 bg-gradient-to-${isEn ? 'r' : 'l'} from-blue-600 to-transparent"></div>
+                                <h3 class="text-3xl font-bold text-blue-400 mb-2">${t.wuTitle}</h3>
+                                <p class="text-sm text-blue-200 font-semibold mb-6 px-3 py-1 bg-blue-900/30 inline-block rounded-md border border-blue-800/50">${t.wuYears}</p>
+                                
+                                <div class="space-y-5 text-gray-300 leading-relaxed text-sm sm:text-base">
+                                    <div>
+                                        <strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub1}</strong>
+                                        <p>${t.wuDesc1}</p>
+                                    </div>
+                                    <div>
+                                        <strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub2}</strong>
+                                        <p>${t.wuDesc2}</p>
+                                    </div>
+                                    <div class="bg-gray-800/80 p-6 rounded-xl border border-gray-700 mt-6 shadow-inner">
+                                        <strong class="text-blue-300 block mb-4 text-xl flex items-center gap-2"><span class="text-2xl">🎯</span> ${t.wuReasonsTitle}</strong>
+                                        <ul class="space-y-4 list-none">
+                                            <li class="flex gap-3"><span class="text-red-400 mt-1">🛑</span><div><strong class="text-white">${t.wuReason1Title}</strong> ${t.wuReason1Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-emerald-400 mt-1">🌿</span><div><strong class="text-white">${t.wuReason2Title}</strong> ${t.wuReason2Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-blue-400 mt-1">🧭</span><div><strong class="text-white">${t.wuReason3Title}</strong> ${t.wuReason3Desc}</div></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ספינה Placeholder -->
+                    <div class="image-placeholder w-full h-48 sm:h-64 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-orange-400 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            <p>${t.caravanPlaceholder}</p>
+                        </div>
+                    </div>
+
+                    <!-- אסטרטגיה וסחורות -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-yellow-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">⚖️</span> ${t.strategyTitle}
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-yellow-400 mb-3">${t.economyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.economyDesc}</p>
+                            </div>
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-red-400 mb-3">${t.milStrategyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.milStrategyDesc}</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 mt-4">
+                            <h3 class="text-xl font-bold text-emerald-400 mb-4 border-b border-gray-700 pb-2">${t.goodsOriginTitle}</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🇮🇩</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.chinaOrigin}</strong> ${t.chinaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🇮🇳</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.indiaOrigin}</strong> ${t.indiaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🌍</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.persiaOrigin}</strong> ${t.persiaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🇪🇺</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.romeOrigin}</strong> ${t.romeGoods}</p></li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <!-- אידאולוגיה וטכנולוגיה -->
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-purple-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">💡</span> ${t.ideologyTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.ideologyDesc}</p>
+                        </div>
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-emerald-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">🧭</span> ${t.techTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.techDesc}</p>
+                            <ul class="list-disc list-inside mt-4 text-gray-300 space-y-2 font-semibold">
+                                <li class="text-emerald-300">${t.tech1}</li>
+                                <li class="text-emerald-300">${t.tech2}</li>
+                                <li class="text-emerald-300">${t.tech3}</li>
+                                <li class="text-emerald-300">${t.tech4}</li>
+                            </ul>
+                            <p class="text-gray-400 text-sm mt-4">${t.techSummary}</p>
+                        </div>
+                    </section>
+                    
+                    <!-- סיכום -->
+                    <section class="glass-card p-8 rounded-3xl bg-red-900/10 border-red-900/30 text-center">
+                        <h3 class="text-2xl font-bold text-red-400 mb-4">${t.declineTitle}</h3>
+                        <p class="text-gray-300 leading-relaxed max-w-3xl mx-auto">${t.declineDesc}</p>
+                    </section>
+                </main>
+
+                <!-- פוטר -->
+                <footer class="mt-auto border-t border-gray-800 bg-gray-900/90 py-6 text-center z-10">
+                    <p class="text-gray-500 text-sm font-semibold tracking-wide">${t.footer}</p>
+                </footer>
+            `;
+            
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        // טעינה ראשונית
+        window.onload = renderPage;
+    </script>
+</body>
+</html>
