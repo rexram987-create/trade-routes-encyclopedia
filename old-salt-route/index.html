@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דרך המלח העתיקה - מחקר היסטורי מקיף</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* הגדרות גופנים לקריאה מחקרית נוחה על מסכי Samsung S25 Ultra */
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Frank+Ruhl+Libre:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* עיצוב Glassmorphism לפרימיום Dark Mode */
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* עיצוב לתמונות עתידיות (Placeholders) */
+        .image-placeholder {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(31, 41, 55, 0.8),
+                rgba(31, 41, 55, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 20px
+            );
+            border: 2px dashed rgba(226, 232, 240, 0.5); /* צבע מלח/לבן-אפרפר */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .image-placeholder:hover {
+            border-color: rgba(226, 232, 240, 1);
+            color: #E5E7EB;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen selection:bg-slate-400 selection:text-white flex flex-col">
+
+    <div id="app-container" class="flex-grow w-full"></div>
+
+    <script>
+        let currentLang = 'he';
+
+        // מסד הנתונים הדו-לשוני המלא
+        const content = {
+            he: {
+                dir: "rtl",
+                navBack: "חזור לאנציקלופדיה",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "English",
+                heroTitle: "דרך המלח העתיקה",
+                heroYears: "שנות פעילות מרכזיות: המאה ה-11 – סוף המאה ה-16",
+                heroLength: "אורך משוער: כ-100 קילומטרים (מלינבורג לליבק)",
+                heroDesc: "עורק הכלכלה החשוב ביותר של צפון אירופה בימי הביניים. נתיב קצר אך קריטי שהוביל את ה'זהב הלבן' (מלח) ממכרות היבשה אל נמלי הים הבלטי, ואיפשר את שגשוגה של ברית ההאנזה האדירה.",
+                mapPlaceholder: "",
+                mapHint: "הכנס כאן את קובץ המפה (למשל: old-salt-route-map.jpg)",
+                
+                etyTitle: "ניתוח אטימולוגי מלא",
+                etyAuthor: "חוקר ברית ההאנזה בעת המודרנית:",
+                etyAuthorDesc: "המחקר ההיסטורי על רשתות הסחר של צפון אירופה וחשיבותה של דרך המלח קודם משמעותית על ידי ההיסטוריון הגרמני <strong>יוהנס שילדהאואר (Johannes Schildhauer)</strong>, מגדולי המומחים לחקר ברית ההאנזה.",
+                etyYears: "שנות חייו של ההיסטוריון (שילדהאואר):",
+                etyYearsDesc: "1918 – 1995.",
+                etyContext: "<strong class='text-slate-300'>ארץ מוצא ומקום לידה:</strong> ברמן, גרמניה (עיר האנזית היסטורית בעצמה). ספריו חשפו את המנגנונים הכלכליים שהפכו סוחרי דגים ומלח לכוח הפוליטי החזק באירופה של ימי הביניים.",
+                etyOriginal: "מונח המקור (בגרמנית):",
+                etyPart1Title: "חלק א' – Alte (עתיקה)",
+                etyPart1Desc: "המילה מדגישה את מקורותיו של הנתיב בימי הביניים המוקדמים. בניגוד לדרכים אימפריאליות מתוכננות, זה היה במקור שביל עפר טבעי שעבר בין ביצות ויערות צפופים שנוצרו בעידן הקרח בצפון גרמניה.",
+                etyPart2Title: "חלק ב' – Salzstraße (דרך המלח)",
+                etyPart2Desc: "שילוב של המילים 'Salz' (מלח) ו-'Straße' (דרך או רחוב). המלח בעת העתיקה ובימי הביניים לא היה רק תבלין, אלא אמצעי השימור הבלעדי לבשר ודגים. ללא מלח, ערי אירופה היו גוועות ברעב במהלך החורף הארוך.",
+
+                bioTitle: "מייסדי הנתיב והרקע ההיסטורי",
+                bioIntro: "הדרך התפתחה באופן טבעי, אך מיקודה והפיכתה למונופול כלכלי מרושת נזקפים לזכותו של אחד המנהיגים השאפתניים והאכזריים ביותר של ימי הביניים המוקדמים בגרמניה.",
+                
+                wuTitle: "היינריך הארי (Henry the Lion - Heinrich der Löwe)",
+                wuYears: "שנות חיים: 1129 – 1195 | תקופת שלטון (כדוכס סקסוניה): 1142 – 1180",
+                wuSub1: "ילדות, שורשים וצמיחה לשלטון מתוך אובדן:",
+                wuDesc1: "היינריך נולד לשושלת בית ולף (Welf), אחת ממשפחות האצולה החזקות באירופה. בהיותו צעיר, נשללו מאביו (היינריך הגאה) רוב תאריו ונחלותיו על ידי הקיסר קונראד השלישי. היינריך גדל בתחושת אובדן ורצון עז להשיב את נחלות משפחתו. הוא לא חיפש רק נקמה צבאית, אלא ביסוס כוח שאינו תלוי בחסדי הקיסר. כשהחזיר לעצמו את דוכסות סקסוניה, הוא הפך לשליט החזק ביותר בגרמניה, פעל להרחבת גבולותיה מזרחה (Ostsiedlung), וייסד ערים רבות, ביניהן מינכן וליבק.",
+                wuSub2: "אידאולוגיה ותפיסת עולם כלכלית:",
+                wuDesc2: "היינריך הקדים את זמנו בתפיסתו הכלכלית-פוליטית. בעוד שאצילים פאודלים העריכו רק שטחי אדמה חקלאיים וכוח צבאי, היינריך פעל תחת האידאולוגיה של 'מונופול מסחרי'. הוא הבין שמי ששולט בצווארי הבקבוק של המסחר (גשרים, מכרות ונמלים) צובר הון עצום שאפשר להמיר לכוח פוליטי. הוא טיפח את מעמד הבורגנות והסוחרים (הפאטריציוס) על חשבון האצולה המסורתית.",
+                wuReasonsTitle: "הסיבות המדויקות והאסטרטגיות להקמת ליבק וביסוס דרך המלח:",
+                wuReason1Title: "שליטה במקור 'הזהב הלבן' (לינבורג):",
+                wuReason1Desc: "היינריך זיהה את הפוטנציאל העצום של מעיינות המלח בעיר לינבורג (Lüneburg) שבשטחו. הוא השתלט עליהם והפך אותם למרכז ייצור תעשייתי. הוא נזקק לדרך בטוחה ויעילה להוביל את המלח צפונה אל חופי הים.",
+                wuReason2Title: "תעשיית הדגים הקתולית (שימור ההרינג):",
+                wuReason2Desc: "בימי הביניים, הכנסייה הקתולית אסרה על אכילת בשר בלמעלה מ-130 ימים בשנה (ימי צום ותענית). הפתרון היה אכילת דגי הרינג (מליח) שנידוגו בים הבלטי. אולם, ללא מלח, הדגים הרקיבו מיד. היינריך ביסס את דרך המלח כדי לחבר את מלח היבשה עם דגי הים, ויצר תעשיית שימור שהזינה את כל אירופה הקתולית.",
+                wuReason3Title: "חיבור אירופה הפנימית לים הבלטי (הקמת ליבק):",
+                wuReason3Desc: "בשנת 1159, היינריך הקים מחדש את העיר ליבק (Lübeck) בקצה הצפוני של דרך המלח, והעניק לה זכויות סחר עצמאיות מיוחדות. הוא בנה אותה כנמל עמוק-מים הראשון בים הבלטי, מה שאפשר לה להפוך לנקודת הייצוא הבלעדית של המלח הסקסוני לרוסיה ולסקנדינביה, ולימים ל'מלכת ברית ההאנזה'.",
+
+                animalsTitle: "לוגיסטיקה של בעלי חיים: כוח המשיכה בצפון",
+                animalsDesc: "לפני חפירת תעלת שטקניץ במאה ה-14, הובלת המלח נעשתה אך ורק על גבי דרכי עפר שבוציות בחורף הגרמני הקפוא, ודרשה כוח משיכה אדיר.",
+                horseSpecies: "סוס עבודה כבד (Schleswiger Kaltblut / Draft Horse):",
+                horseDesc: "גזע של סוסי משא כבדים (Equus ferus caballus), המכונים 'דם קר' (Kaltblut) בשל מזגם הרגוע ומשקלם העצום. <strong class='text-white mt-2 block'>חשיבות אסטרטגית:</strong> הסוסים נרתמו לעגלות מלח ייעודיות מחוזקות בברזל, שיכלו לשאת למעלה מטון מלח (בלוקים ארוזים בחביות עץ). פרסותיהם הרחבות ורגליהם הקצרות והחסונות אפשרו להם לא לשקוע בבוץ העמוק של צפון גרמניה ולגרור משאות שסוסי רכיבה רגילים לא יכלו להזיז. <strong class='text-white mt-2 block'>ארץ מוצא:</strong> אזור שלזוויג-הולשטיין (צפון גרמניה / יוטלנד).",
+                elephantSpecies: "שור העבודה (Ox / Bos taurus):",
+                elephantDesc: "פרים מסורסים ששימשו לעבודה חקלאית ולמשיכת עגלות משא. <strong class='text-white mt-2 block'>חשיבות אסטרטגית:</strong> בעוד שסוסים היו מהירים יותר ויקרים לתחזוקה, השוורים היו חיות משא זולות וחזקות מאין כמותן. בתקופות של מחסור במספוא, השוורים יכלו להתקיים מתזונה דלה יותר ולהמשיך לגרור לאיטם את עגלות העץ הכבדות במעלה הגבעות, במסע שאורכו כמאה קילומטרים ולקח לעיתים למעלה משבועיים-שלושה. <strong class='text-white mt-2 block'>ארץ מוצא:</strong> אירופה.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "מסחר, אסטרטגיה וגיאופוליטיקה",
+                economyTitle: "חשיבות המסחר והכלכלה",
+                economyDesc: "מלח היה 'הנפט של ימי הביניים'. המונופול על כרייתו ושינועו בדרך המלח העניק לערי הצפון עושר פנומנלי. הערים לינבורג וליבק השתמשו בכספי המלח כדי לממן צבאות פרטיים, לסלול רחובות באבן, ולבנות כנסיות גותיות עצומות מלבנים אדומות מול חופי הים (אדריכלות הלבנים הגותית).",
+                milStrategyTitle: "חשיבות אסטרטגית - הולדת ברית ההאנזה (Hanseatic League)",
+                milStrategyDesc: "דרך המלח הייתה הקטליזטור להיווצרות ברית ההאנזה - רשת של ערי מדינה עצמאיות (גילדות של סוחרים) שהתאגדו כדי להגן על שיירות המלח שלהם מפני שודדי דרכים ואצילים חמדנים. הברית הזו צברה כוח כה רב, עד שהחזיקה צי מלחמה משלה, הטילה אמברגו על ממלכות שלמות (כמו נורווגיה ואנגליה), ואף ניהלה מלחמות נגד מלכי דנמרק כדי לשמר את המונופול המסחרי שלה בים הבלטי.",
+                goodsOriginTitle: "ארץ המוצא של הסחורות המרכזיות שעברו בנתיב",
+                chinaOrigin: "לינבורג (Lüneburg - קצה דרומי):",
+                chinaGoods: "<strong class='text-white'>מלח טהור:</strong> בלינבורג שאבו את התמלחת ממעיינות מלוחים תת-קרקעיים, והרתיחו אותה במחבתות עופרת וברזל ענקיות יומם ולילה, עד לקבלת גבישי מלח לבנים וטהורים לחלוטין.",
+                indiaOrigin: "ליבק והים הבלטי (Lübeck - קצה צפוני):",
+                indiaGoods: "<strong class='text-white'>דגי הרינג ועץ:</strong> מליבק זרמו דרומה חביות עמוסות בדגי הרינג מומלחים, וכן חומרי גלם שהגיעו מסקנדינביה ורוסיה: עצי אורן, שעוות דבורים לנרות הכנסייה, ועורות.",
+                romeOrigin: "המזרח ונובגורוד (דרך ספינות ההאנזה):",
+                romeGoods: "<strong class='text-white'>ענבר ופרוות:</strong> דרך הים הבלטי הגיעו ענבר יקר מחוף פרוסיה ופרוות צובל וסמור מרוסיה, שהוסעו חזרה פנימה אל תוך יבשת אירופה על גבי העגלות שפרקו את המלח.",
+
+                ideologyTitle: "אידאולוגיה ורוח - מהפכת הבורגנות",
+                ideologyDesc: "דרך המלח מסמלת שינוי טקטוני ברוח של ימי הביניים. זו הייתה תחילת סופו של הפאודליזם. ברית ההאנזה, שנוסדה סביב הדרך, דגלה באידאולוגיה בורגנית שבה הכוח אינו עובר בירושת דם לאצילים, אלא נצבר על ידי סוחרים ואומנים בזכות יוזמה כלכלית, קריאת מפות, חוזים משפטיים ועבודה קשה. הפטריציוס (סוחרי העל של ההאנזה) הקימו רפובליקות עירוניות אוטונומיות שהיו כפופות רק לקיסר (Freie Reichsstadt) ולא לדוכסים המקומיים.",
+                
+                techTitle: "הישגים טכנולוגיים ותשתיות אזרחיות",
+                techDesc: "הביקוש העצום למלח חייב מעבר מתחבורה יבשתית לתחבורה ימית מלאכותית:",
+                tech1: "תעלת שטקניץ (Stecknitz Canal - 1398): בניית אחת התעלות המלאכותיות הראשונות באירופה. התעלה חיברה שני נהרות שזרמו בכיוונים מנוגדים. <strong class='text-white'>ארץ פיתוח:</strong> דוכסות סקסוניה-לאוונבורג.",
+                tech2: "תאי שיט / מנעולי פאונד (Pound Locks): כדי להתגבר על הפרשי הגובה (הפרש של 16 מטרים בין הנהרות), המהנדסים תכננו 'מנעולי מים' - תאים סגורים שבהם מפלס המים עולה ויורד כדי להרים או להוריד את הספינות השטות בהם.",
+                tech3: "סירות המלח / פראם (Salzprahm): פיתוח סירות נהר בעלות תחתית שטוחה לחלוטין שנועדו לשייט במים רדודים (עומק של כ-80 ס\"מ בלבד בתעלה). הן נגררו נגד הזרם באמצעות חבלים שנמשכו על ידי סוסים או אנשים מהגדה.",
+                techSummary: "בזכות התעלה, יכולת נשיאת המלח הוכפלה פי כמה וכמה לעומת עגלות השוורים, וזמן המסע מלינבורג לליבק קוצר משמעותית.",
+
+                declineTitle: "דעיכת הנתיב ההיסטורי",
+                declineDesc: "השגשוג של דרך המלח העתיקה הגיע לקיצו החל מהמאה ה-16. <strong class='text-slate-300'>סיבה כלכלית-ימית:</strong> ספינות מפרש הולנדיות ואנגליות גדולות ומשוכללות החלו לייבא מלח ים (שאידה השמש) מהריביירה הצרפתית, מספרד ומפורטוגל (Baie de Bourgneuf). מלח הים היה הרבה יותר זול ממלח המכרות הגרמני, שכן לא נדרש עץ יקר להרתחתו. <strong class='text-slate-300'>סיבה גיאופוליטית:</strong> ברית ההאנזה החלה לאבד את עוצמתה הכלכלית מול מדינות לאום מתעוררות במערב (הולנד, שוודיה, ואנגליה). מכת המחץ ניתנה במאה ה-17 במהלך 'מלחמת שלושים השנים', שהחריבה את כלכלת צפון גרמניה ורוקנה את הדרך מחשיבותה האירופאית.",
+
+                footer: "המחקר נכתב וקודד על ידי ג'מיני ורם © 2026"
+            },
+            en: {
+                dir: "ltr",
+                navBack: "Back to Encyclopedia",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "עברית",
+                heroTitle: "The Old Salt Route",
+                heroYears: "Peak Active Years: 11th Century – Late 16th Century",
+                heroLength: "Estimated Length: ~100 Kilometers (Lüneburg to Lübeck)",
+                heroDesc: "The most vital economic artery of Northern Europe in the Middle Ages. A short but critical route that transported 'White Gold' (salt) from inland mines to the Baltic Sea ports, enabling the prosperity of the mighty Hanseatic League.",
+                mapPlaceholder: "",
+                mapHint: "Insert your map file here (e.g., old-salt-route-map.jpg)",
+                
+                etyTitle: "Complete Etymological Analysis",
+                etyAuthor: "Modern Hanseatic League Researcher:",
+                etyAuthorDesc: "Historical research on Northern Europe's trade networks and the importance of the Salt Route was significantly advanced by the German historian <strong>Johannes Schildhauer</strong>, a leading expert on the Hanseatic League.",
+                etyYears: "Historian's Lifespan (Schildhauer):",
+                etyYearsDesc: "1918 – 1995.",
+                etyContext: "<strong class='text-slate-300'>Country of Origin & Birthplace:</strong> Bremen, Germany (a historical Hanseatic city itself). His books revealed the economic mechanisms that turned fish and salt merchants into the strongest political force in medieval Europe.",
+                etyOriginal: "Original Term (in German):",
+                etyPart1Title: "Part A – Alte (Old)",
+                etyPart1Desc: "The word emphasizes the route's origins in the Early Middle Ages. Unlike planned imperial roads, this was originally a natural dirt path passing through dense swamps and forests created during the Ice Age in Northern Germany.",
+                etyPart2Title: "Part B – Salzstraße (Salt Route)",
+                etyPart2Desc: "A combination of 'Salz' (Salt) and 'Straße' (Street/Road). In antiquity and the Middle Ages, salt was not merely a spice, but the exclusive means of preserving meat and fish. Without salt, European cities would have starved during the long winters.",
+
+                bioTitle: "Founders and Historical Background",
+                bioIntro: "The route developed naturally, but its focus and transformation into a networked economic monopoly are credited to one of the most ambitious and ruthless leaders of early medieval Germany.",
+                
+                wuTitle: "Henry the Lion (Heinrich der Löwe)",
+                wuYears: "Lifespan: 1129 – 1195 | Reign (as Duke of Saxony): 1142 – 1180",
+                wuSub1: "Childhood, Roots, and Rise to Power from Loss:",
+                wuDesc1: "Henry was born into the Welf dynasty, one of Europe's most powerful noble families. When he was young, his father (Henry the Proud) was stripped of most of his titles and lands by Emperor Conrad III. Henry grew up with a sense of loss and a fierce desire to reclaim his family's estates. He sought not just military revenge, but to build power independent of the Emperor's grace. Upon regaining the Duchy of Saxony, he became the most powerful ruler in Germany, pushing its borders eastward (Ostsiedlung), and founding many cities, including Munich and Lübeck.",
+                wuSub2: "Ideology and Economic Worldview:",
+                wuDesc2: "Henry was ahead of his time in his politico-economic thinking. While feudal lords valued only agricultural land and military might, Henry operated under the ideology of 'commercial monopoly'. He understood that whoever controls trade chokepoints (bridges, mines, and ports) accumulates immense capital that can be converted into political power. He nurtured the bourgeoisie and merchant class (Patricians) at the expense of traditional nobility.",
+                wuReasonsTitle: "Exact Strategic Reasons for Founding Lübeck and Establishing the Salt Route:",
+                wuReason1Title: "Controlling the 'White Gold' Source (Lüneburg):",
+                wuReason1Desc: "Henry recognized the immense potential of the brine springs in Lüneburg within his territory. He seized control of them and turned them into an industrial production center. He needed a safe and efficient route to transport the salt north to the seacoasts.",
+                wuReason2Title: "The Catholic Fish Industry (Herring Preservation):",
+                wuReason2Desc: "In the Middle Ages, the Catholic Church forbade eating meat for over 130 days a year (fasting days). The solution was eating herring caught in the Baltic Sea. However, without salt, the fish rotted immediately. Henry established the Salt Route to connect inland salt with sea fish, creating a preservation industry that fed all of Catholic Europe.",
+                wuReason3Title: "Connecting Inland Europe to the Baltic Sea (Founding Lübeck):",
+                wuReason3Desc: "In 1159, Henry refounded the city of Lübeck at the northern end of the Salt Route, granting it special independent trading rights. He built it as the first deep-water port on the Baltic Sea, allowing it to become the exclusive export point of Saxon salt to Russia and Scandinavia, and eventually the 'Queen of the Hanseatic League'.",
+
+                animalsTitle: "Animal Logistics: The Pulling Power in the North",
+                animalsDesc: "Before the Stecknitz Canal was dug in the 14th century, transporting salt was done entirely on muddy dirt roads in the freezing German winter, requiring immense pulling power.",
+                horseSpecies: "Heavy Draft Horse (Schleswiger Kaltblut):",
+                horseDesc: "A breed of heavy draft horses (Equus ferus caballus), referred to as 'Coldblood' (Kaltblut) due to their calm temperament and massive weight. <strong class='text-white mt-2 block'>Strategic Importance:</strong> The horses were hitched to specially built, iron-reinforced salt wagons capable of carrying over a ton of salt (blocks packed in wooden barrels). Their broad hooves and short, sturdy legs allowed them to avoid sinking into the deep mud of northern Germany, pulling loads that regular riding horses couldn't move. <strong class='text-white mt-2 block'>Origin:</strong> Schleswig-Holstein region (Northern Germany / Jutland).",
+                elephantSpecies: "The Ox (Bos taurus):",
+                elephantDesc: "Castrated bulls used for agricultural work and pulling freight wagons. <strong class='text-white mt-2 block'>Strategic Importance:</strong> While horses were faster and more expensive to maintain, oxen were incredibly strong and cheap beasts of burden. During periods of fodder shortage, oxen could survive on poorer diets and continue slowly dragging the heavy wooden wagons up the hills, on a 100-kilometer journey that often took over two to three weeks. <strong class='text-white mt-2 block'>Origin:</strong> Europe.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "Trade, Strategy, and Geopolitics",
+                economyTitle: "Importance of Trade and Economy",
+                economyDesc: "Salt was the 'oil of the Middle Ages'. The monopoly on its mining and transport on the Salt Route granted northern cities phenomenal wealth. Lüneburg and Lübeck used salt money to fund private armies, pave streets with stone, and build massive red-brick Gothic churches facing the sea (Brick Gothic architecture).",
+                milStrategyTitle: "Strategic Importance - Birth of the Hanseatic League",
+                milStrategyDesc: "The Salt Route was the catalyst for the formation of the Hanseatic League - a network of independent city-states (merchant guilds) that banded together to protect their salt caravans from highwaymen and greedy nobles. This league amassed such power that it maintained its own war fleet, imposed embargoes on entire kingdoms (like Norway and England), and even waged wars against Danish kings to preserve its commercial monopoly in the Baltic Sea.",
+                goodsOriginTitle: "Origin of Key Commodities",
+                chinaOrigin: "Lüneburg (Southern End):",
+                chinaGoods: "<strong class='text-white'>Pure Salt:</strong> In Lüneburg, brine was pumped from underground saline springs and boiled in giant lead and iron pans day and night, until perfectly pure white salt crystals were obtained.",
+                indiaOrigin: "Lübeck and the Baltic Sea (Northern End):",
+                indiaGoods: "<strong class='text-white'>Herring and Timber:</strong> From Lübeck, barrels loaded with salted herring flowed south, along with raw materials arriving from Scandinavia and Russia: pine timber, beeswax for church candles, and leather.",
+                romeOrigin: "The East and Novgorod (Via Hanseatic Ships):",
+                romeGoods: "<strong class='text-white'>Amber and Furs:</strong> Through the Baltic Sea came precious amber from the Prussian coast and sable and ermine furs from Russia, which were transported back inland on the wagons that had unloaded the salt.",
+
+                ideologyTitle: "Ideology and Spirit - The Bourgeois Revolution",
+                ideologyDesc: "The Salt Route symbolizes a tectonic shift in the spirit of the Middle Ages. It was the beginning of the end of feudalism. The Hanseatic League, founded around the route, championed a bourgeois ideology where power isn't inherited by nobles through blood, but accumulated by merchants and craftsmen through economic enterprise, map reading, legal contracts, and hard work. The Patricians (Hanseatic elite merchants) established autonomous urban republics subject only to the Emperor (Freie Reichsstadt) rather than local dukes.",
+                
+                techTitle: "Technological Achievements and Civic Infrastructure",
+                techDesc: "The massive demand for salt necessitated a shift from land transport to artificial water transport:",
+                tech1: "Stecknitz Canal (1398): Building one of the first artificial canals in Europe. The canal connected two rivers flowing in opposite directions. <strong class='text-white'>Development Origin:</strong> Duchy of Saxe-Lauenburg.",
+                tech2: "Pound Locks (Chamber Locks): To overcome the elevation differences (a 16-meter difference between the rivers), engineers designed 'water locks' - enclosed chambers where the water level rises and falls to lift or lower the navigating ships.",
+                tech3: "Salt Prams (Salzprahm): Developing river barges with entirely flat bottoms designed to navigate shallow waters (only about 80 cm deep in the canal). They were towed against the current using ropes pulled by horses or men from the riverbank.",
+                techSummary: "Thanks to the canal, the salt-carrying capacity multiplied several times compared to ox carts, and the travel time from Lüneburg to Lübeck was significantly reduced.",
+
+                declineTitle: "Decline of the Historical Route",
+                declineDesc: "The prosperity of the Old Salt Route came to an end starting in the 16th century. <strong class='text-slate-300'>Economic-Maritime Reason:</strong> Large, advanced Dutch and English sailing ships began importing sea salt (evaporated by the sun) from the French Riviera, Spain, and Portugal (Baie de Bourgneuf). Sea salt was vastly cheaper than German mined salt, as it didn't require expensive wood for boiling. <strong class='text-slate-300'>Geopolitical Reason:</strong> The Hanseatic League began losing its economic might to emerging nation-states in the west (Netherlands, Sweden, and England). The final blow was delivered in the 17th century during the 'Thirty Years' War', which devastated the economy of northern Germany and stripped the route of its European significance.",
+
+                footer: "Research written and coded by Gemini & Ram © 2026"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'he' ? 'en' : 'he';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = content[currentLang].dir;
+            renderPage();
+        }
+
+        function renderPage() {
+            const t = content[currentLang];
+            const isEn = currentLang === 'en';
+            
+            const html = `
+                <nav class="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                        <a href="../index.html" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
+                            <svg class="w-5 h-5 transform ${isEn ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span class="font-bold tracking-wide text-sm sm:text-base">${t.navBack}</span>
+                        </a>
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleLanguage()" class="text-sm font-semibold text-gray-300 hover:text-white bg-gray-800/60 hover:bg-gray-700/60 px-3 py-1.5 rounded-lg border border-gray-700 transition-all">
+                                ${t.langBtn}
+                            </button>
+                            <div class="text-gray-400 font-semibold tracking-widest text-sm uppercase hidden sm:block">
+                                ${t.navTitle}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24 space-y-12">
+                    
+                    <header class="text-center space-y-6">
+                        <div class="inline-block p-6 rounded-full bg-gray-800 border-4 border-gray-700 shadow-2xl mb-4">
+                            <span class="text-7xl">🧂</span>
+                        </div>
+                        <h1 class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-200 via-white to-slate-400 tracking-tight">
+                            ${t.heroTitle}
+                        </h1>
+                        <div class="flex flex-wrap justify-center gap-3 text-sm sm:text-base font-semibold">
+                            <span class="bg-slate-800/40 text-slate-300 px-4 py-1.5 rounded-full border border-slate-700/50">${t.heroYears}</span>
+                            <span class="bg-teal-900/40 text-teal-300 px-4 py-1.5 rounded-full border border-teal-800/50">${t.heroLength}</span>
+                        </div>
+                        <p class="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mt-6">
+                            ${t.heroDesc}
+                        </p>
+                    </header>
+
+                    <div class="image-placeholder w-full h-64 sm:h-96 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-slate-300 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p>${t.mapPlaceholder}</p>
+                            <p class="text-sm font-normal text-gray-500">${t.mapHint}</p>
+                        </div>
+                    </div>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-slate-300"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">📖</span> ${t.etyTitle}
+                        </h2>
+                        <div class="space-y-6">
+                            <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 space-y-5 shadow-inner">
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-slate-300 text-lg block mb-1">${t.etyAuthor}</strong>
+                                    <p class="text-gray-300 leading-relaxed">${t.etyAuthorDesc}</p>
+                                </div>
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-slate-300 text-lg block mb-1">${t.etyYears}</strong>
+                                    <p class="text-gray-300 leading-relaxed font-semibold">${t.etyYearsDesc}</p>
+                                </div>
+                                <div class="pb-2">
+                                    <p class="text-gray-300 leading-relaxed">${t.etyContext}</p>
+                                </div>
+                                <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50 inline-block w-full text-center">
+                                    <strong class="text-slate-300">${t.etyOriginal}</strong> <span class="text-xl font-bold text-white tracking-widest font-mono mx-2">Alte Salzstraße</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-slate-400">
+                                    <h4 class="text-slate-300 font-bold text-lg mb-2">${t.etyPart1Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart1Desc}</p>
+                                </div>
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-teal-400">
+                                    <h4 class="text-teal-300 font-bold text-lg mb-2">${t.etyPart2Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart2Desc}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-blue-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🏛️</span> ${t.bioTitle}
+                        </h2>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8">${t.bioIntro}</p>
+
+                        <div class="space-y-10">
+                            <div class="bg-gray-800/40 p-6 sm:p-8 rounded-2xl border border-gray-700/70 shadow-lg hover:border-slate-500/50 transition-colors relative overflow-hidden">
+                                <div class="absolute top-0 ${isEn ? 'left-0' : 'right-0'} w-full h-1 bg-gradient-to-${isEn ? 'r' : 'l'} from-slate-400 to-transparent"></div>
+                                <h3 class="text-3xl font-bold text-slate-300 mb-2">${t.wuTitle}</h3>
+                                <p class="text-sm text-slate-300 font-semibold mb-6 px-3 py-1 bg-slate-800/50 inline-block rounded-md border border-slate-700/50">${t.wuYears}</p>
+                                
+                                <div class="space-y-5 text-gray-300 leading-relaxed text-sm sm:text-base">
+                                    <div><strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub1}</strong><p>${t.wuDesc1}</p></div>
+                                    <div><strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub2}</strong><p>${t.wuDesc2}</p></div>
+                                    <div class="bg-gray-800/80 p-6 rounded-xl border border-gray-700 mt-6 shadow-inner">
+                                        <strong class="text-slate-300 block mb-4 text-xl flex items-center gap-2"><span class="text-2xl">🎯</span> ${t.wuReasonsTitle}</strong>
+                                        <ul class="space-y-4 list-none">
+                                            <li class="flex gap-3"><span class="text-slate-200 mt-1">🧂</span><div><strong class="text-white">${t.wuReason1Title}</strong> ${t.wuReason1Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-teal-400 mt-1">🐟</span><div><strong class="text-white">${t.wuReason2Title}</strong> ${t.wuReason2Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-blue-400 mt-1">⚓</span><div><strong class="text-white">${t.wuReason3Title}</strong> ${t.wuReason3Desc}</div></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-slate-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🐎</span> ${t.animalsTitle}
+                        </h2>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8">${t.animalsDesc}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700">
+                                <h4 class="text-slate-300 font-bold text-xl mb-4 flex items-center gap-2">🐎 ${t.horseSpecies}</h4>
+                                <p class="text-gray-300 text-sm sm:text-base leading-relaxed">${t.horseDesc}</p>
+                            </div>
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700">
+                                <h4 class="text-slate-300 font-bold text-xl mb-4 flex items-center gap-2">🐂 ${t.elephantSpecies}</h4>
+                                <p class="text-gray-300 text-sm sm:text-base leading-relaxed">${t.elephantDesc}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="image-placeholder w-full h-48 sm:h-64 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-12 h-12 mx-auto text-slate-400 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            <p>${t.caravanPlaceholder}</p>
+                        </div>
+                    </div>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-teal-600"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">⚖️</span> ${t.strategyTitle}
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-slate-300 mb-3">${t.economyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.economyDesc}</p>
+                            </div>
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-teal-400 mb-3">${t.milStrategyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.milStrategyDesc}</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 mt-4">
+                            <h3 class="text-xl font-bold text-slate-200 mb-4 border-b border-gray-700 pb-2">${t.goodsOriginTitle}</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🧂</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.chinaOrigin}</strong> ${t.chinaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🐟</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.indiaOrigin}</strong> ${t.indiaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🪵</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.romeOrigin}</strong> ${t.romeGoods}</p></li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-teal-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">💡</span> ${t.ideologyTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.ideologyDesc}</p>
+                        </div>
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-slate-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">⚙️</span> ${t.techTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.techDesc}</p>
+                            <ul class="list-disc list-inside mt-4 text-gray-300 space-y-2 font-semibold">
+                                <li class="text-slate-300">${t.tech1}</li>
+                                <li class="text-slate-300">${t.tech2}</li>
+                                <li class="text-slate-300">${t.tech3}</li>
+                            </ul>
+                            <p class="text-gray-400 text-sm mt-4">${t.techSummary}</p>
+                        </div>
+                    </section>
+                    
+                    <section class="glass-card p-8 rounded-3xl bg-red-900/10 border-red-900/30 text-center">
+                        <h3 class="text-2xl font-bold text-red-400 mb-4">${t.declineTitle}</h3>
+                        <p class="text-gray-300 leading-relaxed max-w-3xl mx-auto">${t.declineDesc}</p>
+                    </section>
+                </main>
+
+                <footer class="mt-auto border-t border-gray-800 bg-gray-900/90 py-6 text-center z-10">
+                    <p class="text-gray-500 text-sm font-semibold tracking-wide">${t.footer}</p>
+                </footer>
+            `;
+            
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        window.onload = renderPage;
+    </script>
+</body>
+</html>
+
