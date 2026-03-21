@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>נתיב הסחר מהוורנגים ליוונים - מחקר היסטורי מקיף</title>
+    <!-- שילוב Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* הגדרות גופנים לקריאה מחקרית נוחה על מסכי Samsung S25 Ultra */
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Frank+Ruhl+Libre:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* עיצוב Glassmorphism לפרימיום Dark Mode */
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* עיצוב לתמונות עתידיות (Placeholders) */
+        .image-placeholder {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(31, 41, 55, 0.8),
+                rgba(31, 41, 55, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 20px
+            );
+            border: 2px dashed rgba(14, 165, 233, 0.5); /* צבע כחול-קרח/ים */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .image-placeholder:hover {
+            border-color: rgba(14, 165, 233, 1);
+            color: #E5E7EB;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen selection:bg-sky-500 selection:text-white flex flex-col">
+
+    <!-- קונטיינר ראשי אליו יוזרק התוכן הדינמי -->
+    <div id="app-container" class="flex-grow w-full"></div>
+
+    <script>
+        let currentLang = 'he';
+
+        // מסד הנתונים הדו-לשוני המלא
+        const content = {
+            he: {
+                dir: "rtl",
+                navBack: "חזור לאנציקלופדיה",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "English",
+                heroTitle: "הנתיב מהוורנגים ליוונים",
+                heroYears: "שנות פעילות מרכזיות: המאה ה-8 – המאה ה-11 לספירה",
+                heroLength: "אורך משוער: כ-3,000 קילומטרים (מהים הבלטי לים השחור)",
+                heroDesc: "רשת הנהרות האדירה של מזרח אירופה שדרכה שטו סוחרים-לוחמים סקנדינבים (הויקינגים/רוּס). הנתיב חיבר את היערות הקפואים של הצפון אל בירת העולם דאז, קונסטנטינופול, והוביל להקמת רוסיה ואוקראינה המודרניות.",
+                mapPlaceholder: "",
+                mapHint: "הכנס כאן את קובץ המפה (למשל: varangians-greeks-map.jpg)",
+                
+                etyTitle: "ניתוח אטימולוגי מלא",
+                etyAuthor: "חוקר והיסטוריון כלכלי מודרני:",
+                etyAuthorDesc: "חקר הרשתות הכלכליות של הויקינגים המזרחיים (הרוּס) וקשריהם עם האימפריה הביזנטית והעולם האסלאמי קודם משמעותית על ידי ההיסטוריון והנומיסמט (חוקר מטבעות) האמריקאי <strong>תומאס ס. נונאן (Thomas S. Noonan)</strong>.",
+                etyYears: "שנות חייו של ההיסטוריון (נונאן):",
+                etyYearsDesc: "1938 – 2001.",
+                etyContext: "<strong class='text-sky-400'>ארץ מוצא ומקום לידה:</strong> ארצות הברית. מחקרו הוכיח כיצד מיליוני מטבעות כסף אסלאמיים וביזנטיים הגיעו לאדמת שוודיה ורוסיה דרך נתיבי נהרות אלו.",
+                etyOriginal: "מונח המקור (בכרוניקה הרוסית הראשונה):",
+                etyPart1Title: "חלק א' – Varangians (וַרַנְגִים)",
+                etyPart1Desc: "המקור מהמילה הנורדית העתיקה 'Væringi', שמשמעותה 'שותף לשבועה' או 'אנשים שנשבעו אמונים'. זה היה הכינוי היווני-ביזנטי והסלאבי לשבטים הויקינגים (הרוּס) שהגיעו משוודיה למזרח אירופה כשכירי חרב וכסוחרים.",
+                etyPart2Title: "חלק ב' – Greeks (יוונים)",
+                etyPart2Desc: "מונח המתייחס לאימפריה הביזנטית (האימפריה הרומית המזרחית). למרות שהביזנטים ראו עצמם כ'רומאים', הם דיברו יוונית והשתייכו לכנסייה האורתודוקסית, ולכן כונו 'יוונים' בפי עמי הצפון.",
+
+                bioTitle: "מייסדי הנתיב והרקע ההיסטורי",
+                bioIntro: "הנתיב נוצר תחילה על ידי ויקינגים שחיפשו כסף קל, אך מי שהפך אותו לעורק אימפריאלי ממוסד, ואגב כך ייסד מדינה חדשה, היה נסיך סקנדינבי חסר רחמים.",
+                
+                wuTitle: "אולג מנובגורוד (Oleg of Novgorod / Helgi)",
+                wuYears: "שנות חיים: לא ידוע – 912 לספירה | תקופת שלטון (נסיך קייב): 879 – 912 לספירה",
+                wuSub1: "ילדות, שורשים וכיבוש קייב:",
+                wuDesc1: "אולג (שנקרא 'הלגי' בנורדית עתיקה) היה אציל ויקינגי-וורנגי, ככל הנראה גיסו או קרוב משפחתו של רוריק (מייסד שושלת רוריק). לאחר מות רוריק ב-879, אולג לקח את השלטון בעיר נובגורוד שבצפון. כמי שגדל בתרבות הימית הויקינגית שקידשה את הניידות והסחר בכוח הזרוע, הוא הבין שנובגורוד מרוחקת מדי מהעושר האמיתי. בשנת 882 הוא יצא למסע צבאי דרומה לאורך נהר הדנייפר, רצח בעורמה את השליטים הויקינגים המקומיים של העיר קייב (אסקולד ודיר), והכריז עליה כ'אם ערי הרוס'. בכך הוא איחד את הצפון והדרום והקים הלכה למעשה את אימפריית 'רוס של קייב'.",
+                wuSub2: "אידאולוגיה ותפיסת עולם שלטונית:",
+                wuDesc2: "האידאולוגיה של אולג נשענה על שיטת ה'פוליודה' (Poliudie - סיור גביית מס). במקום לפשוט ולשדוד כפרים בצורה אקראית, האידאולוגיה הייתה של 'חסות מאפיוזית' ממוסדת: האליטה הויקינגית דרשה מהשבטים הסלאבים המקומיים לשלם מס שנתי קבוע (בפרוות, דבש, ועבדים) תמורת הגנה. אולג הבין שכדי להתעשר באמת, עליו לאסוף את כל התוצרת הזו ולרכז אותה בנתיב מים אחד ויחיד שמוביל אל השוק הגדול ביותר בעולם דאז – קונסטנטינופול.",
+                wuReasonsTitle: "הסיבות המדויקות והאסטרטגיות לשליטה בנתיב הדנייפר:",
+                wuReason1Title: "עקיפת האמברגו הכוזרי במזרח:",
+                wuReason1Desc: "אימפריית הכוזרים חלשה על נהר הוולגה והטילה מיסים כבדים על סוחרי הרוס. שליטה בלעדית על נהר הדנייפר (הנתיב המערבי יותר) אפשרה לאולג ולויקינגים גישה ישירה לים השחור ולביזנטיון, מבלי לשלם דמי מעבר למעצמות יריבות.",
+                wuReason2Title: "גישה ישירה ל'מיקלאגארד' (העיר הגדולה):",
+                wuReason2Desc: "קונסטנטינופול (מיקלאגארד בפי הויקינגים) הייתה העיר העשירה באירופה. אולג רצה כסף ומשי ביזנטי. בשנת 907 הוא הצעיד את ציו (לפי המסורת, הוא העלה את ספינותיו על גלגלים כדי לעקוף את החומות) והטיל מצור על העיר, מה שאילץ את הקיסר הביזנטי לחתום איתו על הסכם סחר היסטורי שפטר את סוחרי הרוס ממכס.",
+                wuReason3Title: "מיזוג דמוגרפי (יצירת אליטה חדשה):",
+                wuReason3Desc: "אסטרטגית, אולג והנסיכים אחריו השתמשו בנתיב כדי לאחד אליטה צבאית ויקינגית קטנה עם אוכלוסייה סלאבית עצומה. הנתיב עצמו שימש ככור ההיתוך שיצר את הזהות ה'רוסית' המוקדמת – שילוב של מיומנות ימית סקנדינבית ותרבות יבשתית סלאבית.",
+
+                animalsTitle: "לוגיסטיקה של בעלי חיים: מסע הגרירה (Portage)",
+                animalsDesc: "הנתיב לא היה רציף. הוא כלל מערכות נהרות שונות (כמו הוולכוב, הלוואט והדנייפר). כדי לעבור מנהר אחד לשני, היה צורך לגרור פיזית את הספינות העמוסות על פני היבשה, בתהליך אכזרי שנקרא 'וולוק' (Volok).",
+                horseSpecies: "סוס הפיורד הנורווגי (Norwegian Fjord Horse / Equus caballus):",
+                horseDesc: "גזע סוסים עתיק וחסון שהגיע עם הויקינגים מסקנדינביה, בעל מראה ייחודי של רעמה זקופה (Mohawk). <strong class='text-white mt-2 block'>חשיבות אסטרטגית והיסטורית:</strong> למרות שרוב עבודת גרירת הספינות (Portage) בין הנהרות נעשתה באמצעות כוח אדם כפוי (עבדים ושבטים מקומיים שגויסו למשימה), סוסי הפיורד, שידועים בכוח המשיכה יוצא הדופן שלהם ביחס לגודלם ובעמידותם הקיצונית לקור ולשלג, סייעו לויקינגים למשוך את הספינות על גבי בולי עץ עגולים במעברי היבשה הקשים. <strong class='text-white mt-2 block'>ארץ מוצא:</strong> נורווגיה / סקנדינביה.",
+                elephantSpecies: "שור מזרח-אירופאי (Eastern European Ox / Bos taurus):",
+                elephantDesc: "שוורים שגודלו על ידי השבטים הסלאבים לאורך הנתיב. <strong class='text-white mt-2 block'>חשיבות היסטורית:</strong> כאשר משלחות הויקינגים ירדו דרומה אל תוך הערבות (הסטפות) של אוקראינה, אזורים בהם המעברים היבשתיים בין הנהרות היו ארוכים ובוציים, הם שכרו או החרימו שוורים מקומיים כדי לגרור את ספינות העץ הכבדות. השוורים סיפקו כוח גס ויציב שאיפשר לשמור על רצף המסחר בעונות המעבר. <strong class='text-white mt-2 block'>ארץ מוצא:</strong> מזרח אירופה (אזור אוקראינה-רוסיה).",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "מסחר, אסטרטגיה וגיאופוליטיקה",
+                economyTitle: "חשיבות המסחר והכלכלה",
+                economyDesc: "כלכלת הנתיב התבססה במידה רבה על סחר בעבדים ובמוצרי יער. הויקינגים פשטו על כפרים סלאבים, שבו את התושבים (מכאן המקור האטימולוגי למילה Slave - עבד/סלאבי), והשיטו אותם דרומה כדי למכרם בשווקי קונסטנטינופול תמורת מטבעות כסף, משי ויין. התעשרותם של נסיכי קייב מנתיב זה הפכה את רוס של קייב למעצמה העשירה ביותר במזרח אירופה.",
+                milStrategyTitle: "חשיבות אסטרטגית - כוח שכירי החרב",
+                milStrategyDesc: "הביזנטים גילו את עוצמתם הקטלנית של הלוחמים שהגיעו מהנתיב הזה. במקום להילחם בהם, הקיסרים הביזנטים החלו לשכור אותם למשמר המלכותי האישי שלהם - <strong class='text-sky-400'>'המשמר הוורנגי' (Varangian Guard)</strong>. לוחמים ויקינגים חמושים בגרזני קרב דו-ידניים הפכו לכוח הצבאי המטיל אימה ביותר במזרח התיכון, והם היו נאמנים לקיסר הביזנטי בלבד (שכן שילם להם בזהב).",
+                goodsOriginTitle: "ארץ המוצא של הסחורות המרכזיות שעברו בנתיב",
+                chinaOrigin: "סקנדינביה והצפון הרחוק (שוודיה, נורווגיה):",
+                chinaGoods: "<strong class='text-white'>ענבר, נשק ושכירי חרב:</strong> מהארצות הבלטיות הגיע ענבר צהוב, חרבות פלדה פרנקיות משובחות (שנמכרו במחירים מופקעים במזרח), וכמובן - לוחמים להשכרה.",
+                indiaOrigin: "יערות רוסיה ואוקראינה (אזור קייב ונובגורוד):",
+                indiaGoods: "<strong class='text-white'>עבדים (Saqaliba), פרוות יוקרה, דבש ושעוות דבורים:</strong> עורות של דובים, שועלים, צובל וסמור נועדו לבגדי החורף של האצולה הביזנטית. שעוות דבורים הייתה חיונית לייצור נרות עבור הכנסיות האורתודוקסיות הענקיות.",
+                romeOrigin: "האימפריה הביזנטית (קונסטנטינופול):",
+                romeGoods: "<strong class='text-white'>בדי משי, יין, זכוכית ומטבעות:</strong> האימפריה הביזנטית שילמה עבור סחורות הצפון במטבעות כסף, תכשיטים, פירות דרומיים (כמו תאנים), וכלי זכוכית שאותם קברו הויקינגים יחד עם מתיהם בסקנדינביה.",
+
+                ideologyTitle: "אידאולוגיה ורוח - ההתנצרות של רוס",
+                ideologyDesc: "מעבר לסחורות, הנתיב העביר אידאולוגיה דתית שעיצבה את גבולות אירופה עד ימינו. דרך קשרי הסחר הרציפים, התרבות הביזנטית חלחלה לקייב. בשנת 988, ולדימיר הגדול (נסיך קייב) בחר להמיר את דתה של אימפריית הרוס לנצרות האורתודוקסית הביזנטית (ולא לקתולית מרומא), צעד שהתאפשר תודות לקשרים הגיאופוליטיים על גבי הנתיב. החלטה זו כבלה את רוסיה לתרבות האורתודוקסית והקירילית לנצח.",
+                
+                techTitle: "הישגים טכנולוגיים: מים רדודים ויבשה",
+                techDesc: "הניווט בנהרות רדודים מלאי שרטונות הצריך הנדסה וימית ייחודית:",
+                tech1: "ספינות הקנאר (Knarr / Karve): ספינות ויקינגיות שנבנו בשיטת הקלינקר (לוחות עץ חופפים). הן היו בעלות שוקע רדוד מאוד (פחות ממטר) שאפשר להן לשוט עמוק בתוך נהרות, אך גם היו חזקות מספיק כדי לחצות את הים הבלטי והים השחור. <strong class='text-white'>ארץ פיתוח:</strong> סקנדינביה.",
+                tech2: "מערכת הגרירה (Volok): פיתוח לוגיסטי ותשתיות עץ שאפשרו לגרור ספינות באורך 20 מטר על פני קילומטרים של יבשה באמצעות בולי עץ מתגלגלים, כדי לגשר על חסרי החיבור בין אגני הנהרות.",
+                tech3: "המונוקסילון (Monoxylon): סירות סלאביות קטנות שעשויות מגזע עץ חלול אחד. הויקינגים השתמשו בהן כדי להעביר את סחורותיהם מעבר למפלי הדנייפר המסוכנים, שם לא יכלו להעביר את ספינותיהם הגדולות.",
+                techSummary: "יכולתם של הויקינגים להמיר את הספינה מכלי שייט לכלי יבשתי נגרר הפכה את המים למערכת כבישים שלמה.",
+
+                declineTitle: "דעיכת הנתיב ההיסטורי",
+                declineDesc: "הנתיב החל לדעוך בסוף המאה ה-11 ובתחילת המאה ה-12 מסיבות גיאופוליטיות וכלכליות. ראשית, <strong class='text-sky-400'>מסעות הצלב</strong> פתחו נתיבי סחר חדשים דרך הים התיכון ישירות למזרח התיכון, וערי איטליה (כמו ונציה וגנואה) תפסו את השליטה במסחר, מה שהפך את נתיב הנהרות הצפוני לבלתי כדאי. שנית, התעצמות שבטי הקומנים (נוודים טורקים) בערבות הדרום חסמה את נהר הדנייפר והפכה את המסע דרומה להתאבדות. מכת המחץ הסופית הגיעה במאה ה-13 עם <strong class='text-sky-400'>הפלישה המונגולית</strong> שהחריבה את העיר קייב עד היסוד (בשנת 1240) וקטעה את הרצף הפוליטי לאורך הנהר לנצח.",
+
+                footer: "המחקר נכתב וקודד על ידי ג'מיני ורם © 2026"
+            },
+            en: {
+                dir: "ltr",
+                navBack: "Back to Encyclopedia",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "עברית",
+                heroTitle: "Varangians to the Greeks",
+                heroYears: "Peak Active Years: 8th Century – 11th Century CE",
+                heroLength: "Estimated Length: ~3,000 Kilometers (Baltic Sea to the Black Sea)",
+                heroDesc: "The massive Eastern European river network navigated by Scandinavian warrior-merchants (the Vikings/Rus). The route connected the frozen northern forests to the capital of the known world, Constantinople, leading to the foundation of modern Russia and Ukraine.",
+                mapPlaceholder: "",
+                mapHint: "Insert your map file here (e.g., varangians-greeks-map.jpg)",
+                
+                etyTitle: "Complete Etymological Analysis",
+                etyAuthor: "Modern Economic Historian & Researcher:",
+                etyAuthorDesc: "Research on the economic networks of the Eastern Vikings (the Rus) and their ties with the Byzantine and Islamic worlds was significantly advanced by American historian and numismatist <strong>Thomas S. Noonan</strong>.",
+                etyYears: "Historian's Lifespan (Noonan):",
+                etyYearsDesc: "1938 – 2001.",
+                etyContext: "<strong class='text-sky-400'>Country of Origin & Birthplace:</strong> United States. His research proved how millions of Islamic and Byzantine silver coins reached Swedish and Russian soil through these river routes.",
+                etyOriginal: "Original Term (in the Primary Chronicle):",
+                etyPart1Title: "Part A – Varangians",
+                etyPart1Desc: "Derived from the Old Norse word 'Væringi', meaning 'sworn companion' or 'men of the pledge'. It was the Greek-Byzantine and Slavic designation for the Viking tribes (the Rus) arriving from Sweden to Eastern Europe as mercenaries and traders.",
+                etyPart2Title: "Part B – Greeks",
+                etyPart2Desc: "A term referring to the Byzantine Empire (Eastern Roman Empire). Although the Byzantines considered themselves 'Romans', they spoke Greek and belonged to the Orthodox Church, thus they were called 'Greeks' by the northern peoples.",
+
+                bioTitle: "Founders and Historical Background",
+                bioIntro: "The route was initially forged by Vikings seeking quick wealth, but the man who transformed it into an institutionalized imperial artery—and in doing so, founded a new nation—was a ruthless Scandinavian prince.",
+                
+                wuTitle: "Oleg of Novgorod (Helgi)",
+                wuYears: "Lifespan: Unknown – 912 CE | Reign (Prince of Kiev): 879 – 912 CE",
+                wuSub1: "Childhood, Roots, and the Conquest of Kiev:",
+                wuDesc1: "Oleg (known as 'Helgi' in Old Norse) was a Varangian-Viking noble, likely the brother-in-law or kinsman of Rurik (founder of the Rurik Dynasty). After Rurik's death in 879, Oleg took power in the northern city of Novgorod. Raised in the Viking maritime culture that prized mobility and trade by force, he realized Novgorod was too far from true wealth. In 882, he launched a military expedition south along the Dnieper River, cunningly murdered the local Viking rulers of Kiev (Askold and Dir), and declared it the 'Mother of Rus Cities'. In doing so, he united the north and south, effectively creating the 'Kievan Rus' empire.",
+                wuSub2: "Ideology and Concept of Governance:",
+                wuDesc2: "Oleg's ideology rested on the 'Poliudie' system (the tribute-gathering tour). Instead of randomly raiding and looting villages, the ideology was one of institutionalized 'mafia-like protection': the Viking elite demanded a fixed annual tribute (in furs, honey, and slaves) from the local Slavic tribes in exchange for protection. Oleg understood that to truly amass wealth, he had to collect all this produce and channel it into a single water route leading to the world's largest market at the time—Constantinople.",
+                wuReasonsTitle: "Exact Strategic Reasons for Controlling the Dnieper Route:",
+                wuReason1Title: "Bypassing the Khazar Embargo in the East:",
+                wuReason1Desc: "The Khazar Empire dominated the Volga River and imposed heavy taxes on Rus merchants. Exclusive control of the Dnieper River (the more western route) granted Oleg and the Vikings direct access to the Black Sea and Byzantium without paying transit tolls to rival powers.",
+                wuReason2Title: "Direct Access to 'Miklagard' (The Great City):",
+                wuReason2Desc: "Constantinople (Miklagard to the Vikings) was Europe's wealthiest city. Oleg wanted Byzantine silver and silk. In 907, he marched his fleet (legend says he mounted his ships on wheels to bypass the walls) and laid siege to the city, forcing the Byzantine Emperor to sign a historic trade treaty that exempted Rus merchants from customs duties.",
+                wuReason3Title: "Demographic Fusion (Creating a New Elite):",
+                wuReason3Desc: "Strategically, Oleg and subsequent princes used the route to fuse a small Viking military elite with a massive Slavic population. The route itself served as the melting pot that created early 'Russian' identity—a blend of Scandinavian maritime skill and Slavic continental culture.",
+
+                animalsTitle: "Animal Logistics: The Portage Journey (Volok)",
+                animalsDesc: "The route was not continuous. It involved various river systems (like the Volkhov, Lovat, and Dnieper). To cross from one river to another, heavily loaded ships had to be physically dragged overland in a brutal process called 'Volok'.",
+                horseSpecies: "Norwegian Fjord Horse (Equus caballus):",
+                horseDesc: "An ancient, sturdy horse breed arriving with the Vikings from Scandinavia, known for its distinct upright mane (Mohawk). <strong class='text-white mt-2 block'>Historical and Strategic Importance:</strong> Although most of the portage work between rivers was done using forced human labor (slaves and conscripted local tribes), Fjord horses—known for their exceptional pulling power relative to their size and extreme resistance to cold and snow—assisted the Vikings in dragging ships over rolling logs across harsh overland passes. <strong class='text-white mt-2 block'>Origin:</strong> Norway / Scandinavia.",
+                elephantSpecies: "Eastern European Ox (Bos taurus):",
+                elephantDesc: "Oxen bred by Slavic tribes along the route. <strong class='text-white mt-2 block'>Historical Importance:</strong> When Viking expeditions traveled south into the Ukrainian steppes, where land portages between rivers were long and muddy, they hired or requisitioned local oxen to drag the heavy wooden ships. Oxen provided the brute, steady force necessary to maintain the flow of trade during transitional seasons. <strong class='text-white mt-2 block'>Origin:</strong> Eastern Europe (Ukraine-Russia region).",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "Trade, Strategy, and Geopolitics",
+                economyTitle: "Importance of Trade and Economy",
+                economyDesc: "The route's economy relied heavily on the slave and forest product trade. Vikings raided Slavic villages, captured inhabitants (hence the etymological root for the word 'Slave' / 'Slavic'), and transported them south to be sold in the markets of Constantinople for silver coins, silk, and wine. The wealth amassed by Kievan princes from this route made Kievan Rus the wealthiest power in Eastern Europe.",
+                milStrategyTitle: "Strategic Importance - The Mercenary Force",
+                milStrategyDesc: "The Byzantines recognized the lethal power of the warriors arriving from this route. Instead of fighting them, Byzantine emperors began hiring them for their personal royal guard - the <strong class='text-sky-400'>'Varangian Guard'</strong>. Viking warriors armed with two-handed battle axes became the most terrifying military force in the Middle East, loyal only to the Byzantine Emperor (who paid them in gold).",
+                goodsOriginTitle: "Origin of Key Commodities",
+                chinaOrigin: "Scandinavia and the Far North (Sweden, Norway):",
+                chinaGoods: "<strong class='text-white'>Amber, Weapons, and Mercenaries:</strong> From the Baltics came yellow amber, fine Frankish steel swords (sold at exorbitant prices in the East), and, of course, warriors for hire.",
+                indiaOrigin: "Russian and Ukrainian Forests (Kiev & Novgorod Regions):",
+                indiaGoods: "<strong class='text-white'>Slaves (Saqaliba), Luxury Furs, Honey, and Beeswax:</strong> Pelts of bear, fox, sable, and ermine were destined for the winter garments of Byzantine nobility. Beeswax was essential for making candles for the massive Orthodox churches.",
+                romeOrigin: "The Byzantine Empire (Constantinople):",
+                romeGoods: "<strong class='text-white'>Silk Fabrics, Wine, Glass, and Coins:</strong> The Byzantine Empire paid for northern goods with silver coins, jewelry, southern fruits (like figs), and glassware that Vikings would bury with their dead back in Scandinavia.",
+
+                ideologyTitle: "Ideology and Spirit - The Christianization of Rus",
+                ideologyDesc: "Beyond commodities, the route transmitted a religious ideology that shaped Europe's borders to this day. Through continuous trade ties, Byzantine culture permeated Kiev. In 988, Vladimir the Great (Prince of Kiev) chose to convert the Rus Empire to Byzantine Orthodox Christianity (rather than Roman Catholicism), a step made possible entirely due to geopolitical connections along the route. This decision bound Russia to Orthodox and Cyrillic culture forever.",
+                
+                techTitle: "Technological Achievements: Shallows and Land",
+                techDesc: "Navigating shallow, sandbank-filled rivers required unique maritime engineering:",
+                tech1: "Knarr / Karve Ships: Viking ships built using the clinker method (overlapping wooden planks). They had a very shallow draft (less than a meter) allowing deep river navigation, yet were strong enough to cross the Baltic and Black Seas. <strong class='text-white'>Development Origin:</strong> Scandinavia.",
+                tech2: "The Portage System (Volok): Logistical developments and wooden infrastructures allowing 20-meter ships to be dragged over kilometers of land using rolling logs, bridging the gaps between river basins.",
+                tech3: "The Monoxylon: Small Slavic boats made from a single hollowed-out tree trunk. Vikings used them to transport their goods past the treacherous Dnieper Rapids, where their large ships could not pass.",
+                techSummary: "The Vikings' ability to convert their ship from a watercraft into a dragged land vehicle turned the rivers into an entire highway system.",
+
+                declineTitle: "Decline of the Historical Route",
+                declineDesc: "The route began to decline in the late 11th and early 12th centuries due to geopolitical and economic reasons. First, the <strong class='text-sky-400'>Crusades</strong> opened new trade routes through the Mediterranean directly to the Middle East, and Italian cities (like Venice and Genoa) took control of trade, making the northern river route unprofitable. Second, the rising power of the Cuman tribes (Turkic nomads) in the southern steppes blocked the Dnieper River, turning the journey south into suicide. The final, fatal blow came in the 13th century with the <strong class='text-sky-400'>Mongol Invasion</strong>, which razed the city of Kiev to the ground (in 1240) and severed the political continuity along the river forever.",
+
+                footer: "Research written and coded by Gemini & Ram © 2026"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'he' ? 'en' : 'he';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = content[currentLang].dir;
+            renderPage();
+        }
+
+        function renderPage() {
+            const t = content[currentLang];
+            const isEn = currentLang === 'en';
+            
+            const html = `
+                <!-- סרגל ניווט עליון -->
+                <nav class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                        <a href="../index.html" class="flex items-center gap-2 text-sky-400 hover:text-sky-300 transition-colors group">
+                            <svg class="w-5 h-5 transform ${isEn ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span class="font-bold tracking-wide text-sm sm:text-base">${t.navBack}</span>
+                        </a>
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleLanguage()" class="text-sm font-semibold text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-700/60 px-3 py-1.5 rounded-lg border border-slate-700 transition-all">
+                                ${t.langBtn}
+                            </button>
+                            <div class="text-slate-400 font-semibold tracking-widest text-sm uppercase hidden sm:block">
+                                ${t.navTitle}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24 space-y-12">
+                    
+                    <header class="text-center space-y-6">
+                        <div class="inline-block p-6 rounded-full bg-slate-800 border-4 border-slate-700 shadow-2xl mb-4">
+                            <span class="text-7xl">🛶</span>
+                        </div>
+                        <h1 class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-sky-500 to-blue-600 tracking-tight">
+                            ${t.heroTitle}
+                        </h1>
+                        <div class="flex flex-wrap justify-center gap-3 text-sm sm:text-base font-semibold">
+                            <span class="bg-sky-900/40 text-sky-300 px-4 py-1.5 rounded-full border border-sky-800/50">${t.heroYears}</span>
+                            <span class="bg-blue-900/40 text-blue-300 px-4 py-1.5 rounded-full border border-blue-800/50">${t.heroLength}</span>
+                        </div>
+                        <p class="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed mt-6">
+                            ${t.heroDesc}
+                        </p>
+                    </header>
+
+                    <div class="image-placeholder w-full h-64 sm:h-96 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-sky-500 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p>${t.mapPlaceholder}</p>
+                            <p class="text-sm font-normal text-slate-500">${t.mapHint}</p>
+                        </div>
+                    </div>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-sky-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">📖</span> ${t.etyTitle}
+                        </h2>
+                        <div class="space-y-6">
+                            <div class="bg-slate-800/60 p-6 rounded-2xl border border-slate-700 space-y-5 shadow-inner">
+                                <div class="border-b border-slate-700/60 pb-4">
+                                    <strong class="text-sky-400 text-lg block mb-1">${t.etyAuthor}</strong>
+                                    <p class="text-slate-300 leading-relaxed">${t.etyAuthorDesc}</p>
+                                </div>
+                                <div class="border-b border-slate-700/60 pb-4">
+                                    <strong class="text-sky-400 text-lg block mb-1">${t.etyYears}</strong>
+                                    <p class="text-slate-300 leading-relaxed font-semibold">${t.etyYearsDesc}</p>
+                                </div>
+                                <div class="pb-2">
+                                    <p class="text-slate-300 leading-relaxed">${t.etyContext}</p>
+                                </div>
+                                <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 inline-block w-full text-center">
+                                    <strong class="text-sky-400">${t.etyOriginal}</strong> <span class="text-xl font-bold text-white tracking-widest font-mono mx-2">Væringi / Ῥῶς</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-slate-800/40 p-5 rounded-2xl border-t-2 border-t-sky-400">
+                                    <h4 class="text-sky-300 font-bold text-lg mb-2">${t.etyPart1Title}</h4>
+                                    <p class="text-slate-400 text-sm leading-relaxed">${t.etyPart1Desc}</p>
+                                </div>
+                                <div class="bg-slate-800/40 p-5 rounded-2xl border-t-2 border-t-blue-400">
+                                    <h4 class="text-blue-300 font-bold text-lg mb-2">${t.etyPart2Title}</h4>
+                                    <p class="text-slate-400 text-sm leading-relaxed">${t.etyPart2Desc}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-blue-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🪓</span> ${t.bioTitle}
+                        </h2>
+                        <p class="text-slate-300 text-lg leading-relaxed mb-8">${t.bioIntro}</p>
+
+                        <div class="space-y-10">
+                            <div class="bg-slate-800/40 p-6 sm:p-8 rounded-2xl border border-slate-700/70 shadow-lg hover:border-sky-500/50 transition-colors relative overflow-hidden">
+                                <div class="absolute top-0 ${isEn ? 'left-0' : 'right-0'} w-full h-1 bg-gradient-to-${isEn ? 'r' : 'l'} from-sky-400 to-transparent"></div>
+                                <h3 class="text-3xl font-bold text-sky-300 mb-2">${t.wuTitle}</h3>
+                                <p class="text-sm text-sky-200 font-semibold mb-6 px-3 py-1 bg-sky-900/30 inline-block rounded-md border border-sky-800/50">${t.wuYears}</p>
+                                
+                                <div class="space-y-5 text-slate-300 leading-relaxed text-sm sm:text-base">
+                                    <div><strong class="text-white text-lg border-b border-slate-700 pb-1 mb-2 inline-block">${t.wuSub1}</strong><p>${t.wuDesc1}</p></div>
+                                    <div><strong class="text-white text-lg border-b border-slate-700 pb-1 mb-2 inline-block">${t.wuSub2}</strong><p>${t.wuDesc2}</p></div>
+                                    <div class="bg-slate-800/80 p-6 rounded-xl border border-slate-700 mt-6 shadow-inner">
+                                        <strong class="text-sky-300 block mb-4 text-xl flex items-center gap-2"><span class="text-2xl">🎯</span> ${t.wuReasonsTitle}</strong>
+                                        <ul class="space-y-4 list-none">
+                                            <li class="flex gap-3"><span class="text-indigo-400 mt-1">🛡️</span><div><strong class="text-white">${t.wuReason1Title}</strong> ${t.wuReason1Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-yellow-400 mt-1">👑</span><div><strong class="text-white">${t.wuReason2Title}</strong> ${t.wuReason2Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-emerald-400 mt-1">🤝</span><div><strong class="text-white">${t.wuReason3Title}</strong> ${t.wuReason3Desc}</div></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-slate-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🐎</span> ${t.animalsTitle}
+                        </h2>
+                        <p class="text-slate-300 text-lg leading-relaxed mb-8">${t.animalsDesc}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700">
+                                <h4 class="text-sky-400 font-bold text-xl mb-4 flex items-center gap-2">🐎 ${t.horseSpecies}</h4>
+                                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">${t.horseDesc}</p>
+                            </div>
+                            <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700">
+                                <h4 class="text-sky-400 font-bold text-xl mb-4 flex items-center gap-2">🐂 ${t.elephantSpecies}</h4>
+                                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">${t.elephantDesc}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="image-placeholder w-full h-48 sm:h-64 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-12 h-12 mx-auto text-sky-400 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            <p>${t.caravanPlaceholder}</p>
+                        </div>
+                    </div>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-sky-600"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">⚖️</span> ${t.strategyTitle}
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50">
+                                <h3 class="text-xl font-bold text-yellow-400 mb-3">${t.economyTitle}</h3>
+                                <p class="text-slate-300 leading-relaxed text-sm sm:text-base">${t.economyDesc}</p>
+                            </div>
+                            <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50">
+                                <h3 class="text-xl font-bold text-red-400 mb-3">${t.milStrategyTitle}</h3>
+                                <p class="text-slate-300 leading-relaxed text-sm sm:text-base">${t.milStrategyDesc}</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800/60 p-6 rounded-2xl border border-slate-700 mt-4">
+                            <h3 class="text-xl font-bold text-sky-400 mb-4 border-b border-slate-700 pb-2">${t.goodsOriginTitle}</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🌲</span><p class="text-slate-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.chinaOrigin}</strong> ${t.chinaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🐻</span><p class="text-slate-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.indiaOrigin}</strong> ${t.indiaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🍷</span><p class="text-slate-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.romeOrigin}</strong> ${t.romeGoods}</p></li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-yellow-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">💡</span> ${t.ideologyTitle}</h3>
+                            <p class="text-slate-300 leading-relaxed">${t.ideologyDesc}</p>
+                        </div>
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-sky-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">⚙️</span> ${t.techTitle}</h3>
+                            <p class="text-slate-300 leading-relaxed">${t.techDesc}</p>
+                            <ul class="list-disc list-inside mt-4 text-slate-300 space-y-2 font-semibold">
+                                <li class="text-sky-300">${t.tech1}</li>
+                                <li class="text-sky-300">${t.tech2}</li>
+                                <li class="text-sky-300">${t.tech3}</li>
+                            </ul>
+                            <p class="text-slate-400 text-sm mt-4">${t.techSummary}</p>
+                        </div>
+                    </section>
+                    
+                    <section class="glass-card p-8 rounded-3xl bg-red-900/10 border-red-900/30 text-center">
+                        <h3 class="text-2xl font-bold text-red-400 mb-4">${t.declineTitle}</h3>
+                        <p class="text-slate-300 leading-relaxed max-w-3xl mx-auto">${t.declineDesc}</p>
+                    </section>
+                </main>
+
+                <footer class="mt-auto border-t border-slate-800 bg-slate-900/90 py-6 text-center z-10">
+                    <p class="text-slate-500 text-sm font-semibold tracking-wide">${t.footer}</p>
+                </footer>
+            `;
+            
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        window.onload = renderPage;
+    </script>
+</body>
+</html>
+
