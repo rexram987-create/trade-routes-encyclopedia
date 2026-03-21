@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הדרך המלכותית הפרסית - מחקר היסטורי מקיף</title>
+    <!-- שילוב Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* התאמת גופנים לקריאה מחקרית נוחה על מסכי Samsung S25 Ultra */
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Frank+Ruhl+Libre:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* עיצוב Glassmorphism לפרימיום Dark Mode */
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* עיצוב לתמונות עתידיות (Placeholders) */
+        .image-placeholder {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(31, 41, 55, 0.8),
+                rgba(31, 41, 55, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 20px
+            );
+            border: 2px dashed rgba(52, 211, 153, 0.5); /* צבע ירוק-אמרלד/פרסי */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .image-placeholder:hover {
+            border-color: rgba(52, 211, 153, 1);
+            color: #E5E7EB;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen selection:bg-emerald-500 selection:text-white flex flex-col">
+
+    <!-- קונטיינר ראשי אליו יוזרק התוכן הדינמי -->
+    <div id="app-container" class="flex-grow w-full"></div>
+
+    <script>
+        let currentLang = 'he';
+
+        // מסד הנתונים הדו-לשוני של המחקר 
+        const content = {
+            he: {
+                dir: "rtl",
+                navBack: "חזור לאנציקלופדיה",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "English",
+                heroTitle: "הדרך המלכותית הפרסית",
+                heroYears: "שנות פעילות מרכזיות: כ-500 לפנה\"ס – 330 לפנה\"ס",
+                heroLength: "אורך משוער: כ-2,699 קילומטרים (משושן לסרדיס)",
+                heroDesc: "מפעל התשתיות והתקשורת המהפכני של העולם העתיק. הדרך חצתה את האימפריה האחמנית (ממערב איראן ועד מערב טורקיה של ימינו), ואפשרה לשליחי המלך להעביר מסרים במהירות שטרם נראתה בהיסטוריה האנושית.",
+                mapPlaceholder: "",
+                mapHint: "הכנס כאן את קובץ המפה (למשל: persian-royal-road-map.jpg)",
+                
+                etyTitle: "ניתוח אטימולוגי מלא",
+                etyAuthor: "חוקר והיסטוריון מודרני:",
+                etyAuthorDesc: "בעוד שהמידע המקורי מגיע מההיסטוריון היווני הירודוטוס, המחקר הארכאולוגי המודרני המקיף על תשתיות האימפריה הפרסית והגדרתן קודם רבות על ידי ההיסטוריון האמריקאי <strong>אלברט ט. אולמסטד (Albert T. Olmstead)</strong>.",
+                etyYears: "שנות חייו של ההיסטוריון (אולמסטד):",
+                etyYearsDesc: "1880 – 1945.",
+                etyContext: "<strong class='text-emerald-400'>ארץ מוצא ומקום לידה:</strong> טרוי, ניו יורק, ארצות הברית. ספרו המונומנטלי 'היסטוריה של האימפריה הפרסית' נחשב עד היום לאבן דרך בחקר התקופה האחמנית.",
+                etyOriginal: "מונח המקור:",
+                etyPart1Title: "חלק א' – Royal (מלכותית)",
+                etyPart1Desc: "המקור ביוונית עתיקה 'Basileia Odos'. המילה 'מלכותית' אינה מטאפורה לאיכות, אלא הגדרה משפטית: הדרך ותחנות הרענון שבה היו רכושו הבלעדי של 'מלך המלכים' הפרסי. לנוסעים רגילים וסוחרים חל איסור להשתמש בסוסים הממשלתיים ללא היתר מלכותי מפורש (חותם המלך).",
+                etyPart2Title: "חלק ב' – Persian Road (הדרך הפרסית)",
+                etyPart2Desc: "מתייחסת לאימפריה האחמנית (הפרסית) שאיגדה רשת של דרכי עפר קדומות (אשוריות ובבליות) לכדי מערכת אוטוסטרדות מרכזית ורציפה אחת, שנועדה לחבר את לב האימפריה אל מחוזותיה הרחוקים ביותר.",
+
+                bioTitle: "מייסדי הנתיב והרקע ההיסטורי",
+                bioIntro: "הדרך המלכותית היא פרי חזונו של איש אחד שניצב בראשה של האימפריה הגדולה ביותר שהעולם ידע עד לאותה עת. הוא לא רק כבש שטחים, אלא ארגן אותם למערכת בירוקרטית מופתית.",
+                
+                wuTitle: "דריווש הראשון 'הגדול' (Darius I the Great)",
+                wuYears: "שנות חיים: 550 לפנה\"ס – 486 לפנה\"ס | תקופת שלטון: 522 לפנה\"ס – 486 לפנה\"ס",
+                wuSub1: "ילדות, שורשים ועלייה לשלטון מתוך הכאוס:",
+                wuDesc1: "דריווש נולד כבנו של היסטספס, אחשדרפן (מושל מחוז) באימפריה הפרסית. הוא לא היה יורש העצר הישיר של כורש הגדול. בצעירותו שירת כנושא רומחו של המלך כנבוזי. עלייתו לשלטון הייתה דרמטית ורוויית דם: לאחר מות כנבוזי, פרץ מרד שאותו הנהיג אדם בשם גאומתה (שרבים האמינו שהוא מתחזה לאחיו של המלך). דריווש, יחד עם שישה אצילים נוספים, ארגן קשר, התנקש במתחזה, ותפס את כס המלוכה. שנותיו הראשונות הוקדשו לדיכוי אכזרי של מרידות בכל רחבי האימפריה.",
+                wuSub2: "אידאולוגיה ותפיסת עולם דתית:",
+                wuDesc2: "האידאולוגיה של דריווש נשענה לחלוטין על הדת הזורואסטרית (אמגושיות). הוא ראה עצמו כנציגו עלי אדמות של 'אהורה מאזדא' (Ahura Mazda) – אל האור והחוכמה. תפיסת עולמו חילקה את המציאות לשניים: 'אשה' (Asha - האמת והסדר הקוסמי) מול 'דרוג'' (Druj - השקר והכאוס). ניהול האימפריה וסלילת הדרכים נתפסו בעיניו לא רק כמהלך פוליטי, אלא כחובה דתית קדושה להשליט סדר, חוק ואמת על עולם שקרי וכאוטי.",
+                wuReasonsTitle: "הסיבות המדויקות והאסטרטגיות לסלילת הדרך המלכותית:",
+                wuReason1Title: "שליטה מודיעינית ותקשורת בזק:",
+                wuReason1Desc: "האימפריה הפרסית חלשה על מיליוני קמ\"ר מתראקיה ועד הודו. דריווש הבין שכדי למנוע מרידות כמו אלו שעימן התמודד בראשית שלטונו, עליו לדעת מה קורה בכל מחוז בזמן אמת. הדרך נסללה כדי לאפשר למערך המודיעין שלו – רשת מרגלים שכונתה 'עיני המלך ואוזניו' – להעביר מסרים לבירה שושן בתוך ימים במקום חודשים.",
+                wuReason2Title: "תנועת צבא ודיכוי מרידות מהיר:",
+                wuReason2Desc: "אוטוסטרדה סלולה ומוגנת אפשרה ל'צבא האלמוות' הפרסי וללגיונות האחרים לצעוד במהירות שיא אל קצוות האימפריה (בעיקר לעבר יוון ואסיה הקטנה), מבלי להסתבך בתוואי שטח קשים או לחכות לאספקה מקומית, שכן תחנות הדרך סיפקו מזון ומים לצבא הצועד.",
+                wuReason3Title: "מיסוי וריכוזיות כלכלית (שיטת האחשדרפנים):",
+                wuReason3Desc: "דריווש חילק את האימפריה ל-20 מחוזות ('סאטרפיות'). כדי לגבות את המס השנתי מכל מחוז (שכלל לעיתים מאות כיכרות כסף וזהב, וכן תבואה וסוסים) באופן מסודר וללא שחיתות, היה צורך בנתיב תעבורה מאובטח לחלוטין שיזרים את העושר ישירות לקופות המלך בפרסופוליס ושושן.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "מסחר, אסטרטגיה וגיאופוליטיקה",
+                economyTitle: "חשיבות המסחר והכלכלה (תופעת הלוואי)",
+                economyDesc: "אף שהדרך נסללה לצרכים צבאיים ובירוקרטיים, הביטחון המוחלט ששרר בה (עקב נוכחות חיילי המלך) הפך אותה למגנט עבור סוחרים בינלאומיים. סוחרים הורשו להשתמש בדרך (עם בהמותיהם שלהם), מה שחיבר לראשונה את שוקי הודו ואסיה המרכזית ישירות לים האגאי. דריווש הטביע את המטבע התקני הראשון (ה'דרכמון'), שהפך למטבע הסחר הבינלאומי המקובל לאורך הנתיב, וייצב את הכלכלה העולמית.",
+                milStrategyTitle: "חשיבות אסטרטגית מוסדית",
+                milStrategyDesc: "ההישג האסטרטגי הגדול ביותר של הדרך היה הפיכת חלל גאוגרפי עצום ורב-לאומי לישות פוליטית מתפקדת אחת. הדרך המלכותית הוכיחה שניתן לנהל אימפריה ענקית מהמרכז, מבלי להתפצל לממלכות קטנות. הציטוט המפורסם של הירודוטוס על שליחי הדרך המלכותית: 'לא שלג, לא גשם, לא חום ולא חשכת הלילה יעכבו את השליחים מלהשלים את משימתם' – מייצג את שיא העוצמה המוסדית בעולם העתיק.",
+                goodsOriginTitle: "ארץ המוצא של הסחורות המרכזיות שעברו בנתיב",
+                chinaOrigin: "פרס ומסופוטמיה (שושן, פרסופוליס, בבל):",
+                chinaGoods: "<strong class='text-white'>זהב, שטיחים ובירוקרטיה:</strong> מהמרכז יצאו פקודות מלכותיות (צווים חתומים בחימר ופפירוס), שטיחים פרסיים שנארגו על ידי אומנים, אבני לאפיס לזולי (שיובאו קודם לכן מאפגניסטן) ועבודות זהב מורכבות.",
+                indiaOrigin: "אסיה הקטנה / לידיה (סרדיס, מערב טורקיה של ימינו):",
+                indiaGoods: "<strong class='text-white'>כסף, אריגים ומוצרים יווניים:</strong> סרדיס (בירת לידיה לשעבר) הייתה נקודת המפגש עם הכלכלה היוונית. משם זרמו למזרח מטבעות כסף, כדי חרס יווניים מעוטרים, אריגים משובחים ושמן זית.",
+                romeOrigin: "הודו ובאקטריה (מנתיבי ההתחברות ממזרח):",
+                romeGoods: "<strong class='text-white'>תבלינים ושנהב:</strong> למרות שהדרך המלכותית הסתיימה רשמית בשושן, היא התחברה לנתיבים מזרחיים שהביאו את ראשוני התבלינים ההודיים, שנהב פילים ואבני חן נדירות אל תוך המזרח התיכון.",
+
+                ideologyTitle: "אידאולוגיה ורוח",
+                ideologyDesc: "הדרך המלכותית תפקדה כעורק שהפיץ את רעיון ה'סובלנות האחמנית'. בניגוד לאשורים ולבבלים שהגלו עמים ודיכאו תרבויות (הגלות), האידאולוגיה של דריווש דגלה בפלורליזם דתי ותרבותי – כל מחוז שמר על שפתו ואלוהיו, בתנאי ששילם מס וקיבל את עליונות המלך. הדרך אפשרה לתרבויות שונות (יוונים, יהודים, ארמים, עילמים) לקיים קשרים הדדיים תחת מטריית שלום אחידה (ה'פאקס-פרסיקה'). עזרא ונחמיה, ששבו לבנות את ירושלים, נעו מזרחה על גבי מערכות הדרכים והבירוקרטיה הללו.",
+                
+                techTitle: "הישגים טכנולוגיים ותשתיות",
+                techDesc: "קיום תקשורת מהירה לאורך אלפי קילומטרים דרש טכנולוגיות וארגון חסרי תקדים:",
+                tech1: "צ'אפאר חאנה (Chapar Khaneh): הקמת 111 תחנות ממסר במרחק של קפיצת סוס אחת מהשנייה (כ-25 ק\"מ). בכל תחנה המתינו סוסים טריים ושליחים חלופיים. <strong class='text-white'>ארץ מוצא/פיתוח:</strong> האימפריה האחמנית (פרס).",
+                tech2: "מטבע הדרכמון (Daric): טביעת מטבע זהב תקני (מעל 95% טוהר) הנושא את דיוקן המלך עם קשת. <strong class='text-white'>ארץ מוצא:</strong> מבוסס על המצאת המטבע מממלכת לידיה, אך שוכלל למטבע בינלאומי בפרס.",
+                tech3: "תעלות הקנאת (Qanat): רשת צינורות תת-קרקעית המנצלת את כוח המשיכה כדי להוביל מים מאקוויפרים הרריים אל תחנות הדרך והערים בלב המדבר, מבלי שיתאדו. <strong class='text-white'>ארץ מוצא:</strong> איראן העתיקה.",
+                techSummary: "בזכות טכנולוגיית ה'צ'אפאר', שליח פרסי חצה את 2,699 הקילומטרים ב-7 ימים בלבד, מסע שלקח לשיירת סוחרים רגילה כ-90 יום!",
+
+                declineTitle: "דעיכת הנתיב ההיסטורי",
+                declineDesc: "השליטה המוסדית הפרסית על הדרך הסתיימה בפתאומיות בשנת 330 לפנה\"ס, כאשר <strong class='text-emerald-400'>אלכסנדר מוקדון (הגדול)</strong> פלש לאימפריה, הביס את דריווש השלישי, והחריב את פרסופוליס. עם זאת, התשתית הפיזית לא נעלמה; אלכסנדר והאימפריות ההלניסטיות והרומיות שבאו אחריו המשיכו להשתמש בתוואי הדרך (למשל, ה'ויה איגנטיה' הרומית התבססה על חלקיה המערביים). דעיכתה הסופית כעורק יחיד ואחיד קרתה עם התפצלות המזרח התיכון בין האימפריה הביזנטית והאימפריה הסאסאנית (הפרסית החדשה), שקטעו את הרצף הפוליטי.",
+
+                footer: "המחקר נכתב וקודד על ידי ג'מיני ורם © 2026"
+            },
+            en: {
+                dir: "ltr",
+                navBack: "Back to Encyclopedia",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "עברית",
+                heroTitle: "The Persian Royal Road",
+                heroYears: "Peak Active Years: c. 500 BCE – 330 BCE",
+                heroLength: "Estimated Length: ~2,699 Kilometers (Susa to Sardis)",
+                heroDesc: "The revolutionary infrastructure and communication mega-project of the ancient world. The road spanned the Achaemenid Empire (from western Iran to modern-day western Turkey), allowing royal couriers to deliver messages at a speed unseen in human history.",
+                mapPlaceholder: "",
+                mapHint: "Insert your map file here (e.g., persian-royal-road-map.jpg)",
+                
+                etyTitle: "Complete Etymological Analysis",
+                etyAuthor: "Modern Historian & Researcher:",
+                etyAuthorDesc: "While original accounts come from the Greek historian Herodotus, modern archaeological research defining the infrastructure of the Persian Empire was greatly advanced by American historian <strong>Albert T. Olmstead</strong>.",
+                etyYears: "Historian's Lifespan (Olmstead):",
+                etyYearsDesc: "1880 – 1945.",
+                etyContext: "<strong class='text-emerald-400'>Country of Origin & Birthplace:</strong> Troy, New York, USA. His monumental book 'History of the Persian Empire' remains a cornerstone in Achaemenid studies to this day.",
+                etyOriginal: "Original Term:",
+                etyPart1Title: "Part A – Royal",
+                etyPart1Desc: "Derived from the ancient Greek 'Basileia Odos'. 'Royal' was not a metaphor for quality, but a strict legal definition: the road and its relay stations were the exclusive property of the Persian 'King of Kings'. Regular travelers and merchants were strictly forbidden from using government horses without an explicit royal decree (the King's seal).",
+                etyPart2Title: "Part B – Persian Road",
+                etyPart2Desc: "Refers to the Achaemenid (Persian) Empire, which consolidated a network of ancient dirt trails (Assyrian and Babylonian) into a single, continuous central highway system designed to connect the empire's heart to its furthest provinces.",
+
+                bioTitle: "Founders and Historical Background",
+                bioIntro: "The Royal Road was the vision of one man who stood at the helm of the largest empire the world had ever known. He did not merely conquer territories; he organized them into a masterful bureaucratic system.",
+                
+                wuTitle: "Darius I 'The Great'",
+                wuYears: "Lifespan: 550 BCE – 486 BCE | Reign: 522 BCE – 486 BCE",
+                wuSub1: "Childhood, Roots, and Rise to Power from Chaos:",
+                wuDesc1: "Darius was born as the son of Hystaspes, a satrap (provincial governor) in the Persian Empire. He was not the direct heir to Cyrus the Great. In his youth, he served as the lance-bearer for King Cambyses. His ascension to power was dramatic and bloody: after Cambyses' death, a rebellion broke out led by a man named Gaumata (widely believed to be an impostor impersonating the king's brother). Darius, along with six other nobles, orchestrated a plot, assassinated the impostor, and seized the throne. His early years were dedicated to ruthlessly crushing rebellions across the empire.",
+                wuSub2: "Ideology and Religious Worldview:",
+                wuDesc2: "Darius's ideology relied entirely on the Zoroastrian religion. He viewed himself as the earthly representative of 'Ahura Mazda'—the god of light and wisdom. His worldview divided reality into two: 'Asha' (Truth and cosmic order) versus 'Druj' (the Lie and chaos). Managing the empire and paving roads were seen not just as political moves, but as a sacred religious duty to impose order, law, and truth upon a deceitful and chaotic world.",
+                wuReasonsTitle: "Exact Strategic Reasons for Paving the Royal Road:",
+                wuReason1Title: "Intelligence Control and Flash Communication:",
+                wuReason1Desc: "The Persian Empire spanned millions of square kilometers from Thrace to India. Darius understood that to prevent rebellions like the ones he faced early in his reign, he needed real-time intelligence from every province. The road was built so his intelligence network—a spy ring known as the 'Eyes and Ears of the King'—could deliver messages to the capital Susa in days rather than months.",
+                wuReason2Title: "Rapid Troop Movement and Suppression:",
+                wuReason2Desc: "A paved and guarded highway allowed the Persian 'Immortals' and other legions to march at record speed to the empire's fringes (especially towards Greece and Asia Minor) without getting bogged down in harsh terrain or waiting for local supplies, as the waystations provided food and water for the marching army.",
+                wuReason3Title: "Taxation and Economic Centralization (The Satrapy System):",
+                wuReason3Desc: "Darius divided the empire into 20 provinces ('Satrapies'). To collect the annual tribute from each province (often consisting of hundreds of talents of silver and gold, grain, and horses) in an orderly, corruption-free manner, a highly secured transit route was required to funnel the wealth directly into the King's treasuries in Persepolis and Susa.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "Trade, Strategy, and Geopolitics",
+                economyTitle: "Importance of Trade and Economy (The Byproduct)",
+                economyDesc: "Although paved for military and bureaucratic needs, the absolute security along the road (due to the presence of the King's guards) made it a magnet for international merchants. Traders were permitted to use the road (with their own beasts of burden), connecting the markets of India and Central Asia directly to the Aegean Sea for the first time. Darius minted the first standardized coin (the 'Daric'), which became the accepted international trade currency along the route, stabilizing the global economy.",
+                milStrategyTitle: "Institutional Strategic Importance",
+                milStrategyDesc: "The greatest strategic achievement of the road was transforming a vast, multi-national geographic space into a single functioning political entity. The Royal Road proved that a massive empire could be governed from the center without fracturing into smaller kingdoms. Herodotus's famous quote about the Royal Couriers: 'Neither snow nor rain nor heat nor gloom of night stays these couriers from the swift completion of their appointed rounds'—represents the pinnacle of institutional power in the ancient world.",
+                goodsOriginTitle: "Origin of Key Commodities Transiting the Route",
+                chinaOrigin: "Persia and Mesopotamia (Susa, Persepolis, Babylon):",
+                chinaGoods: "<strong class='text-white'>Gold, Carpets, and Bureaucracy:</strong> From the center flowed royal decrees (sealed clay and papyrus edicts), Persian carpets woven by artisans, Lapis Lazuli stones (previously imported from Afghanistan), and intricate goldwork.",
+                indiaOrigin: "Asia Minor / Lydia (Sardis, Modern-day Western Turkey):",
+                indiaGoods: "<strong class='text-white'>Silver, Textiles, and Greek Goods:</strong> Sardis (the former Lydian capital) was the meeting point with the Greek economy. From there, silver coins, decorated Greek pottery, fine textiles, and olive oil flowed eastward.",
+                romeOrigin: "India and Bactria (From eastern connecting routes):",
+                romeGoods: "<strong class='text-white'>Spices and Ivory:</strong> Although the Royal Road officially ended in Susa, it connected to eastern routes that brought the first Indian spices, elephant ivory, and rare gemstones into the Middle East.",
+
+                ideologyTitle: "Ideology and Spirit",
+                ideologyDesc: "The Royal Road functioned as the artery that spread the concept of 'Achaemenid Tolerance'. Unlike the Assyrians and Babylonians who exiled peoples and suppressed cultures, Darius's ideology championed religious and cultural pluralism—each province kept its language and gods, provided they paid taxes and accepted the King's supremacy. The road allowed various cultures (Greeks, Jews, Arameans, Elamites) to interact under a unified umbrella of peace (the 'Pax Persica'). Ezra and Nehemiah, returning to rebuild Jerusalem, traveled westward utilizing these very road systems and bureaucracy.",
+                
+                techTitle: "Technological Achievements and Infrastructure",
+                techDesc: "Maintaining rapid communication across thousands of kilometers required unprecedented technologies and organization:",
+                tech1: "Chapar Khaneh (Courier Stations): Establishing 111 relay stations spaced one horse-ride apart (approx. 25 km). Fresh horses and alternate couriers awaited at each station. <strong class='text-white'>Origin/Development:</strong> Achaemenid Empire (Persia).",
+                tech2: "The Daric Coin: Minting a standardized gold coin (over 95% purity) bearing the image of the King holding a bow. <strong class='text-white'>Origin:</strong> Based on the Lydian invention of coinage, but perfected into an international currency in Persia.",
+                tech3: "Qanat Canals: A network of underground aqueducts utilizing gravity to transport water from mountain aquifers to waystations and cities in the deep desert, preventing evaporation. <strong class='text-white'>Origin:</strong> Ancient Iran.",
+                techSummary: "Thanks to the 'Chapar' technology, a Persian courier crossed the 2,699 kilometers in just 7 days, a journey that took a regular merchant caravan about 90 days!",
+
+                declineTitle: "Decline of the Historical Route",
+                declineDesc: "Persian institutional control over the road ended abruptly in 330 BCE when <strong class='text-emerald-400'>Alexander the Great</strong> invaded the empire, defeated Darius III, and burned Persepolis. However, the physical infrastructure did not vanish; Alexander and the subsequent Hellenistic and Roman empires continued using the route's path (e.g., the Roman 'Via Egnatia' was based on its western segments). Its ultimate decline as a single, unified artery occurred with the fracturing of the Middle East between the Byzantine Empire and the Sassanid (Neo-Persian) Empire, severing the political continuity.",
+
+                footer: "Research written and coded by Gemini & Ram © 2026"
+            }
+        };
+
+        // פונקציית החלפת השפה
+        function toggleLanguage() {
+            currentLang = currentLang === 'he' ? 'en' : 'he';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = content[currentLang].dir;
+            renderPage();
+        }
+
+        // רינדור התוכן למסך
+        function renderPage() {
+            const t = content[currentLang];
+            const isEn = currentLang === 'en';
+            
+            const html = `
+                <!-- סרגל ניווט עליון -->
+                <nav class="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                        <a href="../index.html" class="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors group">
+                            <svg class="w-5 h-5 transform ${isEn ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span class="font-bold tracking-wide text-sm sm:text-base">${t.navBack}</span>
+                        </a>
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleLanguage()" class="text-sm font-semibold text-gray-300 hover:text-white bg-gray-800/60 hover:bg-gray-700/60 px-3 py-1.5 rounded-lg border border-gray-700 transition-all">
+                                ${t.langBtn}
+                            </button>
+                            <div class="text-gray-400 font-semibold tracking-widest text-sm uppercase hidden sm:block">
+                                ${t.navTitle}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- תוכן המחקר -->
+                <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24 space-y-12">
+                    
+                    <!-- כותרת ראשית -->
+                    <header class="text-center space-y-6">
+                        <div class="inline-block p-6 rounded-full bg-gray-800 border-4 border-gray-700 shadow-2xl mb-4">
+                            <span class="text-7xl">🐎</span>
+                        </div>
+                        <h1 class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-emerald-500 to-teal-600 tracking-tight">
+                            ${t.heroTitle}
+                        </h1>
+                        <div class="flex flex-wrap justify-center gap-3 text-sm sm:text-base font-semibold">
+                            <span class="bg-emerald-900/40 text-emerald-300 px-4 py-1.5 rounded-full border border-emerald-800/50">${t.heroYears}</span>
+                            <span class="bg-teal-900/40 text-teal-300 px-4 py-1.5 rounded-full border border-teal-800/50">${t.heroLength}</span>
+                        </div>
+                        <p class="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mt-6">
+                            ${t.heroDesc}
+                        </p>
+                    </header>
+
+                    <!-- מפה Placeholder -->
+                    <div class="image-placeholder w-full h-64 sm:h-96 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-emerald-500 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p>${t.mapPlaceholder}</p>
+                            <p class="text-sm font-normal text-gray-500">${t.mapHint}</p>
+                        </div>
+                    </div>
+
+                    <!-- אטימולוגיה -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-emerald-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">📖</span> ${t.etyTitle}
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 space-y-5 shadow-inner">
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-emerald-400 text-lg block mb-1">${t.etyAuthor}</strong>
+                                    <p class="text-gray-300 leading-relaxed">${t.etyAuthorDesc}</p>
+                                </div>
+                                
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-emerald-400 text-lg block mb-1">${t.etyYears}</strong>
+                                    <p class="text-gray-300 leading-relaxed font-semibold">${t.etyYearsDesc}</p>
+                                </div>
+                                
+                                <div class="pb-2">
+                                    <p class="text-gray-300 leading-relaxed">${t.etyContext}</p>
+                                </div>
+                                
+                                <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50 inline-block w-full">
+                                    <strong class="text-emerald-400">${t.etyOriginal}</strong> <span class="text-xl font-bold text-white tracking-widest font-mono mx-2">Persian Royal Road</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-teal-400">
+                                    <h4 class="text-teal-400 font-bold text-lg mb-2">${t.etyPart1Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart1Desc}</p>
+                                </div>
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-emerald-400">
+                                    <h4 class="text-emerald-300 font-bold text-lg mb-2">${t.etyPart2Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart2Desc}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ביוגרפיה -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-teal-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🏛️</span> ${t.bioTitle}
+                        </h2>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8">${t.bioIntro}</p>
+
+                        <div class="space-y-10">
+                            <!-- דריווש הראשון -->
+                            <div class="bg-gray-800/40 p-6 sm:p-8 rounded-2xl border border-gray-700/70 shadow-lg hover:border-emerald-500/50 transition-colors relative overflow-hidden">
+                                <div class="absolute top-0 ${isEn ? 'left-0' : 'right-0'} w-full h-1 bg-gradient-to-${isEn ? 'r' : 'l'} from-emerald-500 to-transparent"></div>
+                                <h3 class="text-3xl font-bold text-emerald-400 mb-2">${t.wuTitle}</h3>
+                                <p class="text-sm text-emerald-200 font-semibold mb-6 px-3 py-1 bg-emerald-900/30 inline-block rounded-md border border-emerald-800/50">${t.wuYears}</p>
+                                
+                                <div class="space-y-5 text-gray-300 leading-relaxed text-sm sm:text-base">
+                                    <div>
+                                        <strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub1}</strong>
+                                        <p>${t.wuDesc1}</p>
+                                    </div>
+                                    <div>
+                                        <strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub2}</strong>
+                                        <p>${t.wuDesc2}</p>
+                                    </div>
+                                    <div class="bg-gray-800/80 p-6 rounded-xl border border-gray-700 mt-6 shadow-inner">
+                                        <strong class="text-emerald-300 block mb-4 text-xl flex items-center gap-2"><span class="text-2xl">🎯</span> ${t.wuReasonsTitle}</strong>
+                                        <ul class="space-y-4 list-none">
+                                            <li class="flex gap-3"><span class="text-blue-400 mt-1">👁️</span><div><strong class="text-white">${t.wuReason1Title}</strong> ${t.wuReason1Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-red-400 mt-1">⚔️</span><div><strong class="text-white">${t.wuReason2Title}</strong> ${t.wuReason2Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-yellow-400 mt-1">💰</span><div><strong class="text-white">${t.wuReason3Title}</strong> ${t.wuReason3Desc}</div></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- סחורות Placeholder -->
+                    <div class="image-placeholder w-full h-48 sm:h-64 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-emerald-500 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                            <p>${t.caravanPlaceholder}</p>
+                        </div>
+                    </div>
+
+                    <!-- אסטרטגיה וסחורות -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-teal-600"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">⚖️</span> ${t.strategyTitle}
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-yellow-400 mb-3">${t.economyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.economyDesc}</p>
+                            </div>
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-red-400 mb-3">${t.milStrategyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.milStrategyDesc}</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 mt-4">
+                            <h3 class="text-xl font-bold text-emerald-400 mb-4 border-b border-gray-700 pb-2">${t.goodsOriginTitle}</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🏺</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.chinaOrigin}</strong> ${t.chinaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🪙</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.indiaOrigin}</strong> ${t.indiaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🐘</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.romeOrigin}</strong> ${t.romeGoods}</p></li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <!-- אידאולוגיה וטכנולוגיה -->
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-purple-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">💡</span> ${t.ideologyTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.ideologyDesc}</p>
+                        </div>
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-emerald-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">⚙️</span> ${t.techTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.techDesc}</p>
+                            <ul class="list-disc list-inside mt-4 text-gray-300 space-y-2 font-semibold">
+                                <li class="text-emerald-300">${t.tech1}</li>
+                                <li class="text-emerald-300">${t.tech2}</li>
+                                <li class="text-emerald-300">${t.tech3}</li>
+                            </ul>
+                            <p class="text-gray-400 text-sm mt-4">${t.techSummary}</p>
+                        </div>
+                    </section>
+                    
+                    <!-- סיכום -->
+                    <section class="glass-card p-8 rounded-3xl bg-red-900/10 border-red-900/30 text-center">
+                        <h3 class="text-2xl font-bold text-red-400 mb-4">${t.declineTitle}</h3>
+                        <p class="text-gray-300 leading-relaxed max-w-3xl mx-auto">${t.declineDesc}</p>
+                    </section>
+                </main>
+
+                <!-- פוטר -->
+                <footer class="mt-auto border-t border-gray-800 bg-gray-900/90 py-6 text-center z-10">
+                    <p class="text-gray-500 text-sm font-semibold tracking-wide">${t.footer}</p>
+                </footer>
+            `;
+            
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        // טעינה ראשונית
+        window.onload = renderPage;
+    </script>
+</body>
+</html>
