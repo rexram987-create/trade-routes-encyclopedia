@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ויה מאריס (דרך הים) - מחקר היסטורי מקיף</title>
+    <!-- שילוב Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* התאמת גופנים לקריאה מחקרית נוחה על מסכי Samsung S25 Ultra */
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Frank+Ruhl+Libre:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* עיצוב Glassmorphism לפרימיום Dark Mode */
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* עיצוב לתמונות עתידיות (Placeholders) */
+        .image-placeholder {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(31, 41, 55, 0.8),
+                rgba(31, 41, 55, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 20px
+            );
+            border: 2px dashed rgba(59, 130, 246, 0.5); /* צבע כחול/ים */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .image-placeholder:hover {
+            border-color: rgba(59, 130, 246, 1);
+            color: #E5E7EB;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen selection:bg-blue-500 selection:text-white flex flex-col">
+
+    <!-- קונטיינר ראשי אליו יוזרק התוכן הדינמי -->
+    <div id="app-container" class="flex-grow w-full"></div>
+
+    <script>
+        let currentLang = 'he';
+
+        // מסד הנתונים הדו-לשוני של המחקר 
+        const content = {
+            he: {
+                dir: "rtl",
+                navBack: "חזור לאנציקלופדיה",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "English",
+                heroTitle: "ויה מאריס (דרך הים)",
+                heroYears: "שנות פעילות: כ-3000 לפנה\"ס – המאה ה-20 לספירה",
+                heroLength: "אורך משוער: כ-700 קילומטרים (ממצרים העתיקה ועד סוריה)",
+                heroDesc: "העורק היבשתי החשוב ביותר בעולם העתיק. גשר בין-יבשתי צר שחיבר בין שתי אימפריות הענק של העת העתיקה: מצרים מדרום ומסופוטמיה (אשור ובבל) מצפון, דרך מישור החוף של ארץ ישראל.",
+                mapPlaceholder: "",
+                mapHint: "הכנס כאן את קובץ המפה (למשל: via-maris-map.jpg)",
+                
+                etyTitle: "ניתוח אטימולוגי מלא",
+                etyAuthor: "חוקר ופרשן גיאוגרפי מודרני:",
+                etyAuthorDesc: "המונח מוכר מתרגום הוולגטה ללטינית, אך מי שחקר, העמיק ודייק את משמעותו הגיאוגרפית בימינו (וטען שהמונח המקורי התייחס רק לחלק הספציפי שחיבר את פנים הארץ אל חוף הים) היה הבלשן וגאוגרף המקרא פרופ' <strong>אנסון רייני (Anson Rainey)</strong>.",
+                etyYears: "שנות חייו של ההיסטוריון (רייני):",
+                etyYearsDesc: "1930 – 2011.",
+                etyContext: "<strong class='text-blue-400'>ארץ מוצא ומקום לידה:</strong> דאלאס, טקסס, ארצות הברית (פעל כפרופסור באוניברסיטת תל אביב). חקירותיו שפכו אור על רשתות התעבורה בארץ ישראל בתקופת הברונזה והברזל.",
+                etyOriginal: "מונח המקור:",
+                etyPart1Title: "חלק א' – Via / דֶּרֶךְ",
+                etyPart1Desc: "המילה המקראית 'דרך' (כמו בלטינית Via) התייחסה בעת העתיקה למסלול כבוש, מוסדר, ולעיתים מאובטח. המונח המקורי מופיע בספר ישעיהו (ט', א'): \"דֶּרֶךְ הַיָּם, עֵבֶר הַיַּרְדֵּן, גְּלִיל הַגּוֹיִם\".",
+                etyPart2Title: "חלק ב' – Maris / הַיָּם",
+                etyPart2Desc: "נגזר מהמילה הלטינית 'Mare' (ים). הנתיב נקרא כך משום שחלקו המשמעותי והארוך ביותר יצא מדלתת הנילוס במצרים ועבר ממש במקביל לחופי הים התיכון של ארץ ישראל (דרך עזה, אשקלון, יפו ודור), לפני שחתך פנימה למגידו ומשם לדמשק.",
+
+                bioTitle: "מייסדי הנתיב והרקע ההיסטורי",
+                bioIntro: "אף שהנתיב נוצר באופן טבעי על ידי סוחרים כנענים מוקדמים, הוא עבר מיסוד אימפריאלי אגרסיבי והפך לכביש מהיר צבאי וכלכלי על ידי פרעוני מצרים, ובראשם גדול המצביאים של מצרים העתיקה.",
+                
+                wuTitle: "האימפריה המצרית ופרעה תחותמס השלישי (Thutmose III)",
+                wuYears: "שנות חיים: 1481 לפנה\"ס – 1425 לפנה\"ס | תקופת שלטון: 1479 לפנה\"ס – 1425 לפנה\"ס",
+                wuSub1: "ילדות, שורשים וצלו של השלטון:",
+                wuDesc1: "תחותמס השלישי נולד במצרים העתיקה, בנו של פרעה תחותמס השני מאישה משנית. כשאביו מת, תחותמס היה רק בן שנתיים. אמו החורגת, המלכה חתשפסות המפורסמת, לקחה את תפקיד העוצרת ומהר מאוד הכריזה על עצמה כפרעה לכל דבר. במשך למעלה מ-20 שנות שלטונה, תחותמס הצעיר גדל בצל. במקום למרוד, הוא הוכשר בצבא, הפך למצביא טקטי מבריק, צבר נאמנות מהחיילים, והמתין לשעת הכושר שלו עד לפטירתה.",
+                wuSub2: "אידאולוגיה ותפיסת עולם:",
+                wuDesc2: "מבחינה דתית-מצרית, האידאולוגיה של תחותמס נשענה על עקרון ה'מעאת' (Ma'at) – אלילת הצדק, הסדר והאמת. השתלטות כנענית על גבולות מצרים נתפסה כ'כאוס' (איספט). האידאולוגיה האימפריאליסטית שלו גרסה שמצרים חייבת לשלוט שליטה מוחלטת בנתיבי הסחר צפונה כדי למנוע פלישה עתידית (כמו פלישת ההיקסוס שאירעה דורות קודם לכן) וכדי להבטיח את עליונותה הכלכלית מול האימפריות של צפון סוריה והחתים.",
+                wuReasonsTitle: "הסיבות המדויקות למסעות המלחמה וההשתלטות על ויה מאריס (קרב מגידו, 1457 לפנה\"ס):",
+                wuReason1Title: "ריסוק הקואליציה הכנענית-מיתנית:",
+                wuReason1Desc: "עם מותה של חתשפסות (שדגלה במדיניות שלום ומסחר), מרדו ערי המדינה הכנעניות (ובראשן מלך קדש ומלך מגידו) בשלטון המצרי, בתמיכת אימפריית מיתני מצפון. תחותמס יצא מיד בראש צבא כדי לרסק את המרד, שכן הפסד משמעותו הייתה ניתוק מצרים ממקורות הסחר של אסיה.",
+                wuReason2Title: "צוואר הבקבוק האסטרטגי - מעבר מגידו (ואדי עארה):",
+                wuReason2Desc: "הסיבה הגיאוגרפית לעלייתו דרך ויה מאריס הייתה הצורך לחצות את רכס הכרמל. תחותמס בחר באופציה המסוכנת ביותר: הליכה בטור עורפי צר בתוך ואדי עארה (נחל עירון). שריו התחננו שייקח דרך עוקפת רחבה יותר, אך הוא טען שאויביו לא יצפו לצעד כה נועז. הוא צדק, הפתיע את צבא הקואליציה, הביס אותם והטיל מצור על מגידו למשך 7 חודשים עד כניעתה.",
+                wuReason3Title: "יצירת מונופול וגביית מסים (האימפריה החדשה):",
+                wuReason3Desc: "לאחר הניצחון, תחותמס הפך את ערי מישור החוף (עזה, יפו, אשקלון) למרכזים מנהליים מצריים צמודים לויה מאריס. כל שיירת סחר יבשתית נאלצה לעצור, לשלם מס, ולהעביר סחורות לאוצר הפרעוני. בכך הוא הבטיח שמצרים תהיה האימפריה העשירה בעולם.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "מסחר, אסטרטגיה וגיאופוליטיקה",
+                economyTitle: "חשיבות המסחר והכלכלה",
+                economyDesc: "ויה מאריס שימשה כצינור החמצן של העולם העתיק. היא יצרה מעמד של 'ערי מדינה' עשירות בכנען. סוחרים שהובילו שיירות חיפשו פונדקים, מזון ושירותים. כלכלת ארץ ישראל נבנתה סביב כביש זה. המסחר האינטנסיבי עודד שימוש בכתב לשם רישום מלאי, מה שתרם להפצת האלפבית הפרוטו-סינאי (האב הקדמון של כל שפות האלפבית).",
+                milStrategyTitle: "חשיבות אסטרטגית וצבאית",
+                milStrategyDesc: "זה היה נתיב הפלישה של כל אימפריה. מי ששלט בויה מאריס (ולאחר מכן בצומת הדרכים של מגידו) שלט במזרח התיכון כולו. מצרים, אשור, בבל, יוון, רומא, הצלבנים ואפילו נפוליאון בונפרטה בשנת 1799 – כולם הצעידו את צבאותיהם על גבי הנתיב הזה. לא בכדי, בספר ההתגלות הנוצרי (האפוקליפסה), הקרב הסופי בין הטוב לרע יתרחש ב'ארמגדון' (הר מגידו) – לב ליבה של ויה מאריס.",
+                goodsOriginTitle: "ארץ המוצא של הסחורות המרכזיות",
+                chinaOrigin: "האימפריה המצרית (מדרום):",
+                chinaGoods: "<strong class='text-white'>זהב נובי ופפירוס:</strong> מצרים ייצאה צפונה זהב טהור (שנכרה בנוביה/סודאן), גיליונות פפירוס לכתיבה (מונופול מצרי), פשתן איכותי, תבואה (מצרים הייתה אסם התבואה של העולם), ודג יבש.",
+                indiaOrigin: "ארץ כנען ופיניקיה (אזור הלבנט - הדרך עצמה):",
+                indiaGoods: "<strong class='text-white'>ארגמן ושמן זית:</strong> הערים לאורך הדרך, במיוחד הפיניקים (בלבנון של ימינו), ייצאו צבע ארגמן יקר מצידון (המופק מחלזונות ים), שמן זית כנעני משובח, יין, ואת עצי הארז הלבנוניים שנדרשו לבניית מקדשים ואוניות.",
+                romeOrigin: "מסופוטמיה וסוריה (מצפון-מזרח):",
+                romeGoods: "<strong class='text-white'>לפיס לזולי ובדי צמר:</strong> מהאימפריות של צפון סוריה ומהנהרות הפרת והחידקל הגיעו שיירות שסיפקו אבן תכלת נדירה (לפיס לזולי - שבמקורה הגיעה עד מאפגניסטן), בדי צמר עבים, מתכות (כמו בדיל לייצור ברונזה), וכסף.",
+
+                ideologyTitle: "אידאולוגיה ורוח",
+                ideologyDesc: "ויה מאריס הייתה לא רק כביש, אלא צינור לסינקרטיזם דתי ותרבותי. אלים מצריים (כמו חתחור ואמון) התמזגו עם אלוהויות כנעניות מקומיות (כמו בעל ועשתורת). פסלונים ומקדשים המשלבים מוטיבים מצריים-כנעניים נמצאו לאורך כל הנתיב (כגון בבית שאן). הדרך אפשרה את תפוצת המיתולוגיה, השירה וטקסי הפולחן בכל רחבי הסהר הפורה, וגיבשה תרבות מזרח-תיכונית קוסמופוליטית משותפת.",
+                
+                techTitle: "הישגים טכנולוגיים ותשתיות",
+                techDesc: "סלילת ואבטחת הדרך הובילו להמצאות ושכלולים צבאיים ואזרחיים:",
+                tech1: "מרכבות המלחמה (War Chariots): הטכנולוגיה הוכנסה למצרים על ידי ההיקסוס, אך המצרים שכללו את המרכבה הרתומה לסוסים והפכו אותה לכלי הניידות העיקרי לסיורים ואבטחת ויה מאריס. <strong class='text-white'>ארץ מוצא:</strong> מסופוטמיה / פיתוח שושלות ההיקסוס והמצרים.",
+                tech2: "מערכות ביצור אדריכליות: בניית שערי עיר מורכבים (כמו 'שער שש התאים' מתקופת שלמה המלך) במגידו, חצור וגזר כדי לפקח ולהגן על התנועה בדרך הים. <strong class='text-white'>ארץ מוצא:</strong> ערי כנען וישראל.",
+                tech3: "מפעלי מים חצובים: הקמת פירים חצובים בסלע (כמו פיר המים במגידו) שאפשרו לערים לשאוב מים ממעיינות נסתרים גם תחת מצור ארוך, כדי להבטיח אחיזה רציפה על הדרך. <strong class='text-white'>ארץ פיתוח:</strong> ארץ כנען בתקופת הברזל.",
+                techSummary: "תשתיות אלו קיבעו את מערך היישובים בארץ ישראל, וקבעו את מיקומן של ערי המרכז עד עצם היום הזה.",
+
+                declineTitle: "דעיכת הנתיב ההיסטורי",
+                declineDesc: "בניגוד לנתיבים אחרים שננטשו לחלוטין, ויה מאריס מעולם לא נמחקה לגמרי, שכן הגיאוגרפיה מכתיבה את המעבר בארץ ישראל. עם זאת, <strong class='text-blue-400'>דעיכתה כעורק אימפריאלי מרכזי</strong> החלה בתקופה ההלניסטית והרומית, כאשר טכנולוגיות שייט מתקדמות הפכו את הסחר דרך הים התיכון (באוניות משא כבדות) למהיר וזול הרבה יותר ממסעות יבשה על גבי חמורים. הסוף המוחלט של הנתיב הרציף במתכונתו הקדומה התרחש ב<strong>מאה ה-20</strong>: עם קריסת האימפריה העות'מאנית, סלילת גבולות מדיניים מודרניים (והסכסוך הישראלי-ערבי בפרט), נקטע הרצף הגיאוגרפי והתנועה החופשית בין מצרים לסוריה דרך מישור החוף הפסיקה להתקיים.",
+
+                footer: "המחקר נכתב וקודד על ידי ג'מיני ורם © 2026"
+            },
+            en: {
+                dir: "ltr",
+                navBack: "Back to Encyclopedia",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "עברית",
+                heroTitle: "Via Maris (Way of the Sea)",
+                heroYears: "Active Years: c. 3000 BCE – 20th Century CE",
+                heroLength: "Estimated Length: ~700 Kilometers (Ancient Egypt to Syria)",
+                heroDesc: "The most vital continental artery of the ancient world. A narrow intercontinental land bridge connecting the two colossal empires of antiquity: Egypt to the south and Mesopotamia (Assyria and Babylon) to the north, via the coastal plain of the Land of Israel.",
+                mapPlaceholder: "",
+                mapHint: "Insert your map file here (e.g., via-maris-map.jpg)",
+                
+                etyTitle: "Complete Etymological Analysis",
+                etyAuthor: "Modern Geographic Commentator & Researcher:",
+                etyAuthorDesc: "The term is known from the Vulgate translation of the Bible into Latin, but the scholar who deeply researched and clarified its geographical accuracy today (arguing the original term referred only to the specific section connecting the inland to the coast) was the biblical linguist and geographer, Prof. <strong>Anson Rainey</strong>.",
+                etyYears: "Historian's Lifespan (Rainey):",
+                etyYearsDesc: "1930 – 2011.",
+                etyContext: "<strong class='text-blue-400'>Country of Origin & Birthplace:</strong> Dallas, Texas, USA (acted as a professor at Tel Aviv University). His investigations shed light on the transportation networks in the Land of Israel during the Bronze and Iron Ages.",
+                etyOriginal: "Original Term:",
+                etyPart1Title: "Part A – Via / Derekh (Way/Road)",
+                etyPart1Desc: "The biblical word 'Derekh' (like the Latin 'Via') referred in antiquity to a trodden, regulated, and sometimes secured route. The original term appears in the Book of Isaiah (9:1): \"The way of the sea, beyond the Jordan, in Galilee of the nations.\"",
+                etyPart2Title: "Part B – Maris / HaYam (Of the Sea)",
+                etyPart2Desc: "Derived from the Latin word 'Mare' (Sea). The route was named so because its most significant and longest portion originated in the Nile Delta in Egypt and ran directly parallel to the Mediterranean coast of Israel (through Gaza, Ashkelon, Jaffa, and Dor), before cutting inland to Megiddo and onward to Damascus.",
+
+                bioTitle: "Founders and Historical Background",
+                bioIntro: "Although the route evolved naturally via early Canaanite merchants, it underwent aggressive imperial institutionalization, transforming into a military and economic highway by the Egyptian Pharaohs, led by the greatest military commander of Ancient Egypt.",
+                
+                wuTitle: "The Egyptian Empire & Pharaoh Thutmose III",
+                wuYears: "Lifespan: 1481 BCE – 1425 BCE | Reign: 1479 BCE – 1425 BCE",
+                wuSub1: "Childhood, Roots, and the Shadow of Power:",
+                wuDesc1: "Thutmose III was born in Ancient Egypt, the son of Pharaoh Thutmose II by a secondary wife. When his father died, Thutmose was only two years old. His stepmother, the famous Queen Hatshepsut, took on the role of regent and soon declared herself full Pharaoh. For over 20 years of her reign, young Thutmose grew up in her shadow. Instead of rebelling, he trained in the military, became a brilliant tactical commander, garnered the loyalty of the troops, and awaited his opportunity until her passing.",
+                wuSub2: "Ideology and Worldview:",
+                wuDesc2: "In terms of Egyptian religion, Thutmose's ideology rested on the principle of 'Ma'at'—the goddess of justice, cosmic order, and truth. A Canaanite takeover of Egypt's borders was perceived as 'Chaos' (Isfet). His imperialist ideology dictated that Egypt must maintain absolute control over the northern trade routes to prevent future invasions (like the Hyksos invasion generations earlier) and to ensure economic supremacy against the empires of northern Syria and the Hittites.",
+                wuReasonsTitle: "Exact Reasons for Military Campaigns and the Capture of Via Maris (Battle of Megiddo, 1457 BCE):",
+                wuReason1Title: "Crushing the Canaanite-Mitanni Coalition:",
+                wuReason1Desc: "Upon the death of Hatshepsut (who favored a policy of peace and trade), the Canaanite city-states (led by the Kings of Kadesh and Megiddo) rebelled against Egyptian rule, supported by the Mitanni Empire from the north. Thutmose immediately marched an army to crush the rebellion, as losing meant severing Egypt from the Asian trade sources.",
+                wuReason2Title: "The Strategic Chokepoint - Megiddo Pass (Wadi Ara):",
+                wuReason2Desc: "The geographical reason for advancing via the Via Maris was the need to cross the Mount Carmel ridge. Thutmose chose the most dangerous option: marching in a narrow, single-file line through Wadi Ara (Nahal Iron). His generals begged him to take a wider bypass, but he argued his enemies would never expect such a bold move. He was right; he surprised the coalition army, defeated them, and laid siege to Megiddo for 7 months until it surrendered.",
+                wuReason3Title: "Creating a Monopoly and Tax Collection (The New Kingdom):",
+                wuReason3Desc: "Following the victory, Thutmose turned the coastal plain cities (Gaza, Jaffa, Ashkelon) into Egyptian administrative centers adjacent to the Via Maris. Every overland trade caravan had to stop, pay taxes, and transfer goods to the pharaonic treasury. Thus, he ensured Egypt became the wealthiest empire in the world.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "Trade, Strategy, and Geopolitics",
+                economyTitle: "Importance of Trade and Economy",
+                economyDesc: "The Via Maris served as the oxygen tube of the ancient world. It created a class of wealthy 'city-states' in Canaan. Merchants leading caravans sought inns, food, and services. The economy of the Land of Israel was built around this highway. The intense trade encouraged the use of writing for inventory, which contributed to the spread of the Proto-Sinaitic alphabet (the ancestor of all alphabetic languages).",
+                milStrategyTitle: "Strategic and Military Importance",
+                milStrategyDesc: "This was the invasion route for every empire. Whoever controlled the Via Maris (and subsequently the crossroads of Megiddo) controlled the entire Middle East. Egypt, Assyria, Babylon, Greece, Rome, the Crusaders, and even Napoleon Bonaparte in 1799—all marched their armies along this path. It is no wonder that in the Christian Book of Revelation (the Apocalypse), the final battle between good and evil will take place at 'Armageddon' (Mount Megiddo)—the very heart of the Via Maris.",
+                goodsOriginTitle: "Origin of Key Commodities",
+                chinaOrigin: "The Egyptian Empire (From the South):",
+                chinaGoods: "<strong class='text-white'>Nubian Gold and Papyrus:</strong> Egypt exported pure gold (mined in Nubia/Sudan) northward, papyrus sheets for writing (an Egyptian monopoly), fine linen, grain (Egypt was the breadbasket of the world), and dried fish.",
+                indiaOrigin: "Land of Canaan and Phoenicia (The Levant Region - The Route Itself):",
+                indiaGoods: "<strong class='text-white'>Purple Dye and Olive Oil:</strong> The cities along the route, especially the Phoenicians (in modern Lebanon), exported expensive purple dye from Sidon (extracted from sea snails), premium Canaanite olive oil, wine, and Lebanese cedar wood required for building temples and ships.",
+                romeOrigin: "Mesopotamia and Syria (From the Northeast):",
+                romeGoods: "<strong class='text-white'>Lapis Lazuli and Woolen Textiles:</strong> From the empires of northern Syria and the Tigris and Euphrates rivers arrived caravans supplying the rare blue stone (Lapis Lazuli - originating as far as Afghanistan), thick woolen fabrics, metals (like tin for bronze production), and silver.",
+
+                ideologyTitle: "Ideology and Spirit",
+                ideologyDesc: "The Via Maris was not just a highway, but a conduit for religious and cultural syncretism. Egyptian gods (like Hathor and Amun) merged with local Canaanite deities (like Ba'al and Astarte). Statuettes and temples combining Egyptian-Canaanite motifs have been found all along the route (e.g., in Beit She'an). The road enabled the spread of mythology, poetry, and ritual practices across the Fertile Crescent, consolidating a shared cosmopolitan Middle Eastern culture.",
+                
+                techTitle: "Technological Achievements and Infrastructure",
+                techDesc: "Paving and securing the road led to military and civic innovations and improvements:",
+                tech1: "War Chariots: The technology was introduced to Egypt by the Hyksos, but the Egyptians perfected the horse-drawn chariot, turning it into the primary mobile unit for patrolling and securing the Via Maris. <strong class='text-white'>Origin:</strong> Mesopotamia / Developed by Hyksos and Egyptian dynasties.",
+                tech2: "Architectural Fortification Systems: Building complex city gates (like the 'six-chambered gate' from King Solomon's era) in Megiddo, Hazor, and Gezer to monitor and protect traffic on the Way of the Sea. <strong class='text-white'>Origin:</strong> Canaanite and Israelite cities.",
+                tech3: "Rock-Cut Water Systems: Excavating shafts through solid rock (like the water shaft in Megiddo) that allowed cities to draw water from hidden springs even under prolonged siege, ensuring continuous hold over the route. <strong class='text-white'>Development Origin:</strong> Land of Canaan during the Iron Age.",
+                techSummary: "These infrastructures solidified the settlement pattern in the Land of Israel, determining the locations of central cities to this very day.",
+
+                declineTitle: "Decline of the Historical Route",
+                declineDesc: "Unlike other routes that were completely abandoned, the Via Maris was never entirely erased, as geography dictates passage through the Land of Israel. However, <strong class='text-blue-400'>its decline as a central imperial artery</strong> began in the Hellenistic and Roman periods, when advanced sailing technologies made Mediterranean sea trade (via heavy cargo ships) much faster and cheaper than overland donkey caravans. The absolute end of the continuous route in its ancient form occurred in the <strong>20th Century</strong>: with the collapse of the Ottoman Empire, the drawing of modern political borders (and the Israeli-Arab conflict in particular), the geographical continuity was severed, and free movement between Egypt and Syria via the coastal plain ceased to exist.",
+
+                footer: "Research written and coded by Gemini & Ram © 2026"
+            }
+        };
+
+        // פונקציית החלפת השפה
+        function toggleLanguage() {
+            currentLang = currentLang === 'he' ? 'en' : 'he';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = content[currentLang].dir;
+            renderPage();
+        }
+
+        // רינדור התוכן למסך
+        function renderPage() {
+            const t = content[currentLang];
+            const isEn = currentLang === 'en';
+            
+            const html = `
+                <!-- סרגל ניווט עליון -->
+                <nav class="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                        <a href="../index.html" class="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors group">
+                            <svg class="w-5 h-5 transform ${isEn ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span class="font-bold tracking-wide text-sm sm:text-base">${t.navBack}</span>
+                        </a>
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleLanguage()" class="text-sm font-semibold text-gray-300 hover:text-white bg-gray-800/60 hover:bg-gray-700/60 px-3 py-1.5 rounded-lg border border-gray-700 transition-all">
+                                ${t.langBtn}
+                            </button>
+                            <div class="text-gray-400 font-semibold tracking-widest text-sm uppercase hidden sm:block">
+                                ${t.navTitle}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- תוכן המחקר -->
+                <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24 space-y-12">
+                    
+                    <!-- כותרת ראשית -->
+                    <header class="text-center space-y-6">
+                        <div class="inline-block p-6 rounded-full bg-gray-800 border-4 border-gray-700 shadow-2xl mb-4">
+                            <span class="text-7xl">🌊</span>
+                        </div>
+                        <h1 class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-blue-400 to-cyan-500 tracking-tight">
+                            ${t.heroTitle}
+                        </h1>
+                        <div class="flex flex-wrap justify-center gap-3 text-sm sm:text-base font-semibold">
+                            <span class="bg-blue-900/40 text-blue-300 px-4 py-1.5 rounded-full border border-blue-800/50">${t.heroYears}</span>
+                            <span class="bg-cyan-900/40 text-cyan-300 px-4 py-1.5 rounded-full border border-cyan-800/50">${t.heroLength}</span>
+                        </div>
+                        <p class="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mt-6">
+                            ${t.heroDesc}
+                        </p>
+                    </header>
+
+                    <!-- מפה Placeholder -->
+                    <div class="image-placeholder w-full h-64 sm:h-96 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-blue-400 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p>${t.mapPlaceholder}</p>
+                            <p class="text-sm font-normal text-gray-500">${t.mapHint}</p>
+                        </div>
+                    </div>
+
+                    <!-- אטימולוגיה -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-blue-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">📖</span> ${t.etyTitle}
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 space-y-5 shadow-inner">
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-blue-400 text-lg block mb-1">${t.etyAuthor}</strong>
+                                    <p class="text-gray-300 leading-relaxed">${t.etyAuthorDesc}</p>
+                                </div>
+                                
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-blue-400 text-lg block mb-1">${t.etyYears}</strong>
+                                    <p class="text-gray-300 leading-relaxed font-semibold">${t.etyYearsDesc}</p>
+                                </div>
+                                
+                                <div class="pb-2">
+                                    <p class="text-gray-300 leading-relaxed">${t.etyContext}</p>
+                                </div>
+                                
+                                <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50 inline-block w-full">
+                                    <strong class="text-blue-400">${t.etyOriginal}</strong> <span class="text-xl font-bold text-white tracking-widest font-mono mx-2">Via Maris / דֶּרֶךְ הַיָּם</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-cyan-400">
+                                    <h4 class="text-cyan-400 font-bold text-lg mb-2">${t.etyPart1Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart1Desc}</p>
+                                </div>
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-blue-400">
+                                    <h4 class="text-blue-300 font-bold text-lg mb-2">${t.etyPart2Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart2Desc}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ביוגרפיה -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-cyan-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🏛️</span> ${t.bioTitle}
+                        </h2>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8">${t.bioIntro}</p>
+
+                        <div class="space-y-10">
+                            <!-- תחותמס השלישי -->
+                            <div class="bg-gray-800/40 p-6 sm:p-8 rounded-2xl border border-gray-700/70 shadow-lg hover:border-blue-500/50 transition-colors relative overflow-hidden">
+                                <div class="absolute top-0 ${isEn ? 'left-0' : 'right-0'} w-full h-1 bg-gradient-to-${isEn ? 'r' : 'l'} from-cyan-600 to-transparent"></div>
+                                <h3 class="text-3xl font-bold text-cyan-400 mb-2">${t.wuTitle}</h3>
+                                <p class="text-sm text-cyan-200 font-semibold mb-6 px-3 py-1 bg-cyan-900/30 inline-block rounded-md border border-cyan-800/50">${t.wuYears}</p>
+                                
+                                <div class="space-y-5 text-gray-300 leading-relaxed text-sm sm:text-base">
+                                    <div>
+                                        <strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub1}</strong>
+                                        <p>${t.wuDesc1}</p>
+                                    </div>
+                                    <div>
+                                        <strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub2}</strong>
+                                        <p>${t.wuDesc2}</p>
+                                    </div>
+                                    <div class="bg-gray-800/80 p-6 rounded-xl border border-gray-700 mt-6 shadow-inner">
+                                        <strong class="text-cyan-300 block mb-4 text-xl flex items-center gap-2"><span class="text-2xl">🎯</span> ${t.wuReasonsTitle}</strong>
+                                        <ul class="space-y-4 list-none">
+                                            <li class="flex gap-3"><span class="text-red-400 mt-1">⚔️</span><div><strong class="text-white">${t.wuReason1Title}</strong> ${t.wuReason1Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-orange-400 mt-1">🛑</span><div><strong class="text-white">${t.wuReason2Title}</strong> ${t.wuReason2Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-yellow-400 mt-1">💰</span><div><strong class="text-white">${t.wuReason3Title}</strong> ${t.wuReason3Desc}</div></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- סחורות Placeholder -->
+                    <div class="image-placeholder w-full h-48 sm:h-64 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-cyan-600 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                            <p>${t.caravanPlaceholder}</p>
+                        </div>
+                    </div>
+
+                    <!-- אסטרטגיה וסחורות -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-blue-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">⚖️</span> ${t.strategyTitle}
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-yellow-400 mb-3">${t.economyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.economyDesc}</p>
+                            </div>
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-red-400 mb-3">${t.milStrategyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.milStrategyDesc}</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 mt-4">
+                            <h3 class="text-xl font-bold text-cyan-400 mb-4 border-b border-gray-700 pb-2">${t.goodsOriginTitle}</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🇪🇬</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.chinaOrigin}</strong> ${t.chinaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🌿</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.indiaOrigin}</strong> ${t.indiaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🐪</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.romeOrigin}</strong> ${t.romeGoods}</p></li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <!-- אידאולוגיה וטכנולוגיה -->
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-purple-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">💡</span> ${t.ideologyTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.ideologyDesc}</p>
+                        </div>
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-blue-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">⚙️</span> ${t.techTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.techDesc}</p>
+                            <ul class="list-disc list-inside mt-4 text-gray-300 space-y-2 font-semibold">
+                                <li class="text-blue-300">${t.tech1}</li>
+                                <li class="text-blue-300">${t.tech2}</li>
+                                <li class="text-blue-300">${t.tech3}</li>
+                            </ul>
+                            <p class="text-gray-400 text-sm mt-4">${t.techSummary}</p>
+                        </div>
+                    </section>
+                    
+                    <!-- סיכום -->
+                    <section class="glass-card p-8 rounded-3xl bg-red-900/10 border-red-900/30 text-center">
+                        <h3 class="text-2xl font-bold text-red-400 mb-4">${t.declineTitle}</h3>
+                        <p class="text-gray-300 leading-relaxed max-w-3xl mx-auto">${t.declineDesc}</p>
+                    </section>
+                </main>
+
+                <!-- פוטר -->
+                <footer class="mt-auto border-t border-gray-800 bg-gray-900/90 py-6 text-center z-10">
+                    <p class="text-gray-500 text-sm font-semibold tracking-wide">${t.footer}</p>
+                </footer>
+            `;
+            
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        // טעינה ראשונית
+        window.onload = renderPage;
+    </script>
+</body>
+</html>
