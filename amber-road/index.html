@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דרך הענבר - מחקר היסטורי מקיף</title>
+    <!-- שילוב Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* התאמת גופנים לקריאה מחקרית נוחה על מסכי Samsung S25 Ultra */
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Frank+Ruhl+Libre:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* עיצוב Glassmorphism לפרימיום Dark Mode */
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* עיצוב לתמונות עתידיות (Placeholders) */
+        .image-placeholder {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(31, 41, 55, 0.8),
+                rgba(31, 41, 55, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 20px
+            );
+            border: 2px dashed rgba(251, 191, 36, 0.5); /* צבע ענבר/צהוב */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .image-placeholder:hover {
+            border-color: rgba(251, 191, 36, 1);
+            color: #E5E7EB;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen selection:bg-yellow-500 selection:text-white flex flex-col">
+
+    <!-- קונטיינר ראשי אליו יוזרק התוכן הדינמי -->
+    <div id="app-container" class="flex-grow w-full"></div>
+
+    <script>
+        let currentLang = 'he';
+
+        // מסד הנתונים הדו-לשוני של המחקר 
+        const content = {
+            he: {
+                dir: "rtl",
+                navBack: "חזור לאנציקלופדיה",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "English",
+                heroTitle: "דרך הענבר",
+                heroYears: "שנות פעילות: 1600 לפנה\"ס – המאה ה-5 לספירה",
+                heroLength: "אורך משוער: כ-4,000 קילומטרים",
+                heroDesc: "רשת סחר קדומה שיצרה את הגשר הראשון בין השבטים ה'ברברים' של צפון אירופה לבין הציביליזציות המתקדמות של הים התיכון. הדרך הובילה את 'דמעות השמש' – שרף העצים המאובן – מחופי הים הבלטי הקפואים ועד לרומא ולמצרים.",
+                mapPlaceholder: "",
+                mapHint: "הכנס כאן את קובץ המפה (למשל: amber-road-map.jpg)",
+                
+                etyTitle: "ניתוח אטימולוגי מלא",
+                etyAuthor: "חוקר מרכזי מודרני:",
+                etyAuthorDesc: "אף שהרומאים השתמשו במונח 'נתיב הענבר' בעת העתיקה, אחד החוקרים המודרניים הבולטים שהעמיקו בחקר הקשרים הפרה-היסטוריים בין הים הבלטי לים התיכון היה הארכאולוג <strong>יאן בוזק (Jan Bouzek)</strong>.",
+                etyYears: "שנות חייו של ההיסטוריון (בוזק):",
+                etyYearsDesc: "1935 – 2020.",
+                etyContext: "<strong class='text-yellow-400'>ארץ מוצא ומקום לידה:</strong> פראג, צ'כוסלובקיה (כיום צ'כיה). מיקומו במרכז אירופה, על צומת דרכים היסטורי, העניק לו יתרון ייחודי בחפירת תחנות המעבר הקלטיות והגרמאניות שלאורך הנתיב.",
+                etyOriginal: "מונח המקור:",
+                etyPart1Title: "חלק א' – Amber (ענבר)",
+                etyPart1Desc: "המקור האנגלי 'Amber' מגיע למעשה מהמילה הערבית 'ענבר' (Anbar), שתיארה במקור חומר ריחני המופק ממעיים של לווייתנים (Ambergris) שהיה נסחף לחוף, ומאוחר יותר הושאלה לשרף העצים הבלטי בגלל הדמיון במציאתו על החופים. ביוונית קדומה הענבר נקרא <strong>'אלקטרון' (Elektron)</strong> – מאחר והענבר יוצר מטען סטטי כשהוא משופשף, ממילה זו נגזרה המילה המודרנית 'חשמל' (Electronics).",
+                etyPart2Title: "חלק ב' – Road (דרך)",
+                etyPart2Desc: "זו לא הייתה דרך רציפה, אלא פסיפס של נתיבי יבשה דרך יערות עבותים, ובעיקר – שייט לאורך נהרות אירופה הגדולים (כמו נהר הוויסלה, האלבה, והדנובה), עד לחציית רכס הרי האלפים דרומה אל תוך חצי האי האיטלקי.",
+
+                bioTitle: "מייסדי הנתיב והרקע ההיסטורי",
+                bioIntro: "דרך הענבר לא נוסדה על ידי אימפריה אחת ביום אחד. היא החלה כסחר חליפין (ברטר) איטי בין שבטים באלטיים לתרבויות הדרום. אולם, האימפריה הרומית, ובפרט הקיסר נירון, היו אלו שהפכו אותה לעורק מסחרי ממוסד וגלובלי.",
+                
+                wuTitle: "האימפריה הרומית ומשלחת הקיסר נירון (Nero)",
+                wuYears: "שנות חיי הקיסר נירון: 37 לספירה – 68 לספירה",
+                wuSub1: "שורשים ומשלחת האביר האנונימי:",
+                wuDesc1: "הרומאים תמיד קנו ענבר ממתווכים קלטים וגרמאנים במחירים מופקעים. ההיסטוריון הרומי פליניוס הזקן מתעד כי סביב שנת 60 לספירה, החליט הקיסר נירון לשבור את שרשרת התיווך. הוא שלח אביר רומי (Equus Romanus - שמו אבד בהיסטוריה, אך יש המכנים אותו יוליאנוס) למסע מסוכן צפונה, מעבר להרי האלפים ואל מעבה יערות גרמאניה, משימה שוות ערך לחקר היבשת הלא נודעת.",
+                wuSub2: "אידאולוגיה ותפיסת עולם:",
+                wuDesc2: "מבחינת שבטי הצפון (הבאלטים), האידאולוגיה סביב הענבר הייתה אנימיסטית-דתית: הם האמינו שאלו 'דמעות השמש' או דמעותיה של האלה פרייה. מבחינת הרומאים, לעומת זאת, האידאולוגיה הייתה של צריכת ראווה וסמלי סטטוס מוחלטים. הענבר סימל שפע, מותרות ואת יכולתה של רומא לשאוב אליה את אוצרות קצוות תבל.",
+                wuReasonsTitle: "הסיבות המדויקות והאסטרטגיות למסחר ולמשלחת הרומית:",
+                wuReason1Title: "ביקוש עצום למוצרי מותרות ומשחקי גלדיאטורים:",
+                wuReason1Desc: "פליניוס מתעד שהאביר הרומי חזר עם כמות בלתי נתפסת של ענבר. נירון השתמש בו כדי לעטר את רשתות ההגנה של האמפיתיאטרון, את הנשק של הגלדיאטורים, ואפילו את האלונקות שעליהן הוצאו המתים. האצולה הרומית ראתה בענבר הצהרת הון פומבית – פסלון ענבר קטן היה יקר יותר מעבד אנושי חי.",
+                wuReason2Title: "סגולות רפואיות ומיסטיות:",
+                wuReason2Desc: "נשים רומיות נשאו כדורי ענבר בידיהן כדי לקרר אותם, והאמינו שהענבר (המכיל חומצה סוקצינית) מרפא דלקות גרון, מחלות כליות ומרחיק רוחות רעות. חרקים קדומים שנלכדו בתוך השרף השקוף רק הגבירו את האאורה הקסומה שלו.",
+                wuReason3Title: "חיפוש אחר מקורות עקיפים (עקיפת המתווכים):",
+                wuReason3Desc: "רומא שאפה ליצור קשר ישיר עם חופי הים הבלטי ('ארץ האאסטים') כדי להוריד את מחירי הענבר ולהכניס את שבטי הצפון למעגל התלות הכלכלית הרומית (סחר חליפין שבו הרומאים סיפקו מטבעות זהב ונשק תמורת השרף).",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "מסחר, אסטרטגיה וגיאופוליטיקה",
+                economyTitle: "חשיבות המסחר והכלכלה",
+                economyDesc: "דרך הענבר יצרה קפיצת מדרגה כלכלית עבור השבטים הצפוניים. לראשונה, שבטים ברברים נחשפו למטבעות זהב רומיים ולכלכלת כסף ממוסדת. סחר החליפין הכניס לצפון אירופה כלי ברונזה, זכוכית ויין רומי. העיר אקוויליה (Aquileia) בצפון איטליה הפכה למרכז הכלכלי והתעשייתי העולמי לעיבוד וגילוף ענבר, וצברה הון אדיר.",
+                milStrategyTitle: "חשיבות אסטרטגית וצבאית",
+                milStrategyDesc: "הדרך יצרה את נתיב הפלישה והמגע העיקרי בין הלגיונות הרומיים לשבטים הגרמאניים (כמו המרקומנים והקוואדים). רומא נאלצה לבצר את גבול הדנובה (ה'לימס') כדי להגן על תחנות הסחר, אך אותן דרכים ממש שנסללו למסחר, שימשו מאוחר יותר את השבטים הברברים בפלישתם דרומה שהביאה לנפילת האימפריה הרומית.",
+                goodsOriginTitle: "ארץ המוצא של הסחורות המרכזיות",
+                chinaOrigin: "חופי הים הבלטי (סמביה, ליטא ופרוסיה ההיסטורית):",
+                chinaGoods: "<strong class='text-white'>ענבר בלטי (Succinite):</strong> שרף עצים מחטניים שהתאבן במשך עשרות מיליוני שנים ונפלט מהים אל החופים לאחר סערות. נחשב לענבר האיכותי בעולם. בנוסף סיפק הצפון פרוות דובים ושועלים, דבש, עבדים זהובי-שיער ועץ.",
+                indiaOrigin: "מרכז אירופה (אזור צ'כיה ואוסטריה):",
+                indiaGoods: "<strong class='text-white'>מלח וברזל:</strong> השבטים הקלטים במרכז אירופה שלטו בתחנות המעבר וסיפקו מלח (ממכרות כמו האלשטאט) וברזל איכותי, ששימשו גם הם לסחר חליפין מול הרומאים.",
+                romeOrigin: "האימפריה הרומית (חצי האי האיטלקי):",
+                romeGoods: "<strong class='text-white'>סחורות התשלום:</strong> מטבעות זהב וכסף תקניים, כלי נשק רומיים (שפעמים רבות נאסר למכור לברברים, אך הוברחו), תכשיטי זכוכית מצוירים מאקוויליה, קדרות יוקרתית (טרה סיגילטה) ויין.",
+
+                ideologyTitle: "אידאולוגיה ורוח",
+                ideologyDesc: "דרך הענבר הייתה צינור להעברת רעיונות דתיים ותפיסות יופי. עבור תושבי אגן הים התיכון, הענבר ייצג את 'האור הכלוא' ואת נצחיות הטבע. התפשטות המטבעות הרומיים צפונה לא הייתה רק כלכלית, אלא אידאולוגית: פרופיל הקיסר המוטבע על המטבע החדיר את רעיון 'המדינה' והשלטון הריכוזי אל תוך חברות שבטיות שחיו ללא שלטון מרכזי, וזרע את זרעי הממלכות האירופאיות העתידיות.",
+                
+                techTitle: "הישגים טכנולוגיים ותשתיות",
+                techDesc: "שינוע סחורה מצפון אירופה לרומא דרש טכניקות מגוונות:",
+                tech1: "סירות נהר שטוחות שדרית: פיתוח סירות עץ מיוחדות המסוגלות לנווט במים הרדודים של נהרות אירופה (כמו הוויסלה והאלבה). <strong class='text-white'>ארץ מוצא:</strong> השבטים הגרמאניים והקלטיים (מרכז וצפון אירופה).",
+                tech2: "הדרכים הרומיות (Via Claudia Augusta): סלילת רשת כבישים באבן שחצתה את הרי האלפים (מעבר ברנר) ואפשרה תנועת עגלות רציפה מאיטליה לגרמניה בחורף. <strong class='text-white'>ארץ מוצא:</strong> האימפריה הרומית (המאה ה-1 לספירה).",
+                tech3: "טכניקות גילוף במחרטה (Lathe): פיתוח מחרטות עדינות לעיבוד הענבר השביר מבלי לסדוק אותו, יצירת קמעות וטבעות מדויקות. <strong class='text-white'>ארץ מוצא/פיתוח מרכזי:</strong> צפון איטליה (אקוויליה).",
+                techSummary: "תשתיות אלו יצרו למעשה את המתווה הראשוני שעליו נבנתה מפת הכבישים המודרנית של אירופה.",
+
+                declineTitle: "דעיכת הנתיב ההיסטורי",
+                declineDesc: "הדרך ננטשה בהדרגה החל מהמאה ה-5 לספירה. <strong class='text-yellow-400'>הסיבה הגיאופוליטית:</strong> תקופת נדידת העמים ('פולקרוונדרונג') וקריסת האימפריה הרומית המערבית הביאו לכאוס ביטחוני מוחלט. השבטים הגרמאניים שטפו את אירופה, סחרו פחות ונלחמו יותר, מה שהפך את הנתיב למלכודת מוות לסוחרים. העיר אקוויליה, מרכז הענבר העולמי, הוחרבה עד היסוד על ידי אטילה ההוני בשנת 452. <strong class='text-yellow-400'>סיבה דתית:</strong> עם התפשטות הנצרות, שריפת גופות בלוויית קמעות ענבר (נוהג פגאני) הוחלפה בקבורה פשוטה, והביקוש לשרף צנח משמעותית.",
+
+                footer: "המחקר נכתב וקודד על ידי ג'מיני ורם © 2026"
+            },
+            en: {
+                dir: "ltr",
+                navBack: "Back to Encyclopedia",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "עברית",
+                heroTitle: "The Amber Road",
+                heroYears: "Active Years: 1600 BCE – 5th Century CE",
+                heroLength: "Estimated Length: ~4,000 Kilometers",
+                heroDesc: "An ancient trade network that forged the first bridge between the 'barbarian' tribes of Northern Europe and the advanced civilizations of the Mediterranean. The route transported the 'Tears of the Sun'—fossilized tree resin—from the freezing shores of the Baltic Sea to Rome and Egypt.",
+                mapPlaceholder: "",
+                mapHint: "Insert your map file here (e.g., amber-road-map.jpg)",
+                
+                etyTitle: "Complete Etymological Analysis",
+                etyAuthor: "Prominent Modern Researcher:",
+                etyAuthorDesc: "Although the Romans used the term 'Amber Route' in antiquity, one of the most prominent modern scholars who deepened the research into prehistoric ties between the Baltic and Mediterranean was archaeologist <strong>Jan Bouzek</strong>.",
+                etyYears: "Historian's Lifespan (Bouzek):",
+                etyYearsDesc: "1935 – 2020.",
+                etyContext: "<strong class='text-yellow-400'>Country of Origin & Birthplace:</strong> Prague, Czechoslovakia (now Czechia). His location in Central Europe, at a historical crossroads, gave him a unique advantage in excavating Celtic and Germanic transit stations along the route.",
+                etyOriginal: "Original Term:",
+                etyPart1Title: "Part A – Amber",
+                etyPart1Desc: "The English word 'Amber' actually derives from the Arabic word 'Anbar', which originally described a fragrant substance produced in the intestines of sperm whales (Ambergris) that washed ashore. The term was later lent to the Baltic tree resin due to the similarity of finding it on beaches. In ancient Greek, Amber was called <strong>'Elektron'</strong>—since amber creates a static charge when rubbed, this word birthed the modern word 'Electronics' (Electricity).",
+                etyPart2Title: "Part B – Road",
+                etyPart2Desc: "This was not a continuous paved road, but a mosaic of overland trails through dense forests, and primarily—navigation along Europe's great rivers (like the Vistula, Elbe, and Danube), until crossing the Alps southward into the Italian peninsula.",
+
+                bioTitle: "Founders and Historical Background",
+                bioIntro: "The Amber Road was not founded by a single empire in a day. It began as a slow barter trade between Baltic tribes and southern cultures. However, the Roman Empire, and specifically Emperor Nero, turned it into an institutionalized, global commercial artery.",
+                
+                wuTitle: "The Roman Empire and Emperor Nero's Expedition",
+                wuYears: "Emperor Nero's Lifespan: 37 CE – 68 CE",
+                wuSub1: "Roots and the Anonymous Knight's Expedition:",
+                wuDesc1: "Romans always bought amber from Celtic and Germanic middlemen at exorbitant prices. Roman historian Pliny the Elder records that around 60 CE, Emperor Nero decided to break the intermediary chain. He dispatched a Roman Knight (Equus Romanus - his name is lost to history, though some call him Julianus) on a perilous journey north, across the Alps and deep into the Germanic forests, a mission akin to exploring an unknown continent.",
+                wuSub2: "Ideology and Worldview:",
+                wuDesc2: "For the northern tribes (the Balts), the ideology surrounding amber was animistic-religious: they believed these were the 'Tears of the Sun' or the tears of the goddess Freya. For the Romans, however, the ideology was one of conspicuous consumption and absolute status symbols. Amber symbolized abundance, luxury, and Rome's ability to draw the treasures of the ends of the earth to itself.",
+                wuReasonsTitle: "Exact Strategic Reasons for Trade and the Roman Expedition:",
+                wuReason1Title: "Massive Demand for Luxury and Gladiator Games:",
+                wuReason1Desc: "Pliny documents that the Roman Knight returned with an unfathomable quantity of amber. Nero used it to decorate the safety nets of the amphitheater, the gladiators' weapons, and even the litters on which the dead were carried out. The Roman nobility viewed amber as a public declaration of wealth—a small amber statuette was more expensive than a living human slave.",
+                wuReason2Title: "Medicinal and Mystical Properties:",
+                wuReason2Desc: "Roman women carried amber balls in their hands to cool them, believing that amber (which contains succinic acid) cured sore throats, kidney diseases, and warded off evil spirits. Ancient insects trapped within the transparent resin only magnified its magical aura.",
+                wuReason3Title: "Seeking Direct Sources (Bypassing Middlemen):",
+                wuReason3Desc: "Rome aimed to establish direct contact with the Baltic shores ('Land of the Aestii') to lower amber prices and bring the northern tribes into Rome's sphere of economic dependency (bartering gold coins and weapons for the resin).",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "Trade, Strategy, and Geopolitics",
+                economyTitle: "Importance of Trade and Economy",
+                economyDesc: "The Amber Road created an economic leap for northern tribes. For the first time, barbarian tribes were exposed to Roman gold coins and an institutionalized money economy. The barter trade introduced bronze tools, glass, and Roman wine to Northern Europe. The city of Aquileia in northern Italy became the global economic and industrial center for amber processing and carving, accumulating immense wealth.",
+                milStrategyTitle: "Strategic and Military Importance",
+                milStrategyDesc: "The route forged the main path of invasion and contact between Roman legions and Germanic tribes (like the Marcomanni and Quadi). Rome had to fortify the Danube border (the 'Limes') to protect trade stations, but the very roads built for commerce were later used by barbarian tribes in their southward invasions that brought about the fall of the Roman Empire.",
+                goodsOriginTitle: "Origin of Key Commodities",
+                chinaOrigin: "Baltic Sea Shores (Sambia, Lithuania, and Historical Prussia):",
+                chinaGoods: "<strong class='text-white'>Baltic Amber (Succinite):</strong> Coniferous tree resin fossilized over tens of millions of years, washed ashore after storms. Considered the highest quality amber in the world. The North also supplied bear and fox furs, honey, blonde-haired slaves, and timber.",
+                indiaOrigin: "Central Europe (Czechia and Austria Regions):",
+                indiaGoods: "<strong class='text-white'>Salt and Iron:</strong> Celtic tribes in Central Europe controlled transit stations and provided salt (from mines like Hallstatt) and high-quality iron, which were also used in bartering with the Romans.",
+                romeOrigin: "The Roman Empire (Italian Peninsula):",
+                romeGoods: "<strong class='text-white'>Payment Commodities:</strong> Standardized gold and silver coins, Roman weapons (often forbidden to sell to barbarians, but smuggled), painted glass jewelry from Aquileia, luxury pottery (Terra Sigillata), and wine.",
+
+                ideologyTitle: "Ideology and Spirit",
+                ideologyDesc: "The Amber Road was a conduit for transmitting religious ideas and concepts of beauty. For Mediterranean inhabitants, amber represented 'imprisoned light' and the eternity of nature. The northward spread of Roman coins wasn't purely economic; it was ideological: the Emperor's profile stamped on the coin introduced the concept of the 'State' and centralized rule into tribal societies living without central governance, sowing the seeds of future European kingdoms.",
+                
+                techTitle: "Technological Achievements and Infrastructure",
+                techDesc: "Transporting goods from Northern Europe to Rome required diverse techniques:",
+                tech1: "Flat-bottomed River Boats: Developing special wooden boats capable of navigating the shallow waters of European rivers (like the Vistula and Elbe). <strong class='text-white'>Country of Origin:</strong> Germanic and Celtic tribes (Central and Northern Europe).",
+                tech2: "Roman Roads (Via Claudia Augusta): Paving a stone road network across the Alps (Brenner Pass) allowing continuous wagon movement from Italy to Germany in winter. <strong class='text-white'>Country of Origin:</strong> Roman Empire (1st Century CE).",
+                tech3: "Lathe Carving Techniques: Developing delicate lathes to process the brittle amber without cracking it, creating precise amulets and rings. <strong class='text-white'>Origin/Main Development:</strong> Northern Italy (Aquileia).",
+                techSummary: "These infrastructures essentially created the initial blueprint upon which the modern road map of Europe was built.",
+
+                declineTitle: "Decline of the Historical Route",
+                declineDesc: "The route was gradually abandoned starting in the 5th Century CE. <strong class='text-yellow-400'>Geopolitical Reason:</strong> The Migration Period ('Völkerwanderung') and the collapse of the Western Roman Empire brought total security chaos. Germanic tribes swept across Europe, trading less and fighting more, turning the route into a death trap for merchants. Aquileia, the global amber hub, was razed to the ground by Attila the Hun in 452. <strong class='text-yellow-400'>Religious Reason:</strong> With the spread of Christianity, the cremation of bodies accompanied by amber amulets (a pagan practice) was replaced by simple burial, and the demand for the resin dropped significantly.",
+
+                footer: "Research written and coded by Gemini & Ram © 2026"
+            }
+        };
+
+        // פונקציית החלפת השפה
+        function toggleLanguage() {
+            currentLang = currentLang === 'he' ? 'en' : 'he';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = content[currentLang].dir;
+            renderPage();
+        }
+
+        // רינדור התוכן למסך
+        function renderPage() {
+            const t = content[currentLang];
+            const isEn = currentLang === 'en';
+            
+            const html = `
+                <!-- סרגל ניווט עליון -->
+                <nav class="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                        <a href="../index.html" class="flex items-center gap-2 text-yellow-400 hover:text-yellow-300 transition-colors group">
+                            <svg class="w-5 h-5 transform ${isEn ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span class="font-bold tracking-wide text-sm sm:text-base">${t.navBack}</span>
+                        </a>
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleLanguage()" class="text-sm font-semibold text-gray-300 hover:text-white bg-gray-800/60 hover:bg-gray-700/60 px-3 py-1.5 rounded-lg border border-gray-700 transition-all">
+                                ${t.langBtn}
+                            </button>
+                            <div class="text-gray-400 font-semibold tracking-widest text-sm uppercase hidden sm:block">
+                                ${t.navTitle}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- תוכן המחקר -->
+                <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24 space-y-12">
+                    
+                    <!-- כותרת ראשית -->
+                    <header class="text-center space-y-6">
+                        <div class="inline-block p-6 rounded-full bg-gray-800 border-4 border-gray-700 shadow-2xl mb-4">
+                            <span class="text-7xl">🟠</span>
+                        </div>
+                        <h1 class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-600 tracking-tight">
+                            ${t.heroTitle}
+                        </h1>
+                        <div class="flex flex-wrap justify-center gap-3 text-sm sm:text-base font-semibold">
+                            <span class="bg-yellow-900/40 text-yellow-300 px-4 py-1.5 rounded-full border border-yellow-800/50">${t.heroYears}</span>
+                            <span class="bg-amber-900/40 text-amber-300 px-4 py-1.5 rounded-full border border-amber-800/50">${t.heroLength}</span>
+                        </div>
+                        <p class="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mt-6">
+                            ${t.heroDesc}
+                        </p>
+                    </header>
+
+                    <!-- מפה Placeholder -->
+                    <div class="image-placeholder w-full h-64 sm:h-96 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-yellow-400 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p>${t.mapPlaceholder}</p>
+                            <p class="text-sm font-normal text-gray-500">${t.mapHint}</p>
+                        </div>
+                    </div>
+
+                    <!-- אטימולוגיה -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-yellow-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">📖</span> ${t.etyTitle}
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 space-y-5 shadow-inner">
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-yellow-400 text-lg block mb-1">${t.etyAuthor}</strong>
+                                    <p class="text-gray-300 leading-relaxed">${t.etyAuthorDesc}</p>
+                                </div>
+                                
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-yellow-400 text-lg block mb-1">${t.etyYears}</strong>
+                                    <p class="text-gray-300 leading-relaxed font-semibold">${t.etyYearsDesc}</p>
+                                </div>
+                                
+                                <div class="pb-2">
+                                    <p class="text-gray-300 leading-relaxed">${t.etyContext}</p>
+                                </div>
+                                
+                                <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50 inline-block w-full">
+                                    <strong class="text-yellow-400">${t.etyOriginal}</strong> <span class="text-xl font-bold text-white tracking-widest font-mono mx-2">Amber Road / Bernsteinstraße</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-amber-400">
+                                    <h4 class="text-amber-400 font-bold text-lg mb-2">${t.etyPart1Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart1Desc}</p>
+                                </div>
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-gray-400">
+                                    <h4 class="text-gray-300 font-bold text-lg mb-2">${t.etyPart2Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart2Desc}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ביוגרפיה -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-blue-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🏛️</span> ${t.bioTitle}
+                        </h2>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8">${t.bioIntro}</p>
+
+                        <div class="space-y-10">
+                            <!-- הקיסר נירון -->
+                            <div class="bg-gray-800/40 p-6 sm:p-8 rounded-2xl border border-gray-700/70 shadow-lg hover:border-yellow-500/50 transition-colors relative overflow-hidden">
+                                <div class="absolute top-0 ${isEn ? 'left-0' : 'right-0'} w-full h-1 bg-gradient-to-${isEn ? 'r' : 'l'} from-yellow-600 to-transparent"></div>
+                                <h3 class="text-3xl font-bold text-yellow-400 mb-2">${t.wuTitle}</h3>
+                                <p class="text-sm text-yellow-200 font-semibold mb-6 px-3 py-1 bg-yellow-900/30 inline-block rounded-md border border-yellow-800/50">${t.wuYears}</p>
+                                
+                                <div class="space-y-5 text-gray-300 leading-relaxed text-sm sm:text-base">
+                                    <div>
+                                        <strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub1}</strong>
+                                        <p>${t.wuDesc1}</p>
+                                    </div>
+                                    <div>
+                                        <strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub2}</strong>
+                                        <p>${t.wuDesc2}</p>
+                                    </div>
+                                    <div class="bg-gray-800/80 p-6 rounded-xl border border-gray-700 mt-6 shadow-inner">
+                                        <strong class="text-yellow-300 block mb-4 text-xl flex items-center gap-2"><span class="text-2xl">🎯</span> ${t.wuReasonsTitle}</strong>
+                                        <ul class="space-y-4 list-none">
+                                            <li class="flex gap-3"><span class="text-red-400 mt-1">⚔️</span><div><strong class="text-white">${t.wuReason1Title}</strong> ${t.wuReason1Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-indigo-400 mt-1">✨</span><div><strong class="text-white">${t.wuReason2Title}</strong> ${t.wuReason2Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-amber-400 mt-1">🤝</span><div><strong class="text-white">${t.wuReason3Title}</strong> ${t.wuReason3Desc}</div></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- סחורות Placeholder -->
+                    <div class="image-placeholder w-full h-48 sm:h-64 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-amber-600 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p>${t.caravanPlaceholder}</p>
+                        </div>
+                    </div>
+
+                    <!-- אסטרטגיה וסחורות -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-yellow-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">⚖️</span> ${t.strategyTitle}
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-yellow-400 mb-3">${t.economyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.economyDesc}</p>
+                            </div>
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-red-400 mb-3">${t.milStrategyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.milStrategyDesc}</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 mt-4">
+                            <h3 class="text-xl font-bold text-yellow-400 mb-4 border-b border-gray-700 pb-2">${t.goodsOriginTitle}</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🌊</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.chinaOrigin}</strong> ${t.chinaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">⛰️</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.indiaOrigin}</strong> ${t.indiaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🏛️</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.romeOrigin}</strong> ${t.romeGoods}</p></li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <!-- אידאולוגיה וטכנולוגיה -->
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-purple-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">💡</span> ${t.ideologyTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.ideologyDesc}</p>
+                        </div>
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-blue-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">⚙️</span> ${t.techTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.techDesc}</p>
+                            <ul class="list-disc list-inside mt-4 text-gray-300 space-y-2 font-semibold">
+                                <li class="text-blue-300">${t.tech1}</li>
+                                <li class="text-blue-300">${t.tech2}</li>
+                                <li class="text-blue-300">${t.tech3}</li>
+                            </ul>
+                            <p class="text-gray-400 text-sm mt-4">${t.techSummary}</p>
+                        </div>
+                    </section>
+                    
+                    <!-- סיכום -->
+                    <section class="glass-card p-8 rounded-3xl bg-red-900/10 border-red-900/30 text-center">
+                        <h3 class="text-2xl font-bold text-red-400 mb-4">${t.declineTitle}</h3>
+                        <p class="text-gray-300 leading-relaxed max-w-3xl mx-auto">${t.declineDesc}</p>
+                    </section>
+                </main>
+
+                <!-- פוטר -->
+                <footer class="mt-auto border-t border-gray-800 bg-gray-900/90 py-6 text-center z-10">
+                    <p class="text-gray-500 text-sm font-semibold tracking-wide">${t.footer}</p>
+                </footer>
+            `;
+            
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        // טעינה ראשונית
+        window.onload = renderPage;
+    </script>
+</body>
+</html>
