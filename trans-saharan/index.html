@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>נתיבי הסחר הטראנס-סהרייניים - מחקר היסטורי מקיף</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* התאמת גופנים לקריאה מחקרית נוחה על מסכי Samsung S25 Ultra */
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Frank+Ruhl+Libre:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* עיצוב Glassmorphism לפרימיום Dark Mode */
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* עיצוב לתמונות עתידיות (Placeholders) */
+        .image-placeholder {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(31, 41, 55, 0.8),
+                rgba(31, 41, 55, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 20px
+            );
+            border: 2px dashed rgba(217, 119, 6, 0.5); /* צבע אדמה/זהב */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .image-placeholder:hover {
+            border-color: rgba(217, 119, 6, 1);
+            color: #E5E7EB;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen selection:bg-amber-600 selection:text-white flex flex-col">
+
+    <div id="app-container" class="flex-grow w-full"></div>
+
+    <script>
+        let currentLang = 'he';
+
+        // מסד הנתונים הדו-לשוני המלא
+        const content = {
+            he: {
+                dir: "rtl",
+                navBack: "חזור לאנציקלופדיה",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "English",
+                heroTitle: "נתיבי הסחר הטראנס-סהרייניים",
+                heroYears: "שנות פעילות: המאה ה-8 לספירה – סוף המאה ה-16",
+                heroLength: "אורך משוער: משתנה (מאות נתיבים באורך של כ-2,000 עד 3,000 ק\"מ כל אחד)",
+                heroDesc: "רשת הנימים שחצתה את מדבר הסהרה הבלתי-עביר. הנתיבים חיברו את אימפריות הזהב של מערב אפריקה עם הכלכלות של הים התיכון והעולם האסלאמי, ויצרו עושר אגדי שאין לו אח ורע בהיסטוריה.",
+                mapPlaceholder: "",
+                mapHint: "הכנס כאן את קובץ המפה (למשל: trans-saharan-map.jpg)",
+                
+                etyTitle: "ניתוח אטימולוגי מלא",
+                etyAuthor: "חוקר והיסטוריון מודרני מובהק:",
+                etyAuthorDesc: "חקר הסחר בסהרה ותיעודו המערבי חבים רבות להיסטוריון הבריטי <strong>א.ו. בוביל (Edward William Bovill)</strong>. ספרו המונומנטלי משנת 1958, 'סחר הזהב של המורים' (The Golden Trade of the Moors), הפך לטקסט היסוד בחקר אפריקה המערבית לפני העידן הקולוניאלי.",
+                etyYears: "שנות חייו של ההיסטוריון (בוביל):",
+                etyYearsDesc: "1892 – 1966.",
+                etyContext: "<strong class='text-amber-500'>ארץ מוצא ומקום לידה:</strong> לונדון, אנגליה. בוביל לא היה רק אקדמאי, אלא קצין קולוניאלי ששירת באפריקה ושילב ידע גיאוגרפי ממקור ראשון עם היסטוריה.",
+                etyOriginal: "מונח המקור (Trans-Saharan):",
+                etyPart1Title: "חלק א' – Trans (מעבר / חוצה)",
+                etyPart1Desc: "קידומת לטינית שמשמעותה 'מצד אחד אל הצד השני'. המונח מדגיש את הפעולה הפיזית והלוגיסטית של <em>חציית</em> המכשול הגיאוגרפי העצום, ולא סתם תנועה בתוכו.",
+                etyPart2Title: "חלק ב' – Saharan (סהרייני)",
+                etyPart2Desc: "נגזר מהשם 'סהרה' (Sahara). המקור הוא מהמילה הערבית <strong>صَحْرَاء (ṣaḥrāʾ)</strong> שמשמעותה הפשוטה והאולטימטיבית היא 'מדבר'. סהרה בערבית מציינת 'המדבר הגדול ביותר', מדבר שהוא ישות בפני עצמה.",
+
+                bioTitle: "מייסדי הנתיב והרקע ההיסטורי",
+                bioIntro: "הנתיבים נפרצו לראשונה על ידי נוודי הטוראג (Tuareg) הברברים. אולם, האיש ששם את הדרך הזו על המפה העולמית והפך אותה לסינקרטיזם של הון ואסלאם, היה השליט העשיר ביותר שחי אי פעם.",
+                
+                wuTitle: "מנסא מוסא (Mansa Musa) - קיסר מאלי",
+                wuYears: "שנות חיים: סביב 1280 – סביב 1337 | תקופת שלטון: 1312 – 1337",
+                wuSub1: "ילדות, שורשים ועלייה לשלטון:",
+                wuDesc1: "מוסא קייטה הראשון נולד לשושלת קייטה, משפחת המלוכה של אימפריית מאלי (במערב אפריקה). עלייתו לשלטון נבעה מאירוע ביזארי: קודמו בתפקיד, מנסא אבו בכר השני, היה אובססיבי לגילוי גבולות האוקיינוס האטלנטי. הוא יצא בראש צי ענק של ספינות ללב ים ומעולם לא שרד. מוסא, ששימש כסגנו, ירש את כס המלוכה בשנת 1312. הוא ירש אימפריה עשירה, אך בעזרת ניהול לוגיסטי גאוני, הפך אותה למעצמת-על עולמית החולשת על מכרות הזהב הגדולים בעולם (במחוזות במבוק וואנגרה).",
+                wuSub2: "אידאולוגיה ותפיסת עולם:",
+                wuDesc2: "מנסא מוסא היה מוסלמי אדוק, והאידאולוגיה שלו שילבה אימפריאליזם כלכלי עם התעוררות דתית ואינטלקטואלית. הוא לא ראה בעושרו רק כלי ראווה, אלא אמצעי להאדיר את שם האסלאם ולהפוך את מאלי למרכז אינטלקטואלי וגיאופוליטי גלובלי. במסגרת אידאולוגיה זו, הוא הזמין למאלי אדריכלים אנדלוסים ומלומדים מהמזרח התיכון כדי לבנות מסגדים ענקיים (כמו מסגד דג'ינגרבר בטימבוקטו) ואוניברסיטאות.",
+                wuReasonsTitle: "הסיבות המדויקות למסע החג' (1324) והמיסוד של רשת הסחר:",
+                wuReason1Title: "מפגן כוח דיפלומטי גלובלי:",
+                wuReason1Desc: "הסיבה המרכזית למסע העלייה לרגל של מוסא למכה (שבו חצה את הסהרה עם שיירה של כ-60,000 איש ו-80 גמלים נושאי זהב) הייתה יחסי ציבור (PR) בסטנדרט חסר תקדים. הוא רצה להוכיח לעולם האסלאמי, ודרכו לאירופה, שמאלי היא אימפריה חזקה ועשירה יותר מכל מעצמה ים-תיכונית.",
+                wuReason2Title: "מונופול סחר החליפין (זהב תמורת מלח):",
+                wuReason2Desc: "מנסא מוסא חתר למסד את הסחר על ידי שליטה בקצוות. מאלי שלטה במקורות הזהב שבדרום, אך מוסא דאג להשתלט צבאית גם על הערים גאו וטימבוקטו, ששימשו כצווארי הבקבוק לסוחרי המלח שהגיעו מהצפון (מכרות טגהאזה). המלח היה חיוני להישרדות האדם באקלים הלח של אפריקה, והוא הוחלף לעיתים קילוגרם תמורת קילוגרם של זהב.",
+                wuReason3Title: "הפיכת טימבוקטו לבירת דעת (Soft Power):",
+                wuReason3Desc: "אסטרטגית, מוסא הבין שכדי לשמור על אימפריה לאורך זמן, כוח צבאי אינו מספיק. הוא השתמש בעושר מהנתיבים כדי לממן ספריות אדירות ומלומדים. טימבוקטו הפכה לתחנת החובה האחרונה של חכמי דת ואקדמאים שחצו את הסהרה, תוך שימוש ב'כוח רך' שהבטיח את יציבות האימפריה.",
+
+                animalsTitle: "לוגיסטיקה של בעלי חיים: ספינות המדבר",
+                animalsDesc: "הסהרה היא מחסום כמעט בלתי עביר. הניסיון לחצות אותה עם סוסים או שוורים נידון למוות בטוח. המהפכה התאפשרה בזכות בעל חיים אחד בלבד.",
+                horseSpecies: "הגמל החד-דבשתי (Camelus dromedarius):",
+                horseDesc: "זהו הגמל הערבי, בעל דבשת אחת. בניגוד לגמל הדו-דבשתי (הבקטארי) של אסיה המרכזית ודרך המשי, החד-דבשתי מותאם ספציפית לחום קיצוני. <strong class='text-white mt-2 block'>חשיבות אסטרטגית והיסטורית:</strong> הכנסת הגמל לשימוש המוני בצפון אפריקה (סביב המאה ה-3 לספירה) יצרה את 'מהפכת הגמל'. גמל יכול לשאת משא של כ-150 עד 250 ק\"ג ולצעוד במשך שבוע עד עשרה ימים ללא טיפת מים, תוך איבוד של עד 30% ממשקל גופו מבלי למות. כפות רגליו הרחבות מנעו שקיעה בדיונות, וריסיו הארוכים הגנו על עיניו מסופות חול. בלעדיו, הכלכלה, הדת וההיסטוריה של אפריקה היו מתפתחות בבידוד מוחלט. <strong class='text-white mt-2 block'>ארץ מוצא:</strong> בוית במקור בחצי האי ערב והובא לאפריקה.",
+                elephantSpecies: "סוסי הברברים (Barb Horse):",
+                elephantDesc: "גזע סוסים צפון אפריקאי (Equus caballus) עמיד ביותר לחום. <strong class='text-white mt-2 block'>חשיבות אסטרטגית:</strong> למרות שהגמלים שימשו למשא, סוסי הברברים שימשו את לוחמי הטוראג והשליטים (כמו פרשי מאלי) לפשיטות מהירות ולאבטחת השיירות בקצוות המדבר, אך הם לא היו מסוגלים לחצות את לב הסהרה עצמה ללא ליווי לוגיסטי של מים. <strong class='text-white mt-2 block'>ארץ מוצא:</strong> אזור הרי האטלס (מגרב).",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "מסחר, אסטרטגיה וגיאופוליטיקה",
+                economyTitle: "חשיבות המסחר והכלכלה",
+                economyDesc: "הנתיב הטראנס-סהרייני היה העוגן הכלכלי של העולם הישן בימי הביניים. עד גילוי אמריקה, שני שלישים מהזהב של אירופה והעולם האסלאמי הגיעו ממערב אפריקה דרך הסהרה. מטבעות הזהב (כמו הדינר והפלורין הפיורנטיני) נטבעו מזהב שמקורו במאלי, מה שאפשר את הצמיחה הכלכלית של הרנסנס האירופאי.",
+                milStrategyTitle: "חשיבות אסטרטגית - שליטה בנאות המדבר (Oases)",
+                milStrategyDesc: "האסטרטגיה הצבאית בסהרה הייתה שונה לחלוטין מאירופה. לא נלחמו על שטחים (חול), אלא על 'איי חיים' - נאות המדבר ובורות המים. שבטי הטוראג, ששלטו במקורות המים, יכלו לחסל שיירה שלמה פשוט על ידי כיסוי בור מים בחול. אימפריות אפריקאיות ואיסלאמיות כרתו בריתות ומימנו שכירי חרב ברברים כדי להבטיח את פתיחת המעברים האסטרטגיים.",
+                goodsOriginTitle: "ארץ המוצא של הסחורות המרכזיות שעברו בנתיב",
+                chinaOrigin: "מערב אפריקה (אימפריות מאלי, סונגהאי וגאנה):",
+                chinaGoods: "<strong class='text-white'>זהב, עבדים ושנהב:</strong> דרום הסהרה סיפקה כמויות אדירות של זהב, נוצות יען, עורות אריות, שנהב פילים אפריקאים, וכן עבדים שחורים שנמכרו לשווקי העולם האסלאמי והים התיכון.",
+                indiaOrigin: "מרכז המדבר (סהרה):",
+                indiaGoods: "<strong class='text-white'>מלח סלעים:</strong> מוקדי הכרייה העיקריים (כמו טגהאזה) היו בלב המדבר הלוהט, שם נכרו לוחות מלח ענקיים על ידי עבדים שהובלו דרומה. המלח היה כה יקר, עד שלעיתים נבנו בתים מלוחות מלח מרוב שפע מקומי אל מול מחסור באבני בניין.",
+                romeOrigin: "הים התיכון והמגרב (צפון אפריקה / עולם איסלאמי):",
+                romeGoods: "<strong class='text-white'>סוסים, תמרים, כלי נשק וטקסטיל:</strong> מהצפון הגיעו סוסי קרב משובחים (שהחיו את חיל הפרשים האפריקאי), חיטה, תמרים, בדי צמר מובחרים, וכלי נשק מברזל מתקדם (חרבות ושריון).",
+
+                ideologyTitle: "אידאולוגיה ורוח",
+                ideologyDesc: "מעבר לסחורות, המטען החשוב ביותר שחצה את הסהרה היה <strong class='text-amber-500'>האסלאם</strong>. סוחרים מוסלמים (רבים מהם צופים) הביאו עמם את הקוראן, השריעה והשפה הערבית (ששימשה ככתב בינלאומי לעסקים). בניגוד לכיבושים במזרח התיכון, האסלאם התפשט במערב אפריקה בדרכי שלום, דרך סוחרים. מלכי אפריקה אימצו את האסלאם כדי להשתלב ברשתות הסחר הבינלאומיות וכדי לקבל לגיטימציה שלטונית בעיני חליפים ועולמא (חכמי דת) בצפון.",
+                
+                techTitle: "הישגים טכנולוגיים ותשתיות אזרחיות",
+                techDesc: "חציית הסהרה, שארכה לעיתים 70-90 יום, הצריכה טכנולוגיות ייחודיות:",
+                tech1: "אוכף הגמלים הצפון-ערבי: פיתוח אוכף שנחבש על דבשת הגמל ואפשר לרוכב לשבת עליו בצורה יציבה ולשלוט בו בקרב, או להעמיס שקי מסע כבדים משני צדדיו. <strong class='text-white'>ארץ מוצא/פיתוח:</strong> השבטים הערביים והברברים בצפון אפריקה.",
+                tech2: "ניווט אסטרונומי מקומי (Takshif): השיירות הובלו על ידי גששים-נווטים (תקשיף) משבט הטוראג. הם השתמשו בניווט כוכבים (האצטרולב הערבי), זיהוי כיוון רוחות, וקריאת צבע החול כדי לאתר נאות מדבר נסתרות. <strong class='text-white'>ארץ מוצא:</strong> נוודי הטוראג במדבר הסהרה.",
+                tech3: "הקרוואנסראי (Caravanserai): תחנות חניה מבוצרות בקצוות המדבר (כמו העיר סיג'ילמסה במרוקו) שסיפקו לחיי השיירות מים, הגנה ואפשרות מסחר. <strong class='text-white'>ארץ מוצא:</strong> אדריכלות איסלאמית עתיקה.",
+                techSummary: "טכנולוגיות הניווט והשינוע הללו אפשרו לשיירות מפלצתיות של עד 12,000 גמלים לחצות אוקיינוס של חול ללא כביש סלול אחד.",
+
+                declineTitle: "דעיכת הנתיב ההיסטורי",
+                declineDesc: "דעיכתם של הנתיבים הייתה מהירה ונבעה מחידוש טכנולוגי-גיאופוליטי אחד: <strong class='text-amber-500'>עידן התגליות</strong>. החל מהמאה ה-15, הפורטוגזים (וזמן קצר אחריהם האירופאים כולם) החלו לשוט ישירות לחופי מערב אפריקה (מפרץ גינאה). המסחר בספינות היה מהיר, זול ובטוח פי כמה ממסע של 3 חודשים במדבר עתיר שודדים. בנוסף, בשנת 1591, פלש צבא מרוקאי לאימפריית סונגהאי (יורשת מאלי) באמצעות נשק חם (ארקבוזים) והחריב את ערי המסחר גאו וטימבוקטו, מה שריסק את התשתית הפוליטית שאבטחה את הדרכים. משלב זה, הסחר עבר אל קו החוף ומערב אפריקה נכנסה לעידן הקולוניאלי.",
+
+                footer: "המחקר נכתב וקודד על ידי ג'מיני ורם © 2026"
+            },
+            en: {
+                dir: "ltr",
+                navBack: "Back to Encyclopedia",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "עברית",
+                heroTitle: "Trans-Saharan Trade Routes",
+                heroYears: "Active Years: 8th Century CE – Late 16th Century",
+                heroLength: "Estimated Length: Variable (Hundreds of routes, each approx. 2,000-3,000 km)",
+                heroDesc: "The vascular network that crossed the impassable Sahara Desert. These routes connected the gold empires of West Africa with the Mediterranean and Islamic economies, generating legendary wealth unparalleled in history.",
+                mapPlaceholder: "",
+                mapHint: "Insert your map file here (e.g., trans-saharan-map.jpg)",
+                
+                etyTitle: "Complete Etymological Analysis",
+                etyAuthor: "Prominent Modern Historian & Researcher:",
+                etyAuthorDesc: "Western documentation and research of Saharan trade owe much to British historian <strong>E. W. Bovill</strong>. His monumental 1958 book, 'The Golden Trade of the Moors', became the foundational text for pre-colonial West African history.",
+                etyYears: "Historian's Lifespan (Bovill):",
+                etyYearsDesc: "1892 – 1966.",
+                etyContext: "<strong class='text-amber-500'>Country of Origin & Birthplace:</strong> London, England. Bovill was not merely an academic; he was a colonial officer who served in Africa, blending firsthand geographical knowledge with history.",
+                etyOriginal: "Original Term (Trans-Saharan):",
+                etyPart1Title: "Part A – Trans (Across)",
+                etyPart1Desc: "A Latin prefix meaning 'from one side to the other'. The term emphasizes the extreme physical and logistical action of <em>crossing</em> a massive geographical obstacle, not merely moving within it.",
+                etyPart2Title: "Part B – Saharan",
+                etyPart2Desc: "Derived from 'Sahara'. The root is the Arabic word <strong>صَحْرَاء (ṣaḥrāʾ)</strong>, simply meaning 'desert'. In Arabic, Sahara denotes 'the greatest desert', a desert that is an entity unto itself.",
+
+                bioTitle: "Founders and Historical Background",
+                bioIntro: "The routes were initially pioneered by nomadic Berber Tuareg tribes. However, the man who put this route on the global map, creating a syncretism of capital and Islam, was the richest ruler who ever lived.",
+                
+                wuTitle: "Mansa Musa - Emperor of Mali",
+                wuYears: "Lifespan: c. 1280 – c. 1337 | Reign: 1312 – 1337",
+                wuSub1: "Childhood, Roots, and Rise to Power:",
+                wuDesc1: "Musa Keita I was born into the Keita dynasty, the royal family of the Mali Empire (West Africa). His rise to power stemmed from a bizarre event: his predecessor, Mansa Abu Bakr II, became obsessed with finding the limits of the Atlantic Ocean. He departed with a massive fleet and was never seen again. Musa, serving as his deputy, assumed the throne in 1312. He inherited a wealthy empire, but through genius logistical management, turned it into a global superpower controlling the world's largest gold mines (in the Bambuk and Wangara regions).",
+                wuSub2: "Ideology and Worldview:",
+                wuDesc2: "Mansa Musa was a devout Muslim, and his ideology blended economic imperialism with religious and intellectual awakening. He didn't see his wealth merely as a display of power, but as a means to glorify Islam and turn Mali into a global intellectual and geopolitical hub. Under this ideology, he invited Andalusian architects and Middle Eastern scholars to Mali to build massive mosques (like the Djinguereber Mosque in Timbuktu) and universities.",
+                wuReasonsTitle: "Exact Reasons for the Hajj Journey (1324) and Route Institutionalization:",
+                wuReason1Title: "Global Diplomatic Show of Force:",
+                wuReason1Desc: "The primary reason for Musa's pilgrimage to Mecca (crossing the Sahara with a caravan of ~60,000 men and 80 gold-bearing camels) was an unprecedented PR campaign. He wanted to prove to the Islamic world, and subsequently Europe, that Mali was a stronger and wealthier empire than any Mediterranean power.",
+                wuReason2Title: "The Barter Monopoly (Gold for Salt):",
+                wuReason2Desc: "Mansa Musa sought to institutionalize trade by controlling both ends. Mali controlled the southern gold sources, but Musa ensured military control over the cities of Gao and Timbuktu, acting as chokepoints for salt merchants arriving from the north (Taghaza mines). Salt was vital for human survival in Africa's humid climate, often traded pound for pound for gold.",
+                wuReason3Title: "Turning Timbuktu into a Capital of Knowledge (Soft Power):",
+                wuReason3Desc: "Strategically, Musa understood that military force alone cannot sustain an empire. He used the wealth from the routes to fund massive libraries and scholars. Timbuktu became the final, mandatory stop for religious scholars and academics crossing the Sahara, utilizing 'soft power' to ensure the empire's stability.",
+
+                animalsTitle: "Animal Logistics: Ships of the Desert",
+                animalsDesc: "The Sahara is a nearly impassable barrier. Attempting to cross it with horses or oxen meant certain death. The revolution was made possible by one single animal.",
+                horseSpecies: "The Dromedary Camel (Camelus dromedarius):",
+                horseDesc: "The Arabian camel, possessing a single hump. Unlike the Bactrian (two-humped) camel of Central Asia and the Silk Road, the Dromedary is specifically adapted to extreme heat. <strong class='text-white mt-2 block'>Historical and Strategic Importance:</strong> The mass introduction of the camel to North Africa (around the 3rd century CE) created the 'Camel Revolution'. A camel can carry a load of 150-250 kg and walk for a week to ten days without a drop of water, losing up to 30% of its body weight without dying. Its wide, padded feet prevented sinking into dunes, and its long eyelashes protected its eyes from sandstorms. Without it, Africa's economy, religion, and history would have developed in total isolation. <strong class='text-white mt-2 block'>Origin:</strong> Originally domesticated in the Arabian Peninsula and brought to Africa.",
+                elephantSpecies: "The Barb Horse:",
+                elephantDesc: "A North African horse breed (Equus caballus) highly resistant to heat. <strong class='text-white mt-2 block'>Strategic Importance:</strong> While camels were used for cargo, Barb horses were used by Tuareg warriors and rulers (like Malian cavalry) for rapid raids and securing caravans at the desert's edges. However, they were incapable of crossing the deep Sahara itself without a logistical water escort. <strong class='text-white mt-2 block'>Origin:</strong> The Atlas Mountains region (Maghreb).",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "Trade, Strategy, and Geopolitics",
+                economyTitle: "Importance of Trade and Economy",
+                economyDesc: "The Trans-Saharan route was the economic anchor of the Old World in the Middle Ages. Until the discovery of the Americas, two-thirds of Europe's and the Islamic world's gold came from West Africa across the Sahara. Gold coins (like the Dinar and the Florentine Florin) were minted from Malian gold, enabling the economic growth of the European Renaissance.",
+                milStrategyTitle: "Strategic Importance - Controlling Oases",
+                milStrategyDesc: "Military strategy in the Sahara was entirely different from Europe. Wars weren't fought over territory (sand), but over 'islands of life' - oases and water wells. Tuareg tribes, controlling water sources, could annihilate an entire caravan simply by covering a well with sand. African and Islamic empires forged alliances and funded Berber mercenaries to ensure the vital passes remained open.",
+                goodsOriginTitle: "Origin of Key Commodities Transiting the Route",
+                chinaOrigin: "West Africa (Mali, Songhai, and Ghana Empires):",
+                chinaGoods: "<strong class='text-white'>Gold, Slaves, and Ivory:</strong> The sub-Sahara supplied massive quantities of gold, ostrich feathers, lion skins, African elephant ivory, and black slaves sold to the Islamic and Mediterranean markets.",
+                indiaOrigin: "The Deep Desert (Sahara):",
+                indiaGoods: "<strong class='text-white'>Rock Salt:</strong> The main mining hubs (like Taghaza) were in the heart of the scorching desert, where massive salt slabs were mined by slaves and transported south. Salt was so valuable that local houses were sometimes built from salt slabs due to local abundance versus a lack of building stone.",
+                romeOrigin: "Mediterranean and Maghreb (North Africa / Islamic World):",
+                romeGoods: "<strong class='text-white'>Horses, Dates, Weapons, and Textiles:</strong> From the north came fine warhorses (revitalizing African cavalry), wheat, dates, premium woolen fabrics, and advanced iron weapons (swords and armor).",
+
+                ideologyTitle: "Ideology and Spirit",
+                ideologyDesc: "Beyond commodities, the most important cargo to cross the Sahara was <strong class='text-amber-500'>Islam</strong>. Muslim merchants (many of them Sufis) brought the Quran, Sharia law, and the Arabic language (which served as an international business script). Unlike conquests in the Middle East, Islam spread in West Africa peacefully, via merchants. African kings adopted Islam to integrate into international trade networks and to gain political legitimacy in the eyes of northern Caliphs and Ulama (religious scholars).",
+                
+                techTitle: "Technological Achievements and Infrastructure",
+                techDesc: "Crossing the Sahara, which often took 70-90 days, required unique technologies:",
+                tech1: "The North Arabian Camel Saddle: Developing a saddle fitted over the camel's hump, allowing the rider to sit stably and control it in combat, or to load heavy saddlebags on both sides. <strong class='text-white'>Origin/Development:</strong> Arab and Berber tribes in North Africa.",
+                tech2: "Local Astronomical Navigation (Takshif): Caravans were led by Tuareg scout-navigators (Takshif). They used star navigation (the Arabic Astrolabe), wind direction identification, and sand color reading to locate hidden oases. <strong class='text-white'>Origin:</strong> Tuareg nomads of the Sahara.",
+                tech3: "Caravanserai: Fortified rest stations at the desert's edges (like the city of Sijilmasa in Morocco) providing caravans with water, protection, and trading facilities. <strong class='text-white'>Origin:</strong> Ancient Islamic architecture.",
+                techSummary: "These navigational and transport technologies allowed monstrous caravans of up to 12,000 camels to cross an ocean of sand without a single paved road.",
+
+                declineTitle: "Decline of the Historical Route",
+                declineDesc: "The decline of the routes was rapid and stemmed from one geopolitical-technological innovation: <strong class='text-amber-500'>The Age of Discovery</strong>. Starting in the 15th century, the Portuguese (and soon all Europeans) began sailing directly to the West African coast (Gulf of Guinea). Maritime trade was immensely faster, cheaper, and safer than a 3-month desert journey fraught with bandits. Furthermore, in 1591, a Moroccan army invaded the Songhai Empire (Mali's successor) using firearms (arquebuses) and destroyed the trading cities of Gao and Timbuktu, shattering the political infrastructure that secured the routes. From this point, trade shifted to the coastline, and West Africa entered the colonial era.",
+
+                footer: "Research written and coded by Gemini & Ram © 2026"
+            }
+        };
+
+        // פונקציית החלפת השפה
+        function toggleLanguage() {
+            currentLang = currentLang === 'he' ? 'en' : 'he';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = content[currentLang].dir;
+            renderPage();
+        }
+
+        // רינדור התוכן למסך
+        function renderPage() {
+            const t = content[currentLang];
+            const isEn = currentLang === 'en';
+            
+            const html = `
+                <nav class="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                        <a href="../index.html" class="flex items-center gap-2 text-amber-500 hover:text-amber-400 transition-colors group">
+                            <svg class="w-5 h-5 transform ${isEn ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span class="font-bold tracking-wide text-sm sm:text-base">${t.navBack}</span>
+                        </a>
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleLanguage()" class="text-sm font-semibold text-gray-300 hover:text-white bg-gray-800/60 hover:bg-gray-700/60 px-3 py-1.5 rounded-lg border border-gray-700 transition-all">
+                                ${t.langBtn}
+                            </button>
+                            <div class="text-gray-400 font-semibold tracking-widest text-sm uppercase hidden sm:block">
+                                ${t.navTitle}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24 space-y-12">
+                    
+                    <header class="text-center space-y-6">
+                        <div class="inline-block p-6 rounded-full bg-gray-800 border-4 border-gray-700 shadow-2xl mb-4">
+                            <span class="text-7xl">🐪</span>
+                        </div>
+                        <h1 class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-500 to-orange-600 tracking-tight">
+                            ${t.heroTitle}
+                        </h1>
+                        <div class="flex flex-wrap justify-center gap-3 text-sm sm:text-base font-semibold">
+                            <span class="bg-amber-900/40 text-amber-300 px-4 py-1.5 rounded-full border border-amber-800/50">${t.heroYears}</span>
+                            <span class="bg-orange-900/40 text-orange-300 px-4 py-1.5 rounded-full border border-orange-800/50">${t.heroLength}</span>
+                        </div>
+                        <p class="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mt-6">
+                            ${t.heroDesc}
+                        </p>
+                    </header>
+
+                    <div class="image-placeholder w-full h-64 sm:h-96 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-amber-500 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p>${t.mapPlaceholder}</p>
+                            <p class="text-sm font-normal text-gray-500">${t.mapHint}</p>
+                        </div>
+                    </div>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-amber-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">📖</span> ${t.etyTitle}
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 space-y-5 shadow-inner">
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-amber-500 text-lg block mb-1">${t.etyAuthor}</strong>
+                                    <p class="text-gray-300 leading-relaxed">${t.etyAuthorDesc}</p>
+                                </div>
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-amber-500 text-lg block mb-1">${t.etyYears}</strong>
+                                    <p class="text-gray-300 leading-relaxed font-semibold">${t.etyYearsDesc}</p>
+                                </div>
+                                <div class="pb-2">
+                                    <p class="text-gray-300 leading-relaxed">${t.etyContext}</p>
+                                </div>
+                                <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50 inline-block w-full text-center">
+                                    <strong class="text-amber-500">${t.etyOriginal}</strong> <span class="text-xl font-bold text-white tracking-widest font-mono mx-2">Trans-Saharan / טראנס סהרייני</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-orange-400">
+                                    <h4 class="text-orange-400 font-bold text-lg mb-2">${t.etyPart1Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart1Desc}</p>
+                                </div>
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-amber-500">
+                                    <h4 class="text-amber-300 font-bold text-lg mb-2">${t.etyPart2Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart2Desc}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-yellow-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🏛️</span> ${t.bioTitle}
+                        </h2>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8">${t.bioIntro}</p>
+
+                        <div class="space-y-10">
+                            <div class="bg-gray-800/40 p-6 sm:p-8 rounded-2xl border border-gray-700/70 shadow-lg hover:border-amber-500/50 transition-colors relative overflow-hidden">
+                                <div class="absolute top-0 ${isEn ? 'left-0' : 'right-0'} w-full h-1 bg-gradient-to-${isEn ? 'r' : 'l'} from-amber-500 to-transparent"></div>
+                                <h3 class="text-3xl font-bold text-amber-400 mb-2">${t.wuTitle}</h3>
+                                <p class="text-sm text-amber-200 font-semibold mb-6 px-3 py-1 bg-amber-900/30 inline-block rounded-md border border-amber-800/50">${t.wuYears}</p>
+                                
+                                <div class="space-y-5 text-gray-300 leading-relaxed text-sm sm:text-base">
+                                    <div><strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub1}</strong><p>${t.wuDesc1}</p></div>
+                                    <div><strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub2}</strong><p>${t.wuDesc2}</p></div>
+                                    <div class="bg-gray-800/80 p-6 rounded-xl border border-gray-700 mt-6 shadow-inner">
+                                        <strong class="text-amber-300 block mb-4 text-xl flex items-center gap-2"><span class="text-2xl">🎯</span> ${t.wuReasonsTitle}</strong>
+                                        <ul class="space-y-4 list-none">
+                                            <li class="flex gap-3"><span class="text-yellow-400 mt-1">🌍</span><div><strong class="text-white">${t.wuReason1Title}</strong> ${t.wuReason1Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-white mt-1">🧂</span><div><strong class="text-white">${t.wuReason2Title}</strong> ${t.wuReason2Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-emerald-400 mt-1">📖</span><div><strong class="text-white">${t.wuReason3Title}</strong> ${t.wuReason3Desc}</div></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-orange-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🐪</span> ${t.animalsTitle}
+                        </h2>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8">${t.animalsDesc}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700">
+                                <h4 class="text-amber-500 font-bold text-xl mb-4 flex items-center gap-2">🐪 ${t.horseSpecies}</h4>
+                                <p class="text-gray-300 text-sm sm:text-base leading-relaxed">${t.horseDesc}</p>
+                            </div>
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700">
+                                <h4 class="text-amber-500 font-bold text-xl mb-4 flex items-center gap-2">🐎 ${t.elephantSpecies}</h4>
+                                <p class="text-gray-300 text-sm sm:text-base leading-relaxed">${t.elephantDesc}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="image-placeholder w-full h-48 sm:h-64 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-12 h-12 mx-auto text-amber-500 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            <p>${t.caravanPlaceholder}</p>
+                        </div>
+                    </div>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-yellow-600"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">⚖️</span> ${t.strategyTitle}
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-yellow-500 mb-3">${t.economyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.economyDesc}</p>
+                            </div>
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-red-400 mb-3">${t.milStrategyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.milStrategyDesc}</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 mt-4">
+                            <h3 class="text-xl font-bold text-amber-500 mb-4 border-b border-gray-700 pb-2">${t.goodsOriginTitle}</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🌍</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.chinaOrigin}</strong> ${t.chinaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🏜️</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.indiaOrigin}</strong> ${t.indiaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🏛️</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.romeOrigin}</strong> ${t.romeGoods}</p></li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-emerald-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">💡</span> ${t.ideologyTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.ideologyDesc}</p>
+                        </div>
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-amber-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">⚙️</span> ${t.techTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.techDesc}</p>
+                            <ul class="list-disc list-inside mt-4 text-gray-300 space-y-2 font-semibold">
+                                <li class="text-amber-400">${t.tech1}</li>
+                                <li class="text-amber-400">${t.tech2}</li>
+                                <li class="text-amber-400">${t.tech3}</li>
+                            </ul>
+                            <p class="text-gray-400 text-sm mt-4">${t.techSummary}</p>
+                        </div>
+                    </section>
+                    
+                    <section class="glass-card p-8 rounded-3xl bg-red-900/10 border-red-900/30 text-center">
+                        <h3 class="text-2xl font-bold text-red-400 mb-4">${t.declineTitle}</h3>
+                        <p class="text-gray-300 leading-relaxed max-w-3xl mx-auto">${t.declineDesc}</p>
+                    </section>
+                </main>
+
+                <footer class="mt-auto border-t border-gray-800 bg-gray-900/90 py-6 text-center z-10">
+                    <p class="text-gray-500 text-sm font-semibold tracking-wide">${t.footer}</p>
+                </footer>
+            `;
+            
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        window.onload = renderPage;
+    </script>
+</body>
+</html>
+
