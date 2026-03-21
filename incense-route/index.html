@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דרך הבשמים - מחקר היסטורי מקיף</title>
+    <!-- שילוב Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* התאמת גופנים לקריאה מחקרית נוחה על מסכי Samsung S25 Ultra */
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Frank+Ruhl+Libre:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* עיצוב Glassmorphism לפרימיום Dark Mode */
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* עיצוב לתמונות עתידיות (Placeholders) */
+        .image-placeholder {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(31, 41, 55, 0.8),
+                rgba(31, 41, 55, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 20px
+            );
+            border: 2px dashed rgba(167, 139, 250, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .image-placeholder:hover {
+            border-color: rgba(167, 139, 250, 1);
+            color: #E5E7EB;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen selection:bg-purple-500 selection:text-white flex flex-col">
+
+    <!-- קונטיינר ראשי אליו יוזרק התוכן הדינמי -->
+    <div id="app-container" class="flex-grow w-full"></div>
+
+    <script>
+        let currentLang = 'he';
+
+        // מסד הנתונים הדו-לשוני של המחקר 
+        const content = {
+            he: {
+                dir: "rtl",
+                navBack: "חזור לאנציקלופדיה",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "English",
+                heroTitle: "דרך הבשמים (הקטורת)",
+                heroYears: "שנות פעילות: המאה ה-3 לפנה\"ס – המאה ה-2 לספירה",
+                heroLength: "אורך משוער: כ-2,000 קילומטרים (מדרום חצי האי ערב לים התיכון)",
+                heroDesc: "נתיב סחר מדברי קשוח ויוקרתי שהפך שבטים נוודים לאימפריה כלכלית אדירה. הדרך הובילה את שרפי הלבונה והמור מהקצה הדרומי של חצי האי ערב, דרך הנגב הישראלי, אל מקדשי יוון ורומא.",
+                mapPlaceholder: "",
+                mapHint: "הכנס כאן את קובץ המפה (למשל: incense-route-map.jpg)",
+                
+                etyTitle: "ניתוח אטימולוגי מלא",
+                etyAuthor: "חוקר והוגה המונח המודרני:",
+                etyAuthorDesc: "הדרך תועדה בעת העתיקה על ידי פליניוס הזקן (שכינה אותה מסלול הלבונה), אך המונח והמחקר המודרני והמקיף עליה קודמו על ידי הארכאולוג וההיסטוריון הבריטי נייג'ל גרום (Nigel Groom), מומחה לסחר הקטורת הערבי.",
+                etyYears: "שנות חייו של ההיסטוריון (גרום):",
+                etyYearsDesc: "1924 – 2014.",
+                etyContext: "<strong class='text-purple-400'>ארץ מוצא ומקום לידה:</strong> לונדון, אנגליה. שירותו הקולוניאלי בדרום חצי האי ערב (תימן/עדן) העניק לו גישה חסרת תקדים לאזורי הגידול המקוריים של הלבונה.",
+                etyOriginal: "מונח המקור:",
+                etyPart1Title: "חלק א' – Incense (קטורת / בשמים)",
+                etyPart1Desc: "המילה בעברית באה מהשורש ק.ט.ר, שמשמעותו העלאת עשן בריח ניחוח המקושר לטקסים ופולחן דתי (כמו 'מזבח הקטורת'). באנגלית, המילה 'Incense' נגזרת מהפועל הלטיני 'incendere' שפירושו להבעיר, להדליק או לשרוף. המונח 'בשמים' מתייחס במקרה זה לשרפי עצים ארומטיים, ולא לנוזלי בושם מודרניים.",
+                etyPart2Title: "חלק ב' – Route (דרך)",
+                etyPart2Desc: "מסלול יבשתי מדברי ואכזר, שחצה את המדבר הערבי – אחד האזורים הצחיחים והעוינים בעולם. הניווט ב'דרך' זו הצריך מומחיות בלעדית, היכרות אינטימית עם מיקומם של בורות מים נסתרים, ויכולת הישרדות שצבאות סדירים לא יכלו לחקות.",
+
+                bioTitle: "מייסדי הנתיב והרקע ההיסטורי",
+                bioIntro: "בשונה מדרכים אחרות שהוקמו על ידי אימפריות או קיסרים בודדים, דרך הבשמים מוסדה ונשלטה באופן בלעדי על ידי עם שלם – הנבטים. תחת מנהיגותם של מלכים חזקים, הם הפכו את המדבר למכונה כלכלית משומנת.",
+                
+                wuTitle: "ממלכת הנבטים (The Nabataeans) והמלך חרתת הרביעי",
+                wuYears: "שנות פעילות הממלכה: המאה ה-4 לפנה\"ס – 106 לספירה | שלטון חרתת ה-4: 9 לפנה\"ס – 40 לספירה",
+                wuSub1: "שורשים, ילדות העם ועלייתו של חרתת:",
+                wuDesc1: "הנבטים החלו את דרכם כשבטי רועים נוודים בחצי האי ערב, שעסקו בשוד שיירות ובמרעה. עם הזמן, הם הבינו שהמסחר משתלם יותר משוד. חרתת הרביעי (Aretas IV Philopatris - 'אוהב עמו'), נולד אל תוך ממלכה נבטית שכבר החלה להתבסס, אך הוא זה שהביא אותה לשיא תפארתה ול'תור הזהב' שלה. תחתיו, בירתם פטרה נחצבה במלוא הדרה, והנבטים הפכו מנוודים לאדריכלים וסוחרים מתוחכמים המשלבים תרבות ערבית, הלניסטית ורומית.",
+                wuSub2: "אידאולוגיה ותפיסת עולם:",
+                wuDesc2: "האידאולוגיה הנבטית התבססה על שני עקרונות: <strong>ניטרליות דיפלומטית וסודיות מוחלטת</strong>. חרתת הרביעי תמרן בגאונות בין האימפריה הרומית לפרתית (הפרסית) ודאג לשמור על עצמאות ממלכתו. מבחינה עסקית, האידאולוגיה הייתה של מונופול קפדני: הם הפיצו לוחמה פסיכולוגית באמצעות שמועות על דרקונים, מפלצות ונחשים מעופפים השומרים על עצי הלבונה בדרום, כדי להרתיע את היוונים והרומאים מלנסות להגיע למקורות העושר בעצמם.",
+                wuReasonsTitle: "הסיבות המדויקות והאסטרטגיות לשליטה בנתיב המדברי:",
+                wuReason1Title: "ניצול היתרון הגיאוגרפי וההישרדותי:",
+                wuReason1Desc: "הסיבה המרכזית שהנבטים שלטו בדרך הייתה פשוטה: הם היו היחידים שיכלו לחצות אותה בחיים. הם שלטו בסוד אגירת המים בבורות סתרים מטויחים במדבר. אימפריות שניסו לכבוש את הנתיב (כמו המשלחת הצבאית הרומית של אליוס גאלוס בשנת 25 לפנה\"ס) הוכשלו בכוונה על ידי מורי דרך נבטים שהובילו אותם למות מצמא במדבר.",
+                wuReason2Title: "מענה לביקוש פולחני עצום במערב:",
+                wuReason2Desc: "העולם הפגאני (יוון, רומא, מצרים) נזקק לכמויות אדירות של קטורת. הלבונה שימשה להקרבת קורבנות במקדשים (כדי לרצות את האלים ולהסוות את ריח הדם והשרוף), והמור שימש לחניטת מתים ולתמרוקי יוקרה של האצולה. הביקוש היה קשיח, והרומאים היו מוכנים לשלם כל מחיר. הנבטים זיהו את ההזדמנות וסיפקו את הסחורה תוך גזירת קופון תיווך ענק.",
+                wuReason3Title: "מיסוי, אבטחה ושירותי פונדקאות:",
+                wuReason3Desc: "הנבטים לא רק שינעו את הסחורה, הם ייסדו 'תעשיית שירותים'. הם הקימו תחנות דרכים (חאנים) במרחק של יום הליכת גמל אחת מהשנייה (כמו עבדת, שבטה, חלוצה וממשית בנגב). הם גבו מס מעבר, מס לינה, ומס על אבטחת השיירות מפני שודדים אחרים.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "מסחר, אסטרטגיה וגיאופוליטיקה",
+                economyTitle: "חשיבות המסחר והכלכלה",
+                economyDesc: "דרך הבשמים הכניסה הון עצום למזרח התיכון. רומא סבלה מ'גירעון מסחרי' כבד מול סוחרי המזרח, שכן היא קנתה לבונה ומור במטבעות כסף וזהב. הכסף הזה מימן את חציבת המקדשים האדירים בפטרה, הפך את עזה לאחד הנמלים העשירים בים התיכון, ויצר תרבות שפע נבטית שבה (לפי הגיאוגרף סטראבון) 'הקנסות מוטלים על מי שממעט בנכסיו'.",
+                milStrategyTitle: "חשיבות אסטרטגית - שליטה במים כנשק",
+                milStrategyDesc: "האסטרטגיה הנבטית לא נשענה על חיל מצב גדול, אלא על 'נשק אקלימי' - הגישה למים. ערי הנגב הנבטיות (ערי המדבר) נבנו במיקומים שחלשו על מקורות מים נסתרים ועל מעברי הרים צרים. מי שרצה להעביר סחורה ליבשת, היה חייב לעבור דרכם. השליטה בתשתיות המים הייתה למעשה שליטה גיאופוליטית בכל האזור.",
+                goodsOriginTitle: "ארץ המוצא של הסחורות המרכזיות",
+                chinaOrigin: "דרום חצי האי ערב (תימן ועומאן של ימינו):",
+                chinaGoods: "<strong class='text-white'>לבונה (Frankincense):</strong> שרף חלבי המופק מעצי הבוסווליה (Boswellia) שגדלו במיקרו-אקלים הייחודי של אזור דופאר (Dhofar) בעומאן ובהדראמות בתימן. <strong class='text-white mt-2 block'>מור (Myrrh):</strong> שרף המופק מעצי הקומיפורה, ששימש בעיקר לקוסמטיקה, בשמים, חניטה נגד זיהומים ורפואה משככת כאבים.",
+                indiaOrigin: "קרן אפריקה (סומליה ואתיופיה):",
+                indiaGoods: "גם אזורים אלו סיפקו זנים של מור ולבונה (שנקראו לעיתים 'תבליני פונט' במסורת המצרית), שעשו את דרכם לנמלי דרום ערב ומשם צפונה דרך המדבר.",
+                persiaOrigin: "הודו (הסחר הימי הנלווה):",
+                persiaGoods: "בנמלי דרום חצי האי ערב פגשה הדרך שיירות ימיות מהודו שהביאו תבלינים, צבעים ופנינים. סחורות אלו הועמסו גם הן על גמלי הנבטים לעבר הים התיכון.",
+                romeOrigin: "נמלי הים התיכון (עזה, אלכסנדריה):",
+                romeGoods: "נקודות הסיום של הדרך היבשתית. מעזה ואלכסנדריה נשלחו הבשמים בספינות מערבה לרומא וליוון, ותמורתם חזרו מטבעות, זכוכית מעוטרת ויין איטלקי יוקרתי.",
+
+                ideologyTitle: "אידאולוגיה ורוח",
+                ideologyDesc: "הנבטים פיתחו פנתיאון אלים ייחודי ששילב מוטיבים מדבריים עם תרבות הלניסטית. האל המרכזי שלהם היה <strong class='text-white'>דושרא (Dushara)</strong>, אל ההרים והשמש שיוצג לרוב כאבן מרובעת נטולת פנים (בטיל). הדרך אפשרה מפגש תרבויות מרתק: האדריכלות הנבטית בפטרה ובמדבר יהודה מדגימה שילוב מדהים של חזיתות מקדש יווניות-רומיות עם כותרות נבטיות ופירמידות מצריות מיניאטוריות, עדות לרוח הקוסמופוליטית שהביא המסחר.",
+                
+                techTitle: "הישגים טכנולוגיים וחקלאיים",
+                techDesc: "היכולת לקיים מסחר רציף במדבר דרשה פיתוח טכנולוגיות פורצות דרך:",
+                tech1: "חקלאות נגר (Runoff Agriculture): ניתוב מדויק של מי שיטפונות מהגבעות המסלעיות אל טרסות חקלאיות בעמקים, מה שאפשר גידול ענבים ליין וחיטה באזורים עם פחות מ-100 מ\"מ גשם בשנה.",
+                tech2: "בורות מים מטויחים (Cisterns): חציבת מאגרי ענק תת-קרקעיים שאספו מי שיטפונות ושמרו עליהם קרים ונקיים מאידוי. הבורות כוסו והוסתרו מפני זרים.",
+                tech3: "אדריכלות חצובה: טכניקת חציבה מלמעלה-למטה באבן החול האדומה (כמו באל-חזנה בפטרה), שיצרה מבני נצח המוגנים מפני רעידות אדמה.",
+                tech4: "ביות ותיעוש הגמל: שימוש נרחב בגמל הערבי (חד-דבשתי) כ'משאית' של העולם העתיק, היכול לשאת משאות כבדים ימים רבים ללא מים.",
+                techSummary: "טכנולוגיות המים הנבטיות היו כה מתקדמות, עד שחוקרים מודרניים באוניברסיטת בן-גוריון שיחזרו אותן כדי לפתח חקלאות מדברית בימינו.",
+
+                declineTitle: "דעיכת הנתיב ההיסטורי",
+                declineDesc: "דעיכת הדרך הייתה תהליך הדרגתי שנבע משתי סיבות עיקריות. ראשית, <strong class='text-purple-400'>גיאופוליטית:</strong> בשנת 106 לספירה, הקיסר הרומי טראיאנוס סיפח את הממלכה הנבטית והפך אותה ל'פרובינקיה ערביה', מה שחיסל את עצמאותם. הרומאים העדיפו לפתח נתיבי סחר ימיים עוקפים דרך הים האדום. שנית, <strong class='text-purple-400'>דתית ואידאולוגית:</strong> עם עלייתה והתבססותה של הנצרות באימפריה הרומית (המאה ה-4 לספירה), קרס הביקוש הכלכלי לקטורת. הנוצרים הראשונים ראו בשריפת קטורת טקס פגאני בזוי (כיוון שנוצרים נרדפים אולצו להקטיר לקיסר הרומי כדי לחמוק ממוות), והפסיקו את השימוש בה, מה שהוביל לקריסת המודל הכלכלי של ערי המדבר.",
+
+                footer: "המחקר נכתב וקודד על ידי ג'מיני ורם © 2026"
+            },
+            en: {
+                dir: "ltr",
+                navBack: "Back to Encyclopedia",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "עברית",
+                heroTitle: "The Incense Route",
+                heroYears: "Active Years: 3rd Century BCE – 2nd Century CE",
+                heroLength: "Estimated Length: ~2,000 Kilometers (Southern Arabia to the Mediterranean)",
+                heroDesc: "A harsh and prestigious desert trade route that transformed nomadic tribes into a colossal economic empire. The route transported frankincense and myrrh resins from the southern tip of the Arabian Peninsula, through the Israeli Negev, to the temples of Greece and Rome.",
+                mapPlaceholder: "",
+                mapHint: "Insert your map file here (e.g., incense-route-map.jpg)",
+                
+                etyTitle: "Complete Etymological Analysis",
+                etyAuthor: "Modern Term Coined & Researched By:",
+                etyAuthorDesc: "The route was documented in antiquity by Pliny the Elder (who called it the 'Frankincense Route'), but the modern, comprehensive term and research were advanced by British archaeologist and historian Nigel Groom, an expert on the Arabian incense trade.",
+                etyYears: "Historian's Lifespan (Groom):",
+                etyYearsDesc: "1924 – 2014.",
+                etyContext: "<strong class='text-purple-400'>Country of Origin & Birthplace:</strong> London, England. His colonial service in South Arabia (Yemen/Aden) granted him unprecedented access to the original frankincense growing regions.",
+                etyOriginal: "Original Term:",
+                etyPart1Title: "Part A – Incense",
+                etyPart1Desc: "In Hebrew (קטורת), the root is K.T.R, meaning raising smoke with a pleasant aroma associated with rituals. In English, 'Incense' derives from the Latin verb 'incendere' meaning to burn or ignite. The term here refers strictly to aromatic tree resins, not modern liquid perfumes.",
+                etyPart2Title: "Part B – Route",
+                etyPart2Desc: "A cruel and arid overland path crossing the Arabian Desert—one of the most hostile regions on earth. Navigating this 'Route' required exclusive expertise, intimate knowledge of hidden water cisterns, and survival skills regular armies could not replicate.",
+
+                bioTitle: "Founders and Historical Background",
+                bioIntro: "Unlike other routes established by empires or solitary emperors, the Incense Route was institutionalized and exclusively controlled by an entire people—the Nabataeans. Under powerful kings, they turned the desert into a well-oiled economic machine.",
+                
+                wuTitle: "The Nabataean Kingdom & King Aretas IV",
+                wuYears: "Kingdom's Peak Years: 4th Century BCE – 106 CE | Reign of Aretas IV: 9 BCE – 40 CE",
+                wuSub1: "Roots, Origins, and the Rise of Aretas:",
+                wuDesc1: "The Nabataeans began as nomadic pastoralist tribes in the Arabian Peninsula, engaging in caravan raiding and herding. Over time, they realized trade was more profitable than plunder. Aretas IV Philopatris ('Lover of his People') was born into an already establishing kingdom, but he brought it to its magnificent 'Golden Age'. Under his rule, their capital Petra was carved in its full glory, and the Nabataeans evolved from nomads to sophisticated architects and merchants blending Arab, Hellenistic, and Roman cultures.",
+                wuSub2: "Ideology and Worldview:",
+                wuDesc2: "Nabataean ideology rested on two principles: <strong>diplomatic neutrality and absolute secrecy</strong>. Aretas IV brilliantly maneuvered between the Roman and Parthian (Persian) empires, maintaining his kingdom's independence. In business, their ideology was a strict monopoly: they employed psychological warfare, spreading rumors of dragons, monsters, and flying serpents guarding the frankincense trees in the south, to deter Greeks and Romans from seeking the wealth sources themselves.",
+                wuReasonsTitle: "Exact Strategic Reasons for Controlling the Desert Route:",
+                wuReason1Title: "Leveraging Geographical and Survival Advantages:",
+                wuReason1Desc: "The primary reason the Nabataeans controlled the route was simple: they were the only ones who could cross it alive. They mastered the secret of harvesting water in hidden, plastered desert cisterns. Empires attempting to conquer the route (like the Roman military expedition of Aelius Gallus in 25 BCE) were intentionally led astray by Nabataean guides to die of thirst in the desert.",
+                wuReason2Title: "Meeting Massive Western Ritual Demand:",
+                wuReason2Desc: "The pagan world (Greece, Rome, Egypt) required staggering quantities of incense. Frankincense was used for temple sacrifices (to appease the gods and mask the smell of burnt blood), while myrrh was used for embalming and elite cosmetics. Demand was inelastic, and Romans paid any price. The Nabataeans seized the opportunity, supplying the goods while taking a massive middleman's cut.",
+                wuReason3Title: "Taxation, Security, and Hospitality Services:",
+                wuReason3Desc: "The Nabataeans didn't just transport goods; they founded a 'service industry'. They built waystations (caravanserais) exactly one camel-walk day apart (like Avdat, Shivta, and Mamshit in the Negev). They collected transit tolls, accommodation taxes, and protection fees against other raiders.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "Trade, Strategy, and Geopolitics",
+                economyTitle: "Importance of Trade and Economy",
+                economyDesc: "The Incense Route funneled immense capital into the Middle East. Rome suffered a severe 'trade deficit' with eastern merchants, purchasing frankincense and myrrh with gold and silver coins. This wealth financed the carving of Petra's colossal temples, turned Gaza into one of the Mediterranean's richest ports, and created a Nabataean culture of abundance where (according to geographer Strabo) 'fines are imposed on those who diminish their wealth'.",
+                milStrategyTitle: "Strategic Importance - Water as a Weapon",
+                milStrategyDesc: "Nabataean strategy relied not on a massive garrison, but on a 'climatic weapon'—access to water. The Nabataean Negev cities were built at locations dominating hidden water sources and narrow mountain passes. Anyone wishing to move goods inland had to pass through them. Controlling water infrastructure effectively meant geopolitical control of the entire region.",
+                goodsOriginTitle: "Origin of Key Commodities",
+                chinaOrigin: "Southern Arabian Peninsula (Modern Yemen & Oman):",
+                chinaGoods: "<strong class='text-white'>Frankincense:</strong> A milky resin extracted from Boswellia trees growing in the unique microclimate of the Dhofar region in Oman and Hadhramaut in Yemen. <strong class='text-white mt-2 block'>Myrrh:</strong> A resin from Commiphora trees, used primarily for cosmetics, perfumes, embalming against infections, and as a pain-relieving medicine.",
+                indiaOrigin: "Horn of Africa (Somalia and Ethiopia):",
+                indiaGoods: "These regions also supplied varieties of myrrh and frankincense (sometimes called the 'Spices of Punt' in Egyptian tradition), which made their way to South Arabian ports and then north across the desert.",
+                persiaOrigin: "India (Accompanying Maritime Trade):",
+                persiaGoods: "At South Arabian ports, the overland route met maritime fleets from India bringing spices, dyes, and pearls. These goods were also loaded onto Nabataean camels heading toward the Mediterranean.",
+                romeOrigin: "Mediterranean Ports (Gaza, Alexandria):",
+                romeGoods: "The endpoints of the overland route. From Gaza and Alexandria, the incense was shipped westward to Rome and Greece, exchanged for coins, decorated glassware, and prestigious Italian wine.",
+
+                ideologyTitle: "Ideology and Spirit",
+                ideologyDesc: "The Nabataeans developed a unique pantheon blending desert motifs with Hellenistic culture. Their chief deity was <strong class='text-white'>Dushara</strong>, god of mountains and the sun, often represented as a faceless square stone (baetyl). The route fostered a fascinating cultural convergence: Nabataean architecture in Petra and the Judean Desert displays an incredible fusion of Greco-Roman temple facades with Nabataean capitals and miniature Egyptian pyramids, a testament to the cosmopolitan spirit brought by trade.",
+                
+                techTitle: "Technological and Agricultural Achievements",
+                techDesc: "Maintaining continuous trade in the desert required groundbreaking technological developments:",
+                tech1: "Runoff Agriculture: Precisely channeling flash floods from rocky hills into agricultural terraces in the valleys, allowing the cultivation of wine grapes and wheat in areas with less than 100mm of annual rain.",
+                tech2: "Plastered Cisterns: Excavating massive underground reservoirs that collected floodwaters, keeping them cold, clean, and safe from evaporation. The cisterns were covered and hidden from strangers.",
+                tech3: "Rock-Cut Architecture: The top-down carving technique in red sandstone (like Al-Khazneh in Petra), creating eternal structures highly resistant to earthquakes.",
+                tech4: "Domestication and Industrialization of the Camel: Widespread use of the Arabian (one-humped) camel as the 'truck' of the ancient world, capable of carrying heavy loads for days without water.",
+                techSummary: "Nabataean water technologies were so advanced that modern researchers at Ben-Gurion University reconstructed them to develop modern desert agriculture.",
+
+                declineTitle: "Decline of the Historical Route",
+                declineDesc: "The route's decline was gradual, stemming from two main reasons. First, <strong class='text-purple-400'>Geopolitically:</strong> In 106 CE, Roman Emperor Trajan annexed the Nabataean Kingdom, turning it into 'Provincia Arabia' and destroying their independence. The Romans preferred developing bypass maritime routes via the Red Sea. Second, <strong class='text-purple-400'>Religiously and Ideologically:</strong> With the rise and establishment of Christianity in the Roman Empire (4th century CE), the economic demand for incense collapsed. Early Christians viewed burning incense as a despicable pagan ritual (since persecuted Christians were forced to burn incense to the Roman Emperor to escape death). They ceased its use, leading to the collapse of the desert cities' economic model.",
+
+                footer: "Research written and coded by Gemini & Ram © 2026"
+            }
+        };
+
+        // פונקציית החלפת השפה
+        function toggleLanguage() {
+            currentLang = currentLang === 'he' ? 'en' : 'he';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = content[currentLang].dir;
+            renderPage();
+        }
+
+        // רינדור התוכן למסך
+        function renderPage() {
+            const t = content[currentLang];
+            const isEn = currentLang === 'en';
+            
+            const html = `
+                <!-- סרגל ניווט עליון -->
+                <nav class="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                        <a href="../index.html" class="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors group">
+                            <svg class="w-5 h-5 transform ${isEn ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span class="font-bold tracking-wide text-sm sm:text-base">${t.navBack}</span>
+                        </a>
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleLanguage()" class="text-sm font-semibold text-gray-300 hover:text-white bg-gray-800/60 hover:bg-gray-700/60 px-3 py-1.5 rounded-lg border border-gray-700 transition-all">
+                                ${t.langBtn}
+                            </button>
+                            <div class="text-gray-400 font-semibold tracking-widest text-sm uppercase hidden sm:block">
+                                ${t.navTitle}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- תוכן המחקר -->
+                <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24 space-y-12">
+                    
+                    <!-- כותרת ראשית -->
+                    <header class="text-center space-y-6">
+                        <div class="inline-block p-6 rounded-full bg-gray-800 border-4 border-gray-700 shadow-2xl mb-4">
+                            <span class="text-7xl">🏺</span>
+                        </div>
+                        <h1 class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-400 to-pink-500 tracking-tight">
+                            ${t.heroTitle}
+                        </h1>
+                        <div class="flex flex-wrap justify-center gap-3 text-sm sm:text-base font-semibold">
+                            <span class="bg-purple-900/40 text-purple-300 px-4 py-1.5 rounded-full border border-purple-800/50">${t.heroYears}</span>
+                            <span class="bg-pink-900/40 text-pink-300 px-4 py-1.5 rounded-full border border-pink-800/50">${t.heroLength}</span>
+                        </div>
+                        <p class="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mt-6">
+                            ${t.heroDesc}
+                        </p>
+                    </header>
+
+                    <!-- מפה Placeholder -->
+                    <div class="image-placeholder w-full h-64 sm:h-96 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-purple-400 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                            <p>${t.mapPlaceholder}</p>
+                            <p class="text-sm font-normal text-gray-500">${t.mapHint}</p>
+                        </div>
+                    </div>
+
+                    <!-- אטימולוגיה -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-purple-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">📖</span> ${t.etyTitle}
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 space-y-5 shadow-inner">
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-purple-400 text-lg block mb-1">${t.etyAuthor}</strong>
+                                    <p class="text-gray-300 leading-relaxed">${t.etyAuthorDesc}</p>
+                                </div>
+                                
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-purple-400 text-lg block mb-1">${t.etyYears}</strong>
+                                    <p class="text-gray-300 leading-relaxed font-semibold">${t.etyYearsDesc}</p>
+                                </div>
+                                
+                                <div class="pb-2">
+                                    <p class="text-gray-300 leading-relaxed">${t.etyContext}</p>
+                                </div>
+                                
+                                <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50 inline-block w-full">
+                                    <strong class="text-purple-400">${t.etyOriginal}</strong> <span class="text-xl font-bold text-white tracking-widest font-mono mx-2">Incense Route</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-pink-400">
+                                    <h4 class="text-pink-400 font-bold text-lg mb-2">${t.etyPart1Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart1Desc}</p>
+                                </div>
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-gray-400">
+                                    <h4 class="text-gray-300 font-bold text-lg mb-2">${t.etyPart2Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart2Desc}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ביוגרפיה -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-blue-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🏛️</span> ${t.bioTitle}
+                        </h2>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8">${t.bioIntro}</p>
+
+                        <div class="space-y-10">
+                            <!-- הנבטים וחרתת -->
+                            <div class="bg-gray-800/40 p-6 sm:p-8 rounded-2xl border border-gray-700/70 shadow-lg hover:border-purple-500/50 transition-colors relative overflow-hidden">
+                                <div class="absolute top-0 ${isEn ? 'left-0' : 'right-0'} w-full h-1 bg-gradient-to-${isEn ? 'r' : 'l'} from-purple-600 to-transparent"></div>
+                                <h3 class="text-3xl font-bold text-purple-400 mb-2">${t.wuTitle}</h3>
+                                <p class="text-sm text-purple-200 font-semibold mb-6 px-3 py-1 bg-purple-900/30 inline-block rounded-md border border-purple-800/50">${t.wuYears}</p>
+                                
+                                <div class="space-y-5 text-gray-300 leading-relaxed text-sm sm:text-base">
+                                    <div>
+                                        <strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub1}</strong>
+                                        <p>${t.wuDesc1}</p>
+                                    </div>
+                                    <div>
+                                        <strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub2}</strong>
+                                        <p>${t.wuDesc2}</p>
+                                    </div>
+                                    <div class="bg-gray-800/80 p-6 rounded-xl border border-gray-700 mt-6 shadow-inner">
+                                        <strong class="text-purple-300 block mb-4 text-xl flex items-center gap-2"><span class="text-2xl">🎯</span> ${t.wuReasonsTitle}</strong>
+                                        <ul class="space-y-4 list-none">
+                                            <li class="flex gap-3"><span class="text-blue-400 mt-1">🏜️</span><div><strong class="text-white">${t.wuReason1Title}</strong> ${t.wuReason1Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-red-400 mt-1">🔥</span><div><strong class="text-white">${t.wuReason2Title}</strong> ${t.wuReason2Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-amber-400 mt-1">🐪</span><div><strong class="text-white">${t.wuReason3Title}</strong> ${t.wuReason3Desc}</div></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- עיר Placeholder -->
+                    <div class="image-placeholder w-full h-48 sm:h-64 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-amber-600 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                            <p>${t.caravanPlaceholder}</p>
+                        </div>
+                    </div>
+
+                    <!-- אסטרטגיה וסחורות -->
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-yellow-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">⚖️</span> ${t.strategyTitle}
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-yellow-400 mb-3">${t.economyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.economyDesc}</p>
+                            </div>
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-red-400 mb-3">${t.milStrategyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.milStrategyDesc}</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 mt-4">
+                            <h3 class="text-xl font-bold text-purple-400 mb-4 border-b border-gray-700 pb-2">${t.goodsOriginTitle}</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🇾🇪</span><p class="text-gray-300 text-sm sm:text-base">${t.chinaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🇪🇹</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.indiaOrigin}</strong> ${t.indiaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🇮🇳</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.persiaOrigin}</strong> ${t.persiaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🏛️</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.romeOrigin}</strong> ${t.romeGoods}</p></li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <!-- אידאולוגיה וטכנולוגיה -->
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-purple-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">💡</span> ${t.ideologyTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.ideologyDesc}</p>
+                        </div>
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-blue-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">💧</span> ${t.techTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.techDesc}</p>
+                            <ul class="list-disc list-inside mt-4 text-gray-300 space-y-2 font-semibold">
+                                <li class="text-blue-300">${t.tech1}</li>
+                                <li class="text-blue-300">${t.tech2}</li>
+                                <li class="text-blue-300">${t.tech3}</li>
+                                <li class="text-blue-300">${t.tech4}</li>
+                            </ul>
+                            <p class="text-gray-400 text-sm mt-4">${t.techSummary}</p>
+                        </div>
+                    </section>
+                    
+                    <!-- סיכום -->
+                    <section class="glass-card p-8 rounded-3xl bg-red-900/10 border-red-900/30 text-center">
+                        <h3 class="text-2xl font-bold text-red-400 mb-4">${t.declineTitle}</h3>
+                        <p class="text-gray-300 leading-relaxed max-w-3xl mx-auto">${t.declineDesc}</p>
+                    </section>
+                </main>
+
+                <!-- פוטר -->
+                <footer class="mt-auto border-t border-gray-800 bg-gray-900/90 py-6 text-center z-10">
+                    <p class="text-gray-500 text-sm font-semibold tracking-wide">${t.footer}</p>
+                </footer>
+            `;
+            
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        // טעינה ראשונית
+        window.onload = renderPage;
+    </script>
+</body>
+</html>
