@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>החילופין הקולומביאנים (הסחר הטרנס-אטלנטי) - מחקר היסטורי מקיף</title>
+    <!-- שילוב Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* הגדרות גופנים לקריאה מחקרית נוחה על מסכי Samsung S25 Ultra */
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Frank+Ruhl+Libre:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* עיצוב Glassmorphism לפרימיום Dark Mode */
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* עיצוב לתמונות עתידיות (Placeholders) */
+        .image-placeholder {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(31, 41, 55, 0.8),
+                rgba(31, 41, 55, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 20px
+            );
+            border: 2px dashed rgba(6, 182, 212, 0.5); /* צבע ציאן/אוקיינוס */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .image-placeholder:hover {
+            border-color: rgba(6, 182, 212, 1);
+            color: #E5E7EB;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen selection:bg-cyan-500 selection:text-white flex flex-col">
+
+    <!-- קונטיינר ראשי אליו יוזרק התוכן הדינמי -->
+    <div id="app-container" class="flex-grow w-full"></div>
+
+    <script>
+        let currentLang = 'he';
+
+        // מסד הנתונים הדו-לשוני המלא
+        const content = {
+            he: {
+                dir: "rtl",
+                navBack: "חזור לאנציקלופדיה",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "English",
+                heroTitle: "החילופין הקולומביאנים",
+                heroYears: "שנות פעילות: 1492 – המאה ה-19 (התמזג לסחר הגלובלי)",
+                heroLength: "אורך משוער: חציית האוקיינוס האטלנטי (כ-6,000 עד 8,000 קילומטרים)",
+                heroDesc: "הנתיב הימי ששבר את בידודה של יבשת אמריקה וחיבר את 'העולם החדש' עם 'העולם הישן'. זהו אינו רק נתיב מסחר, אלא אירוע ביולוגי, תרבותי ודמוגרפי שעיצב את העולם המודרני כפי שאנו מכירים אותו.",
+                mapPlaceholder: "",
+                mapHint: "הכנס כאן את קובץ המפה (למשל: columbian-exchange-map.jpg)",
+                
+                etyTitle: "ניתוח אטימולוגי מלא",
+                etyAuthor: "הוגה המונח והחוקר המודרני:",
+                etyAuthorDesc: "אמנם הנתיב נפתח ב-1492, אך מי שטבע את המונח המודרני 'The Columbian Exchange' (החילופין הקולומביאנים) והפך אותו למושג יסוד בהיסטוריה ובביולוגיה היה ההיסטוריון האמריקאי <strong>אלפרד וו. קרוסבי (Alfred W. Crosby)</strong> בספרו המהפכני משנת 1972.",
+                etyYears: "שנות חייו של ההיסטוריון (קרוסבי):",
+                etyYearsDesc: "1931 – 2018.",
+                etyContext: "<strong class='text-cyan-400'>ארץ מוצא ומקום לידה:</strong> בוסטון, מסצ'וסטס, ארצות הברית. קרוסבי היה חלוץ בתחום ההיסטוריה הסביבתית, והוכיח שההשפעה הגדולה ביותר של המסע לא הייתה פוליטית אלא אקולוגית.",
+                etyOriginal: "מונח המקור (Columbian Exchange):",
+                etyPart1Title: "חלק א' – Columbian (קולומביאני)",
+                etyPart1Desc: "נגזר משמו הלטיני של כריסטופר קולומבוס (Christophorus Columbus). המילה הלטינית 'Columbus' משמעותה 'יונה' (סמל לשלום או שליחות), אך בהקשר זה היא מייצגת את תחילת עידן הגילויים שנקשר בשמו.",
+                etyPart2Title: "חלק ב' – Exchange (חילופין)",
+                etyPart2Desc: "קרוסבי בחר במילה 'חילופין' ולא 'מסחר' בכוונה תחילה. בעוד שמסחר הוא פעולה כלכלית מודעת של בני אדם, הנתיב החדש כלל חילופין לא-מודעים של מיקרובים, וירוסים (מגפות), צמחי בר, ובעלי חיים שהעבירו את עצמם בין היבשות ללא תכנון אנושי.",
+
+                bioTitle: "מייסדי הנתיב והרקע ההיסטורי",
+                bioIntro: "הנתיב נפתח בזכות אובססיה אישית של נווט איטלקי אחד, ששילב ידע גיאוגרפי שגוי עם אמונה משיחית, והצליח לשכנע את מלכי ספרד להמר על הבלתי אפשרי.",
+                
+                wuTitle: "כריסטופר קולומבוס (Cristoforo Colombo)",
+                wuYears: "שנות חיים: 1451 – 1506 | שנת פריצת הנתיב (גילוי אמריקה): 1492",
+                wuSub1: "ילדות, שורשים ותשוקה לים:",
+                wuDesc1: "נולד ברפובליקה של גנואה (איטליה של ימינו), בן לדומיניקו קולומבו, אורג צמר וסוחר גבינות ממעמד הביניים. בילדותו בגנואה - אחת ממעצמות הים התיכון - הוא נחשף לספינות, מפות וספנים. הוא לא זכה להשכלה פורמלית, אך לימד את עצמו לטינית, ספרדית ופורטוגזית כדי לקרוא ספרי קוסמוגרפיה (כולל ספרו של מרקו פולו). כבר בשנות העשרים לחייו השתתף בהפלגות מסחר מסוכנות מצפון אירופה ועד חופי מערב אפריקה.",
+                wuSub2: "אידאולוגיה ותפיסת עולם:",
+                wuDesc2: "בניגוד למיתוס של 'איש המדע', קולומבוס פעל מתוך אידאולוגיה נוצרית-אפוקליפטית קיצונית. הוא האמין שהוא נבחר על ידי אלוהים (משמעות שמו 'כריסטופר' היא 'נושא המשיח') להביא את הנצרות לקצות תבל. מטרתו האמיתית במסע לאסיה הייתה למצוא כמויות עצומות של זהב, שבעזרתו יוכל לממן 'מסע צלב' ענק לשחרור ירושלים מידי המוסלמים, פעולה שלתפיסתו תביא לחזרתו של ישו.",
+                wuReasonsTitle: "הסיבות המדויקות והאסטרטגיות למסע מערבה:",
+                wuReason1Title: "חסימת נתיבי הסחר במזרח:",
+                wuReason1Desc: "כיבוש קונסטנטינופול על ידי האימפריה העות'מאנית (1453) חסם את 'דרך המשי' היבשתית לאירופאים. תבלינים ומשי הפכו ליקרים מנשוא עקב מיסוי מוסלמי ומונופול ונציאני.",
+                wuReason2Title: "טעות מתמטית גורלית (חישוב כדור הארץ):",
+                wuReason2Desc: "כולם ידעו שהארץ עגולה, אך קולומבוס הסתמך על חישובים שגויים (של פטולמאיוס ופייר ד'איי) וטען שהיקף כדור הארץ קטן בהרבה ממה שהוא באמת. הוא העריך שיפן נמצאת רק כ-4,500 ק\"מ מחופי ספרד. אילו ידע את המרחק האמיתי, אף מלך לא היה מממן לו מסע התאבדות כזה.",
+                wuReason3Title: "התחרות הגיאופוליטית מול פורטוגל:",
+                wuReason3Desc: "הפורטוגזים כבר החלו לשלוט בנתיב המזרחי העוקף את אפריקה בדרך להודו. המלכים הקתוליים של ספרד, פרדיננד ואיזבלה, שזה עתה סיימו את כיבוש גרנדה (הרקונקיסטה), היו נואשים לעקוף את הפורטוגזים ולמצוא נתיב חלופי ועצמאי לאסיה.",
+
+                animalsTitle: "לוגיסטיקה של בעלי חיים: המהפכה האקולוגית",
+                animalsDesc: "שום נתיב לא חולל שינוי כה דרמטי בעולם החי כפי שעשה המסע הזה. בעלי חיים אירופאים שינו לחלוטין את הנוף ואת אורח החיים ביבשת אמריקה.",
+                horseSpecies: "הסוס האנדלוסי (Andalusian Horse / Equus caballus):",
+                horseDesc: "סוסי מלחמה מספרד שהובאו באוניות קולומבוס במסעו השני (1493). היבשת האמריקאית לא ראתה סוסים מאז תום עידן הקרח. <strong class='text-white mt-2 block'>חשיבות אסטרטגית והיסטורית:</strong> בהתחלה הסוסים היו נשק פסיכולוגי (הילידים חשבו שהפרש והסוס הם מפלצת אחת). מאוחר יותר, כשהסוסים ברחו אל הטבע (והפכו למוסטנגים), הם שינו לחלוטין את חייהם של שבטי האינדיאנים במישורים הגדולים (כמו הקומאנצ'י והסו), שהפכו מלקטים רגליים לתרבויות של פרשים ציידי-ביזונים. <strong class='text-white mt-2 block'>ארץ מוצא:</strong> אירופה (חצי האי האיברי).",
+                elephantSpecies: "בקר הבית והחזירים (Bos taurus & Sus domesticus):",
+                elephantDesc: "פרות וחזירים הובאו כ'צידה מהלכת' בספינות המגלי ארצות. <strong class='text-white mt-2 block'>חשיבות היסטורית:</strong> באמריקה לא היו כמעט בעלי חיים מבויתים (מלבד הלאמה והאלפקה באנדים). החזירים והבקר חוו 'התפוצצות אוכלוסין' בערבות העשב של צפון ודרום אמריקה, שם לא היו להם טורפים טבעיים. הם הפכו למקור החלבון המרכזי שאיפשר את שגשוג המושבות החדשות, אך במקביל רמסו את השדות החקלאיים של הילידים. <strong class='text-white mt-2 block'>ארץ מוצא:</strong> אירופה ואסיה.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "מסחר, אסטרטגיה וגיאופוליטיקה",
+                economyTitle: "חשיבות המסחר והכלכלה",
+                economyDesc: "הסחר באוקיינוס האטלנטי יצר את הקפיטליזם המודרני. יבול התירס ותפוח האדמה מאמריקה הזינו את אירופה ואפשרו גידול דמוגרפי חסר תקדים, שמנע רעב המוני. במקביל, הזהב והכסף שנכרו באמריקה הציפו את כלכלת אירופה וגרמו ל'מהפכת המחירים'.",
+                milStrategyTitle: "חשיבות אסטרטגית - שליטה ימית גלובלית",
+                milStrategyDesc: "זהו נתיב הסחר הראשון שהאסטרטגיה שלו הייתה 100% ימית (ללא גבולות יבשתיים). השליטה באוקיינוס משמעותה הייתה שליטה בעולם. ספרד בנתה את 'צי האוצר' (Spanish treasure fleet) - מערכת שיירות של אוניות גליאון כבדות, שהפליגו פעם בשנה בליווי צבאי הדוק כדי להגן על כסף וזהב מפני פיראטים אנגלים וצרפתים. הדבר הוליד את תורת המרקנטיליזם ואת מלחמות הציים של העת החדשה.",
+                goodsOriginTitle: "ארץ המוצא של הסחורות בחילופין הטרנס-אטלנטיים",
+                chinaOrigin: "העולם החדש (צפון ודרום אמריקה):",
+                chinaGoods: "<strong class='text-white'>תפוחי אדמה, עגבניות, תירס, קקאו וטבק:</strong> מזונות ששינו לחלוטין את הדיאטה העולמית (הפיצה האיטלקית ללא עגבניה, והשוקולד השוויצרי ללא קקאו, לא היו קיימים). במקביל, העולם החדש 'ייצא' חזרה לאירופה את מחלת העגבת (Syphilis).",
+                indiaOrigin: "העולם הישן (אירופה ואסיה):",
+                indiaGoods: "<strong class='text-white'>חיטה, סוכר, קפה, סוסים ומחלות:</strong> אירופה הביאה את קנה הסוכר והקפה שהפכו לגידולי המטעים המרכזיים באמריקה (פלנטציות). לצידם הובאה המכה הגדולה ביותר: וירוסים (אבעבועות שחורות, חצבת) שהשמידו כ-90% מאוכלוסיית הילידים באמריקה, להם לא הייתה חסינות חיסונית.",
+                romeOrigin: "אפריקה (התפתחות 'הסחר המשולש'):",
+                romeGoods: "<strong class='text-white'>בני אדם (עבדים):</strong> קריסת אוכלוסיית הילידים באמריקה יצרה מחסור בכוח אדם לעבודה במטעי הסוכר והטבק. הדבר הוביל להתרחבות הנתיב לכדי 'סחר משולש', שבו מיליוני אפריקאים נחטפו והועברו בכפייה לאמריקות לעבודת פרך.",
+
+                ideologyTitle: "אידאולוגיה ורוח - גילוי העולם ומרקנטיליזם",
+                ideologyDesc: "פתיחת הנתיב חוללה רעידת אדמה אינטלקטואלית: אירופה גילתה שכתבי הקודש והיוונים הקדמונים לא ידעו הכל (שכן לא הזכירו יבשת שלמה), מה שהאיץ את המהפכה המדעית. מבחינה פוליטית, האידאולוגיה ששלטה בנתיב הייתה 'מרקנטיליזם' וקולוניאליזם - התפיסה לפיה המושבות נועדו אך ורק כדי לשרת ולהעשיר את מדינת האם האירופאית, מה שהצדיק ניצול משאבים ושעבוד ילידים.",
+                
+                techTitle: "הישגים טכנולוגיים: כיבוש האוקיינוס הפתוח",
+                techDesc: "חציית האוקיינוס הפתוח מבלי לראות יבשה חודשים הצריכה טכנולוגיה ימית חדשה:",
+                tech1: "קרוולה וקראק (Caravel & Carrack): אוניות ספרדיות ופורטוגזיות (כמו הניניה, פינטה וסנטה מריה). הן שילבו מפרש מרובע (למהירות עם כיוון הרוח) ומפרש לטיני-משולש (המאפשר תמרון נגד כיוון הרוח), עם גוף עמוק ויציב לגלים גבוהים. <strong class='text-white'>ארץ פיתוח:</strong> חצי האי האיברי.",
+                tech2: "ניווט אסטרונומי - אצטרולב ימי ורבעון (Quadrant): מכשירים למדידת זווית כוכב הצפון או השמש ביחס לאופק, שאפשרו לנווטים לחשב את קו הרוחב שלהם בלב ים. <strong class='text-white'>ארץ מוצא:</strong> העולם הערבי/הלניסטי (הותאם לים בפורטוגל).",
+                tech3: "הכרת זרמי האוקיינוס (Volta do Mar): גילוי רשת זרמי הים והרוחות (Trade Winds) באוקיינוס האטלנטי, שאפשרו לאוניות לחזור לאירופה בתנועה מעגלית מהירה.",
+                techSummary: "כלים אלו העניקו לאירופה את השליטה המוחלטת בימים למשך חמש מאות השנים הבאות.",
+
+                declineTitle: "סוף המונופול והתמזגות לסחר גלובלי",
+                declineDesc: "הנתיב <strong class='text-cyan-400'>מעולם לא דעך</strong>, אלא שינה את אופיו והפך למנוע של הגלובליזציה. המונופול הספרדי והפורטוגזי הבלעדי על החילופין הסתיים החל מהמאה ה-17, כאשר אנגליה, צרפת והולנד החלו ליישד מושבות משלהן בצפון אמריקה ובאיים הקריביים. במאה ה-19, עם סיום סחר העבדים, המהפכה התעשייתית, והופעת ספינות הקיטור, איבד הנתיב את צביונו של העת העתיקה ו'עידן הגילויים', והפך לחלק ממערכת הסחר המודרנית והחופשית שאנו מכירים היום.",
+
+                footer: "המחקר נכתב וקודד על ידי ג'מיני ורם © 2026"
+            },
+            en: {
+                dir: "ltr",
+                navBack: "Back to Encyclopedia",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "עברית",
+                heroTitle: "The Columbian Exchange",
+                heroYears: "Active Years: 1492 – 19th Century (Merged into Global Trade)",
+                heroLength: "Estimated Length: Crossing the Atlantic (~6,000 to 8,000 km)",
+                heroDesc: "The maritime route that shattered the isolation of the Americas and connected the 'New World' with the 'Old World'. This was not merely a trade route, but a biological, cultural, and demographic event that shaped the modern world.",
+                mapPlaceholder: "",
+                mapHint: "Insert your map file here (e.g., columbian-exchange-map.jpg)",
+                
+                etyTitle: "Complete Etymological Analysis",
+                etyAuthor: "Term Coiner & Modern Researcher:",
+                etyAuthorDesc: "Though the route opened in 1492, the modern term 'The Columbian Exchange' became a foundational concept in history and biology thanks to American historian <strong>Alfred W. Crosby</strong> in his revolutionary 1972 book.",
+                etyYears: "Historian's Lifespan (Crosby):",
+                etyYearsDesc: "1931 – 2018.",
+                etyContext: "<strong class='text-cyan-400'>Country of Origin & Birthplace:</strong> Boston, Massachusetts, USA. Crosby pioneered environmental history, proving that the voyage's greatest impact was ecological, not political.",
+                etyOriginal: "Original Term:",
+                etyPart1Title: "Part A – Columbian",
+                etyPart1Desc: "Derived from Christopher Columbus's Latin name (Christophorus Columbus). The Latin word 'Columbus' means 'dove' (a symbol of peace or mission), but here it represents the dawn of the Age of Discovery associated with his name.",
+                etyPart2Title: "Part B – Exchange",
+                etyPart2Desc: "Crosby deliberately chose 'Exchange' rather than 'Trade'. While trade is a conscious economic human action, this new route involved the unconscious transfer of microbes, viruses (pandemics), wild plants, and animals that moved between continents without human planning.",
+
+                bioTitle: "Founders and Historical Background",
+                bioIntro: "The route was opened due to the personal obsession of a single Italian navigator, who combined faulty geographic knowledge with messianic faith, managing to convince the Spanish monarchs to gamble on the impossible.",
+                
+                wuTitle: "Christopher Columbus (Cristoforo Colombo)",
+                wuYears: "Lifespan: 1451 – 1506 | Year of Discovery: 1492",
+                wuSub1: "Childhood, Roots, and Passion for the Sea:",
+                wuDesc1: "Born in the Republic of Genoa (modern Italy), the son of Domenico Colombo, a middle-class wool weaver and cheese merchant. Growing up in Genoa—a Mediterranean maritime power—he was exposed to ships, maps, and sailors. Lacking formal education, he taught himself Latin, Spanish, and Portuguese to read cosmography books (including Marco Polo). By his twenties, he participated in dangerous trading voyages from Northern Europe to the West African coast.",
+                wuSub2: "Ideology and Worldview:",
+                wuDesc2: "Contrary to the myth of the 'man of science', Columbus operated under extreme apocalyptic-Christian ideology. He believed he was chosen by God (his name 'Christopher' means 'Christ-bearer') to bring Christianity to the ends of the earth. His true goal in reaching Asia was to find massive quantities of gold to fund a giant 'Crusade' to liberate Jerusalem from the Muslims, an act he believed would usher in the second coming of Christ.",
+                wuReasonsTitle: "Exact Strategic Reasons for the Westward Voyage:",
+                wuReason1Title: "Blockade of Eastern Trade Routes:",
+                wuReason1Desc: "The fall of Constantinople to the Ottoman Empire (1453) blocked the overland 'Silk Road' for Europeans. Spices and silk became unaffordably expensive due to Muslim taxation and the Venetian monopoly.",
+                wuReason2Title: "A Fatal Mathematical Error (Earth's Circumference):",
+                wuReason2Desc: "Everyone knew the Earth was round, but Columbus relied on faulty calculations (by Ptolemy and Pierre d'Ailly), arguing the Earth's circumference was much smaller than reality. He estimated Japan was only ~4,500 km from Spain. Had he known the true distance, no king would have funded such a suicide mission.",
+                wuReason3Title: "Geopolitical Competition with Portugal:",
+                wuReason3Desc: "The Portuguese had already begun dominating the eastern route around Africa to India. The Catholic Monarchs of Spain, Ferdinand and Isabella, having just finished conquering Granada (the Reconquista), were desperate to bypass the Portuguese and find an independent route to Asia.",
+
+                animalsTitle: "Animal Logistics: The Ecological Revolution",
+                animalsDesc: "No route caused such a dramatic shift in the animal kingdom as this voyage. European livestock completely altered the landscape and lifestyles in the Americas.",
+                horseSpecies: "The Andalusian Horse (Equus caballus):",
+                horseDesc: "Spanish warhorses brought on Columbus's second voyage (1493). The American continent had not seen horses since the end of the Ice Age. <strong class='text-white mt-2 block'>Historical and Strategic Importance:</strong> Initially, horses were a psychological weapon (natives thought rider and horse were a single monster). Later, when horses escaped into the wild (becoming Mustangs), they utterly transformed the lives of Great Plains Native Americans (like the Comanche and Sioux), who shifted from pedestrian gatherers to horse-mounted buffalo-hunting cultures. <strong class='text-white mt-2 block'>Origin:</strong> Europe (Iberian Peninsula).",
+                elephantSpecies: "Domestic Cattle and Pigs (Bos taurus & Sus domesticus):",
+                elephantDesc: "Cows and pigs were brought as 'walking pantries' on explorer ships. <strong class='text-white mt-2 block'>Historical Importance:</strong> The Americas had almost no domesticated animals (save for the Llama and Alpaca in the Andes). Pigs and cattle experienced a 'population explosion' on the grasslands of North and South America, where they had no natural predators. They became the primary protein source enabling the new colonies to thrive, but simultaneously trampled native agricultural fields. <strong class='text-white mt-2 block'>Origin:</strong> Europe and Asia.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "Trade, Strategy, and Geopolitics",
+                economyTitle: "Importance of Trade and Economy",
+                economyDesc: "The Atlantic trade birthed modern capitalism. The maize and potato crops from the Americas fed Europe and allowed an unprecedented demographic boom, preventing mass famines. Simultaneously, the gold and silver mined in the Americas flooded Europe's economy, causing the 'Price Revolution'.",
+                milStrategyTitle: "Strategic Importance - Global Naval Dominance",
+                milStrategyDesc: "This was the first trade route whose strategy was 100% maritime (no land borders). Ruling the ocean meant ruling the world. Spain built the 'Spanish treasure fleet'—a convoy system of heavy galleons that sailed once a year under tight military escort to protect silver and gold from English and French pirates. This gave birth to Mercantilism and modern naval warfare.",
+                goodsOriginTitle: "Origin of Commodities in the Trans-Atlantic Exchange",
+                chinaOrigin: "The New World (North and South America):",
+                chinaGoods: "<strong class='text-white'>Potatoes, Tomatoes, Maize, Cacao, and Tobacco:</strong> Foods that completely altered the global diet (Italian pizza without tomatoes, or Swiss chocolate without cacao, didn't exist). Conversely, the New World 'exported' Syphilis back to Europe.",
+                indiaOrigin: "The Old World (Europe and Asia):",
+                indiaGoods: "<strong class='text-white'>Wheat, Sugar, Coffee, Horses, and Diseases:</strong> Europe introduced sugarcane and coffee, which became the primary plantation crops in the Americas. Alongside these came the greatest blow: viruses (Smallpox, Measles) that wiped out approximately 90% of the Native American population, who possessed no immunological resistance.",
+                romeOrigin: "Africa (Development of the 'Triangular Trade'):",
+                romeGoods: "<strong class='text-white'>Human Beings (Slaves):</strong> The collapse of the native population in the Americas created a labor shortage for the sugar and tobacco plantations. This expanded the route into a 'Triangular Trade', where millions of Africans were kidnapped and forcibly transported to the Americas for hard labor.",
+
+                ideologyTitle: "Ideology and Spirit - World Discovery & Mercantilism",
+                ideologyDesc: "Opening the route caused an intellectual earthquake: Europe discovered that scripture and the Ancient Greeks didn't know everything (since they never mentioned a whole continent), accelerating the Scientific Revolution. Politically, the dominant ideology was 'Mercantilism' and colonialism—the belief that colonies exist solely to serve and enrich the European mother country, justifying resource exploitation and native subjugation.",
+                
+                techTitle: "Technological Achievements: Conquering the Open Ocean",
+                techDesc: "Crossing the open ocean without seeing land for months required new maritime technology:",
+                tech1: "Caravel & Carrack: Spanish and Portuguese ships (like the Niña, Pinta, and Santa María). They combined a square rig (for speed with the wind) and a lateen (triangular) sail (for maneuvering against the wind), with a deep, stable hull for high waves. <strong class='text-white'>Origin:</strong> Iberian Peninsula.",
+                tech2: "Celestial Navigation (Astrolabe & Quadrant): Instruments for measuring the angle of the North Star or the sun relative to the horizon, allowing navigators to calculate their latitude at sea. <strong class='text-white'>Origin:</strong> Arab/Hellenistic world (adapted for sea in Portugal).",
+                tech3: "Ocean Currents (Volta do Mar): Discovering the network of ocean currents and Trade Winds in the Atlantic, allowing ships to return to Europe in a rapid circular motion.",
+                techSummary: "These tools granted Europe absolute mastery of the seas for the next five centuries.",
+
+                declineTitle: "End of the Monopoly and Merger into Global Trade",
+                declineDesc: "The route <strong class='text-cyan-400'>never declined</strong>, but rather changed its character and became the engine of globalization. The exclusive Spanish and Portuguese monopoly over the exchange ended from the 17th century onwards, as England, France, and the Netherlands began establishing their own colonies in North America and the Caribbean. By the 19th century, with the end of the slave trade, the Industrial Revolution, and the advent of steamships, the route lost its ancient 'Age of Discovery' character, blending into the modern, free global trade system we know today.",
+
+                footer: "Research written and coded by Gemini & Ram © 2026"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'he' ? 'en' : 'he';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = content[currentLang].dir;
+            renderPage();
+        }
+
+        function renderPage() {
+            const t = content[currentLang];
+            const isEn = currentLang === 'en';
+            
+            const html = `
+                <!-- סרגל ניווט עליון -->
+                <nav class="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                        <a href="../index.html" class="flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors group">
+                            <svg class="w-5 h-5 transform ${isEn ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span class="font-bold tracking-wide text-sm sm:text-base">${t.navBack}</span>
+                        </a>
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleLanguage()" class="text-sm font-semibold text-gray-300 hover:text-white bg-gray-800/60 hover:bg-gray-700/60 px-3 py-1.5 rounded-lg border border-gray-700 transition-all">
+                                ${t.langBtn}
+                            </button>
+                            <div class="text-gray-400 font-semibold tracking-widest text-sm uppercase hidden sm:block">
+                                ${t.navTitle}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24 space-y-12">
+                    
+                    <header class="text-center space-y-6">
+                        <div class="inline-block p-6 rounded-full bg-gray-800 border-4 border-gray-700 shadow-2xl mb-4">
+                            <span class="text-7xl">🚢</span>
+                        </div>
+                        <h1 class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-500 to-blue-600 tracking-tight">
+                            ${t.heroTitle}
+                        </h1>
+                        <div class="flex flex-wrap justify-center gap-3 text-sm sm:text-base font-semibold">
+                            <span class="bg-cyan-900/40 text-cyan-300 px-4 py-1.5 rounded-full border border-cyan-800/50">${t.heroYears}</span>
+                            <span class="bg-blue-900/40 text-blue-300 px-4 py-1.5 rounded-full border border-blue-800/50">${t.heroLength}</span>
+                        </div>
+                        <p class="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mt-6">
+                            ${t.heroDesc}
+                        </p>
+                    </header>
+
+                    <div class="image-placeholder w-full h-64 sm:h-96 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-cyan-500 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p>${t.mapPlaceholder}</p>
+                            <p class="text-sm font-normal text-gray-500">${t.mapHint}</p>
+                        </div>
+                    </div>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-cyan-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">📖</span> ${t.etyTitle}
+                        </h2>
+                        <div class="space-y-6">
+                            <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 space-y-5 shadow-inner">
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-cyan-400 text-lg block mb-1">${t.etyAuthor}</strong>
+                                    <p class="text-gray-300 leading-relaxed">${t.etyAuthorDesc}</p>
+                                </div>
+                                <div class="border-b border-gray-700/60 pb-4">
+                                    <strong class="text-cyan-400 text-lg block mb-1">${t.etyYears}</strong>
+                                    <p class="text-gray-300 leading-relaxed font-semibold">${t.etyYearsDesc}</p>
+                                </div>
+                                <div class="pb-2">
+                                    <p class="text-gray-300 leading-relaxed">${t.etyContext}</p>
+                                </div>
+                                <div class="bg-gray-900/50 p-4 rounded-xl border border-gray-700/50 inline-block w-full text-center">
+                                    <strong class="text-cyan-400">${t.etyOriginal}</strong> <span class="text-xl font-bold text-white tracking-widest font-mono mx-2">Columbian Exchange</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-blue-400">
+                                    <h4 class="text-blue-300 font-bold text-lg mb-2">${t.etyPart1Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart1Desc}</p>
+                                </div>
+                                <div class="bg-gray-800/40 p-5 rounded-2xl border-t-2 border-t-cyan-400">
+                                    <h4 class="text-cyan-300 font-bold text-lg mb-2">${t.etyPart2Title}</h4>
+                                    <p class="text-gray-400 text-sm leading-relaxed">${t.etyPart2Desc}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-blue-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">⚓</span> ${t.bioTitle}
+                        </h2>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8">${t.bioIntro}</p>
+
+                        <div class="space-y-10">
+                            <div class="bg-gray-800/40 p-6 sm:p-8 rounded-2xl border border-gray-700/70 shadow-lg hover:border-cyan-500/50 transition-colors relative overflow-hidden">
+                                <div class="absolute top-0 ${isEn ? 'left-0' : 'right-0'} w-full h-1 bg-gradient-to-${isEn ? 'r' : 'l'} from-cyan-400 to-transparent"></div>
+                                <h3 class="text-3xl font-bold text-cyan-300 mb-2">${t.wuTitle}</h3>
+                                <p class="text-sm text-cyan-200 font-semibold mb-6 px-3 py-1 bg-cyan-900/30 inline-block rounded-md border border-cyan-800/50">${t.wuYears}</p>
+                                
+                                <div class="space-y-5 text-gray-300 leading-relaxed text-sm sm:text-base">
+                                    <div><strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub1}</strong><p>${t.wuDesc1}</p></div>
+                                    <div><strong class="text-white text-lg border-b border-gray-700 pb-1 mb-2 inline-block">${t.wuSub2}</strong><p>${t.wuDesc2}</p></div>
+                                    <div class="bg-gray-800/80 p-6 rounded-xl border border-gray-700 mt-6 shadow-inner">
+                                        <strong class="text-cyan-300 block mb-4 text-xl flex items-center gap-2"><span class="text-2xl">🎯</span> ${t.wuReasonsTitle}</strong>
+                                        <ul class="space-y-4 list-none">
+                                            <li class="flex gap-3"><span class="text-red-400 mt-1">🛑</span><div><strong class="text-white">${t.wuReason1Title}</strong> ${t.wuReason1Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-indigo-400 mt-1">📐</span><div><strong class="text-white">${t.wuReason2Title}</strong> ${t.wuReason2Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-emerald-400 mt-1">👑</span><div><strong class="text-white">${t.wuReason3Title}</strong> ${t.wuReason3Desc}</div></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-indigo-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🐎</span> ${t.animalsTitle}
+                        </h2>
+                        <p class="text-gray-300 text-lg leading-relaxed mb-8">${t.animalsDesc}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700">
+                                <h4 class="text-cyan-400 font-bold text-xl mb-4 flex items-center gap-2">🐎 ${t.horseSpecies}</h4>
+                                <p class="text-gray-300 text-sm sm:text-base leading-relaxed">${t.horseDesc}</p>
+                            </div>
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700">
+                                <h4 class="text-cyan-400 font-bold text-xl mb-4 flex items-center gap-2">🐂 ${t.elephantSpecies}</h4>
+                                <p class="text-gray-300 text-sm sm:text-base leading-relaxed">${t.elephantDesc}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="image-placeholder w-full h-48 sm:h-64 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-12 h-12 mx-auto text-cyan-400 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            <p>${t.caravanPlaceholder}</p>
+                        </div>
+                    </div>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-blue-600"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">⚖️</span> ${t.strategyTitle}
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-yellow-400 mb-3">${t.economyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.economyDesc}</p>
+                            </div>
+                            <div class="bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                                <h3 class="text-xl font-bold text-red-400 mb-3">${t.milStrategyTitle}</h3>
+                                <p class="text-gray-300 leading-relaxed text-sm sm:text-base">${t.milStrategyDesc}</p>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800/60 p-6 rounded-2xl border border-gray-700 mt-4">
+                            <h3 class="text-xl font-bold text-cyan-400 mb-4 border-b border-gray-700 pb-2">${t.goodsOriginTitle}</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🌽</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.chinaOrigin}</strong> ${t.chinaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🌾</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.indiaOrigin}</strong> ${t.indiaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">⛓️</span><p class="text-gray-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.romeOrigin}</strong> ${t.romeGoods}</p></li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-indigo-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">💡</span> ${t.ideologyTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.ideologyDesc}</p>
+                        </div>
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-cyan-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">⚙️</span> ${t.techTitle}</h3>
+                            <p class="text-gray-300 leading-relaxed">${t.techDesc}</p>
+                            <ul class="list-disc list-inside mt-4 text-gray-300 space-y-2 font-semibold">
+                                <li class="text-cyan-300">${t.tech1}</li>
+                                <li class="text-cyan-300">${t.tech2}</li>
+                                <li class="text-cyan-300">${t.tech3}</li>
+                            </ul>
+                            <p class="text-gray-400 text-sm mt-4">${t.techSummary}</p>
+                        </div>
+                    </section>
+                    
+                    <section class="glass-card p-8 rounded-3xl bg-blue-900/10 border-blue-900/30 text-center">
+                        <h3 class="text-2xl font-bold text-blue-400 mb-4">${t.declineTitle}</h3>
+                        <p class="text-gray-300 leading-relaxed max-w-3xl mx-auto">${t.declineDesc}</p>
+                    </section>
+                </main>
+
+                <footer class="mt-auto border-t border-gray-800 bg-gray-900/90 py-6 text-center z-10">
+                    <p class="text-gray-500 text-sm font-semibold tracking-wide">${t.footer}</p>
+                </footer>
+            `;
+            
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        window.onload = renderPage;
+    </script>
+</body>
+</html>
+
