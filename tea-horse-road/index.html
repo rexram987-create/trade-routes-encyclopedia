@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דרך התה והסוסים - מחקר היסטורי מקיף</title>
+    <!-- שילוב Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* הגדרות גופנים לקריאה מחקרית נוחה על מסכי Samsung S25 Ultra */
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Frank+Ruhl+Libre:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* עיצוב Glassmorphism לפרימיום Dark Mode */
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* עיצוב לתמונות עתידיות (Placeholders) */
+        .image-placeholder {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(31, 41, 55, 0.8),
+                rgba(31, 41, 55, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 20px
+            );
+            border: 2px dashed rgba(22, 163, 74, 0.5); /* צבע ירוק-תה */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .image-placeholder:hover {
+            border-color: rgba(22, 163, 74, 1);
+            color: #E5E7EB;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen selection:bg-green-500 selection:text-white flex flex-col">
+
+    <!-- קונטיינר ראשי אליו יוזרק התוכן הדינמי -->
+    <div id="app-container" class="flex-grow w-full"></div>
+
+    <script>
+        let currentLang = 'he';
+
+        // מסד הנתונים הדו-לשוני המלא
+        const content = {
+            he: {
+                dir: "rtl",
+                navBack: "חזור לאנציקלופדיה",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "English",
+                heroTitle: "דרך התה והסוסים",
+                heroYears: "שנות פעילות מרכזיות: המאה ה-6 לספירה – אמצע המאה ה-20",
+                heroLength: "אורך משוער: כ-4,000 קילומטרים (מסצ'ואן לטיבט והודו)",
+                heroDesc: "רשת סחר החליפין הגבוהה והמסוכנת ביותר בעולם העתיק. הנתיב טיפס אל 'גג העולם' שבהרי ההימלאיה, וקישר בין האימפריה הסינית לממלכת טיבט בברית של הישרדות כלכלית וצבאית.",
+                mapPlaceholder: "",
+                mapHint: "הכנס כאן את קובץ המפה (למשל: tea-horse-road-map.jpg)",
+                
+                etyTitle: "ניתוח אטימולוגי מלא",
+                etyAuthor: "החוקר והאנתרופולוג המודרני:",
+                etyAuthorDesc: "אף שהנתיב פעל מאות שנים, המונח האקדמי המודרני נטבע בשנת 1990 על ידי האנתרופולוג הסיני <strong>פרופ' מו ג'יהונג (Mu Jihong)</strong> יחד עם צוות חוקרים מאוניברסיטת יונאן.",
+                etyYears: "שנות חייו של ההיסטוריון (מו ג'יהונג):",
+                etyYearsDesc: "1952 – היום.",
+                etyContext: "<strong class='text-green-400'>ארץ מוצא ומקום לידה:</strong> קונמינג, יונאן, סין. מו ג'יהונג שחזר רגלית את הנתיבים העתיקים בג'ונגלים של יונאן ובהרי סצ'ואן כדי להוכיח שהרשת הזו הייתה משמעותית למזרח אסיה לא פחות מדרך המשי הצפונית.",
+                etyOriginal: "מונח המקור (במנדרינית):",
+                etyPart1Title: "חלק א' – Chama (茶马 - צָ'ה-מָא)",
+                etyPart1Desc: "הלחם של שתי מילים: 'Cha' (תה) ו-'Ma' (סוס). השם מזקק את המהות הטהורה של הנתיב: סחר חליפין (ברטר) אסטרטגי של שני מוצרים בלבד. הטיבטים היו זקוקים נואשות לתה, והסינים היו זקוקים נואשות לסוסים.",
+                etyPart2Title: "חלק ב' – Dao (道 - דָאוֹ)",
+                etyPart2Desc: "מילה שמשמעותה 'דרך' או 'נתיב', אך בפילוסופיה האסייתית היא מקבלת גם משמעות של חיבור רוחני (כמו בדאואיזם), ואכן הדרך שימשה להעברת רעיונות בודהיסטיים בין סין לטיבט.",
+
+                bioTitle: "מייסדי הנתיב והרקע ההיסטורי",
+                bioIntro: "הנתיב לא נולד מתוך רצון פשוט להתעשר, אלא מתוך נישואים פוליטיים וצורך קיומי שהפגיש שתי מעצמות שונות לחלוטין באופיין.",
+                
+                wuTitle: "סונגטסן גמפו והנסיכה וונצ'נג (Songtsen Gampo & Princess Wencheng)",
+                wuYears: "שנות חיים סונגטסן: סביב 605 – 650 לספירה | המאה ה-7",
+                wuSub1: "ילדות, שורשים וחיבור פוליטי:",
+                wuDesc1: "סונגטסן גמפו היה המלך ה-33 של שושלת יארלונג, אך נחשב למייסד האמיתי של האימפריה הטיבטית. הוא איחד את שבטי הרמה ההררית לכוח צבאי אדיר שאילץ את אימפריית טאנג הסינית להתייחס אליו ברצינות. כדי לפייס אותו, הקיסר הסיני טאיזונג חיתן אותו בשנת 641 לספירה עם אחייניתו, הנסיכה וונצ'נג. הנסיכה הצעירה יצאה למסע מפרך מבירת סין (צ'אנג-אן) אל להסה (טיבט). נדוניתה לא כללה רק זהב, אלא את 'סודות הציוויליזציה': כתבי קודש בודהיסטיים, טכנולוגיות חקלאות, והחשוב מכל – את מסורת שתיית התה.",
+                wuSub2: "אידאולוגיה ותפיסת עולם:",
+                wuDesc2: "האידאולוגיה של סונגטסן הייתה למזג את הכוח הצבאי הטיבטי הנוקשה עם ה'כוח הרך' והתרבות המתקדמת של סין והודו. הוא אימץ את הבודהיזם כדת מדינה. במקביל, האידאולוגיה הכלכלית הסינית ראתה במסחר כלי שלטוני: באמצעות הפיכת טיבט לתלויה לחלוטין בתה הסיני, קיוותה אימפריית טאנג (ומאוחר יותר שושלות סונג ומינג) לרסן את הלוחמנות הטיבטית ללא שפיכות דמים.",
+                wuReasonsTitle: "הסיבות המדויקות והאסטרטגיות לסחר החליפין (ברטר):",
+                wuReason1Title: "הצורך הצבאי הסיני בסוסים (Warhorses):",
+                wuReason1Desc: "שושלות סין היו תחת איום מתמיד מצד נוודי הצפון (המונגולים והטטרים). לסינים לא היו שטחי מרעה טובים לגידול סוסי מלחמה, והסוסים הטיבטים ההרריים נודעו בסיבולת העצומה שלהם. סין הייתה מוכנה לשלם מחיר פנומנלי של 60 ק\"ג תה תמורת סוס מלחמה טיבטי בודד.",
+                wuReason2Title: "הצורך התזונתי הטיבטי בתה (Vitamins):",
+                wuReason2Desc: "אקלים הרמה הטיבטית לא אפשר גידול ירקות, והתזונה המקומית התבססה כמעט כולה על בשר חיות, חלב וחמאת יאק. הטיבטים גילו שהתה הסיני (שאותו רקחו יחד עם חמאת יאק ומלח ל'תה חמאה' עשיר) מסייע בעיכול השומנים ומספק את הוויטמינים החיוניים (ויטמין C) שהיו חסרים להם כדי לשרוד בקור הקיצוני.",
+                wuReason3Title: "יצירת קשר מדיני מחייב (Diplomacy by Trade):",
+                wuReason3Desc: "סחר זה לא נוהל על ידי שוק חופשי בלבד, אלא דרך מוסד ממשלתי סיני מיוחד שנקרא 'סוכנות התה והסוסים' (Chama Si), שקבעה מכסות, פיקחה על האיכות, והבטיחה שהתלות ההדדית תמנע פריצת מלחמות טריטוריאליות בין סין לטיבט.",
+
+                animalsTitle: "לוגיסטיקה של בעלי חיים: מסע בקצה גבול היכולת",
+                animalsDesc: "טיפוס מגובה פני הים לגבהים של מעל 4,000 מטרים הצריך הסתמכות על בעלי חיים ייחודיים לאנדמיים, ועל כוח סבל אנושי בלתי נתפס.",
+                horseSpecies: "היאק הטיבטי (Tibetan Yak / Bos grunniens):",
+                horseDesc: "בהמת המשא הייחודית של הרמה הטיבטית. גדולה, צמרירית, ובעלת יכולת לשרוד בטמפרטורות של מינוס 40 מעלות. <strong class='text-white mt-2 block'>חשיבות אסטרטגית:</strong> בעוד שהסינים השתמשו בסבלים אנושיים בחלק הנמוך של הנתיב, ברגע שהגיעו לרמה הטיבטית, סחורות התה הועמסו על שיירות של יאקים. היאק מתאפיין בריאות ענקיות ובלב מוגדל שמאפשרים לו לתפקד באוויר הדליל, במקומות שבהם סוסים רגילים מתמוטטים. בנוסף, חמאת היאק שימשה מרכיב מרכזי בהכנת משקה התה הטיבטי המסורתי. <strong class='text-white mt-2 block'>ארץ מוצא:</strong> טיבט והרי ההימלאיה.",
+                elephantSpecies: "סבל התה האנושי (Tea Porters / Beifu):",
+                elephantDesc: "אף שלא מדובר בבעל חיים, מערכת זו נשענה על עבודת כפיים ברוטלית של סבלים (גברים, נשים ולעיתים ילדים) ממחוזות סצ'ואן ויונאן. <strong class='text-white mt-2 block'>חשיבות היסטורית:</strong> בגלל תוואי השטח הבוצי והתלול שלא אפשר שימוש בעגלות או בבהמות משא מן הצד הסיני, סבלים אנושיים נשאו את לבני התה על גבם באמצעות מסגרת עץ. משקל המשא היה בין 70 ל-90 קילוגרמים (פעמים רבות יותר ממשקל גופם של הסבלים עצמם). המסע הרגלי ארך מעל ל-20 יום בתנאים אכזריים, והסבלים השתמשו במקל הליכה מברזל ששימש אותם כדי להישען על המשא בעמידה להפסקות מנוחה מבלי להורידו. <strong class='text-white mt-2 block'>ארץ מוצא:</strong> סצ'ואן ויונאן, סין.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "מסחר, אסטרטגיה וגיאופוליטיקה",
+                economyTitle: "חשיבות המסחר והכלכלה",
+                economyDesc: "כלכלת דרום-מערב סין הושתתה במשך מאות שנים על הנתיב הזה. העיר פו'אר (Pu'er) ביונאן הפכה למרכז ייצור תה עולמי, וסוחרים התעשרו מהתיווך. הסחר לא פסק בסוסים; הוא הניע רשת של תבלינים שזרמו מהודו, ומלח מציל חיים שנכרה באגמים טיבטיים יבשים.",
+                milStrategyTitle: "חשיבות אסטרטגית וצבאית",
+                milStrategyDesc: "דרך התה והסוסים הייתה העורק שחימש את צבאות סין. בתקופת שושלת סונג (960–1279), כשהמונגולים חסמו את דרך המשי הצפונית, דרך התה והסוסים הפכה לנתיב ההישרדות היחיד של סין לקניית סוסי קרב, עם היקף סחר שהגיע לשיא של כ-20,000 סוסי מלחמה טיבטיים בשנה תמורת כ-30 מיליון ק\"ג של תה.",
+                goodsOriginTitle: "ארץ המוצא של הסחורות והתוצרת",
+                chinaOrigin: "מחוזות יונאן וסצ'ואן (דרום-מערב סין):",
+                chinaGoods: "<strong class='text-white'>תה מותסס (Pu'er Tea), משי ומלח:</strong> התה עבר תהליך של התססה מיוחדת כדי למנוע את ריקבונו במסע הארוך. הוא נדחס ללבנים מוצקות שהיו קלות לשינוע, ולמעשה שימשו כמטבע חלופי בסחר באזור. בנוסף, נשלחו בדים ואומנות סינית.",
+                indiaOrigin: "ממלכת טיבט (הימלאיה):",
+                indiaGoods: "<strong class='text-white'>סוסי קרב טיבטיים (Tibetan Pony), מושק, וצמחי מרפא:</strong> הסוס הטיבטי אמנם לא היה גדול כמו הסוס הפרסי, אך סיבולתו למסעות הרריים ארוכים באוויר דליל הייתה חסרת תקדים. בנוסף, הטיבטים ייצאו מושק נדיר (בושם טבעי מבלוטות אייל המושק), ופרוות קפואות.",
+                romeOrigin: "הודו ונפאל (בהמשך הנתיב):",
+                romeGoods: "<strong class='text-white'>אבני חן, עץ סנדלווד (Sandalwood) ורעיונות:</strong> הנתיב המשיך מלהסה (בירת טיבט) דרומה אל תוך הודו, משם הגיעו קטורות פולחן עשירות וכתבי קודש בודהיסטיים בסנסקריט שהשפיעו עמוקות על טיבט וסין.",
+
+                ideologyTitle: "אידאולוגיה וטכנולוגיה",
+                ideologyDesc: "מעבר לברטר של סוסים ותה, הנתיב העביר מערכת אמונות שלמה. הבודהיזם ההודי טיפס דרך הרי ההימלאיה אל טיבט ומשם לדרום סין. תחנות המעבר שימשו את עולי הרגל שעשו את דרכם ללהסה. הדרך יצרה כור היתוך תרבותי-דתי שקשר את גורלן של שלוש תרבויות ענק (הודית, טיבטית וסינית) ברשת של כבוד ותלות הדדית.",
+                
+                techTitle: "הישגים טכנולוגיים ותשתיות הנדסיות",
+                techDesc: "ההתגברות על תוואי השטח האכזרי ביותר בכדור הארץ דרשה פתרונות חדשניים:",
+                tech1: "התססת תה ודחיסה ללבנים: כדי שהתה לא ירקיב במסע של חודשים בתנאי לחות וקור, פיתחו החקלאים ביונאן את טכניקת ייצור תה ה'פואר' – התססה חיידקית מבוקרת (כמו יין) ודחיסתו ללבנים קשות כאבן שניתן לערום על מסגרות עץ.",
+                tech2: "גשרי שרשראות ברזל (Iron Chain Bridges): כדי לחצות נהרות אדירים כגון נהר המקונג ונהר הסאלווין שזרמו בתחתית קניונים עמוקים, מהנדסים סינים וטיבטים בנו גשרי תלייה עצומים העשויים מחוליות ברזל מסיביות שעליהן הונחו לוחות עץ (למשל, גשר לודינג המפורסם).",
+                tech3: "אומגות חבלים (Zip-lines / Sliders): באזורים שבהם הנהר היה גועש מדי לבניית גשר עץ, נמתחו חבלי במבוק מעל לתהום, והסוחרים והסחורות גלשו מצד אחד לשני בתוך סלים או באמצעות רתמות עור מעל המים הרועשים.",
+                techSummary: "תשתיות אלו מדגימות כיצד מסחר שרד היכן שכוחות צבא לא יכלו לעבור.",
+
+                declineTitle: "הדעיכה וההיסטוריה המודרנית",
+                declineDesc: "דרך התה והסוסים היא מהנתיבים ההיסטוריים ששרדו הכי הרבה זמן – היא המשיכה לפעול בצורתה הקדומה (באמצעות סבלים ויאקים) עד <strong class='text-green-400'>אמצע המאה ה-20</strong>! במלחמת העולם השנייה, כשהיפנים חסמו את נמלי סין, הנתיב ההררי הזה שימש כעורק חיים להכנסת אספקה מהודו לסין. אולם, הדעיכה הסופית והמוחלטת התרחשה בשנות ה-50 של המאה ה-20: עם הקמת הרפובליקה העממית של סין, הצבא הסיני סלל כבישים מודרניים מאספלט (כמו כביש סצ'ואן-טיבט), שייתר את המסעות הרגליים המסוכנים. בנוסף, ההשתלטות הסינית על טיבט שינתה לחלוטין את יחסי הכוחות, והמסחר המסורתי גווע אל תוך ההיסטוריה.",
+
+                footer: "המחקר נכתב וקודד על ידי ג'מיני ורם © 2026"
+            },
+            en: {
+                dir: "ltr",
+                navBack: "Back to Encyclopedia",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "עברית",
+                heroTitle: "The Tea Horse Road",
+                heroYears: "Peak Active Years: 6th Century CE – Mid 20th Century",
+                heroLength: "Estimated Length: ~4,000 Kilometers (Sichuan to Tibet and India)",
+                heroDesc: "The highest and most dangerous barter network in the ancient world. The route climbed to the 'Roof of the World' in the Himalayas, bridging the Chinese Empire and the Tibetan Kingdom in a pact of economic and military survival.",
+                mapPlaceholder: "",
+                mapHint: "Insert your map file here (e.g., tea-horse-road-map.jpg)",
+                
+                etyTitle: "Complete Etymological Analysis",
+                etyAuthor: "Modern Anthropologist & Researcher:",
+                etyAuthorDesc: "Though the route operated for centuries, the modern academic term was coined in 1990 by Chinese anthropologist <strong>Prof. Mu Jihong</strong> along with a research team from Yunnan University.",
+                etyYears: "Historian's Lifespan (Mu Jihong):",
+                etyYearsDesc: "1952 – Present.",
+                etyContext: "<strong class='text-green-400'>Country of Origin & Birthplace:</strong> Kunming, Yunnan, China. Mu Jihong physically retraced the ancient trails through the jungles of Yunnan and the mountains of Sichuan to prove this network was as significant to East Asia as the northern Silk Road.",
+                etyOriginal: "Original Term (in Mandarin):",
+                etyPart1Title: "Part A – Chama (茶马)",
+                etyPart1Desc: "A portmanteau of two words: 'Cha' (Tea) and 'Ma' (Horse). The name distills the pure essence of the route: a strategic barter of exactly two commodities. The Tibetans desperately needed tea, and the Chinese desperately needed horses.",
+                etyPart2Title: "Part B – Dao (道)",
+                etyPart2Desc: "A word meaning 'road' or 'path', but in Asian philosophy, it also carries the meaning of a spiritual connection (as in Daoism), and indeed the road served to transmit Buddhist ideas between China and Tibet.",
+
+                bioTitle: "Founders and Historical Background",
+                bioIntro: "The route was not born of a simple desire for wealth, but out of political marriages and an existential need that brought together two vastly different powers.",
+                
+                wuTitle: "Songtsen Gampo & Princess Wencheng",
+                wuYears: "Lifespan (Songtsen): c. 605 – 650 CE | 7th Century",
+                wuSub1: "Childhood, Roots, and Political Union:",
+                wuDesc1: "Songtsen Gampo was the 33rd king of the Yarlung Dynasty, but is considered the true founder of the Tibetan Empire. He united the highland tribes into a formidable military force that compelled the Tang Dynasty to take him seriously. To appease him, the Chinese Emperor Taizong married him to his niece, Princess Wencheng, in 641 CE. The young princess embarked on an arduous journey from the Chinese capital (Chang'an) to Lhasa (Tibet). Her dowry included not only gold but 'secrets of civilization': Buddhist scriptures, agricultural technologies, and most importantly—the tradition of tea drinking.",
+                wuSub2: "Ideology and Worldview:",
+                wuDesc2: "Songtsen's ideology was to merge the harsh Tibetan military power with the 'soft power' and advanced culture of China and India. He adopted Buddhism as the state religion. Conversely, Chinese economic ideology viewed trade as a tool of governance: by making Tibet utterly dependent on Chinese tea, the Tang (and later Song and Ming) empires hoped to restrain Tibetan militarism without shedding blood.",
+                wuReasonsTitle: "Exact Strategic Reasons for the Barter Trade:",
+                wuReason1Title: "The Chinese Military Need for Warhorses:",
+                wuReason1Desc: "Chinese dynasties were under constant threat from northern nomads (Mongols and Tatars). The Chinese lacked good pastures for breeding warhorses, whereas the mountainous Tibetan horses were renowned for their immense stamina. China was willing to pay the phenomenal price of 60 kg of tea for a single Tibetan warhorse.",
+                wuReason2Title: "The Tibetan Nutritional Need for Tea (Vitamins):",
+                wuReason2Desc: "The climate of the Tibetan Plateau did not allow for vegetable cultivation, and the local diet relied almost entirely on meat, milk, and yak butter. The Tibetans discovered that Chinese tea (which they churned with yak butter and salt into rich 'butter tea') aided in digesting fats and provided essential vitamins (Vitamin C) necessary to survive the extreme cold.",
+                wuReason3Title: "Creating a Binding Political Tie (Diplomacy by Trade):",
+                wuReason3Desc: "This trade was not managed solely by a free market, but through a special Chinese government institution called the 'Tea and Horse Agency' (Chama Si), which set quotas, monitored quality, and ensured that this mutual dependence prevented the outbreak of territorial wars between China and Tibet.",
+
+                animalsTitle: "Animal Logistics: A Journey at the Edge of Endurance",
+                animalsDesc: "Climbing from sea level to altitudes over 4,000 meters required reliance on unique endemic animals and incomprehensible human stamina.",
+                horseSpecies: "The Tibetan Yak (Bos grunniens):",
+                horseDesc: "The unique beast of burden of the Tibetan Plateau. Large, woolly, and capable of surviving temperatures of minus 40 degrees. <strong class='text-white mt-2 block'>Strategic Importance:</strong> While the Chinese used human porters on the lower segments of the route, once they reached the Tibetan plateau, the tea goods were loaded onto yak caravans. The yak features enormous lungs and an enlarged heart that allow it to function in thin air, where regular horses would collapse. Furthermore, yak butter was a central ingredient in preparing the traditional Tibetan tea beverage. <strong class='text-white mt-2 block'>Origin:</strong> Tibet and the Himalayas.",
+                elephantSpecies: "Human Tea Porters (Beifu):",
+                elephantDesc: "Although not an animal, this system relied on the brutal manual labor of porters (men, women, and sometimes children) from Sichuan and Yunnan provinces. <strong class='text-white mt-2 block'>Historical Importance:</strong> Because the muddy and steep terrain on the Chinese side precluded the use of carts or pack animals, human porters carried the tea bricks on their backs using a wooden frame. The load weighed between 70 to 90 kilograms (often more than the porters' own body weight). The journey on foot took over 20 days in cruel conditions. The porters used a specialized iron-tipped walking stick to prop up their load while standing to rest, without having to lower it to the ground. <strong class='text-white mt-2 block'>Origin:</strong> Sichuan and Yunnan, China.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "Trade, Strategy, and Geopolitics",
+                economyTitle: "Importance of Trade and Economy",
+                economyDesc: "The economy of Southwest China was built upon this route for centuries. The city of Pu'er in Yunnan became a global tea production hub, and middlemen grew exceedingly wealthy. Trade didn't stop at horses; it fueled a network of spices flowing from India and life-saving salt mined from dry Tibetan lakes.",
+                milStrategyTitle: "Strategic and Military Importance",
+                milStrategyDesc: "The Tea Horse Road was the artery that armed China's armies. During the Song Dynasty (960–1279), when the Mongols blocked the northern Silk Road, the Tea Horse Road became China's sole survival route for purchasing warhorses, with trade volume peaking at about 20,000 Tibetan warhorses per year in exchange for approximately 30 million kg of tea.",
+                goodsOriginTitle: "Origin of Key Commodities",
+                chinaOrigin: "Yunnan and Sichuan Provinces (Southwest China):",
+                chinaGoods: "<strong class='text-white'>Fermented Tea (Pu'er Tea), Silk, and Salt:</strong> The tea underwent a special fermentation process to prevent rotting during the months-long journey. It was compressed into solid bricks that were easy to transport and effectively served as an alternative currency in regional trade. Additionally, silk fabrics and Chinese art were exported.",
+                indiaOrigin: "The Kingdom of Tibet (Himalayas):",
+                indiaGoods: "<strong class='text-white'>Tibetan Warhorses (Tibetan Pony), Musk, and Medicinal Herbs:</strong> The Tibetan horse, though not as large as the Persian horse, had unparalleled stamina for long mountainous journeys in thin air. Tibet also exported rare musk (natural perfume from the glands of the musk deer) and frozen furs.",
+                romeOrigin: "India and Nepal (Further down the route):",
+                romeGoods: "<strong class='text-white'>Gemstones, Sandalwood, and Ideas:</strong> The route continued from Lhasa (capital of Tibet) southward into India, bringing rich ritual incense and Buddhist scriptures in Sanskrit that deeply influenced Tibet and China.",
+
+                ideologyTitle: "Ideology and Technology",
+                ideologyDesc: "Beyond the barter of horses and tea, the route transmitted an entire belief system. Indian Buddhism climbed through the Himalayas into Tibet and from there into Southern China. The waystations served pilgrims making their way to Lhasa. The road created a cultural-religious melting pot that bound the fates of three massive cultures (Indian, Tibetan, and Chinese) in a web of respect and mutual dependence.",
+                
+                techTitle: "Technological Achievements and Engineering Infrastructure",
+                techDesc: "Overcoming the most brutal terrain on Earth required innovative solutions:",
+                tech1: "Tea Fermentation and Brick Compression: To prevent tea from rotting during months of travel in humid and freezing conditions, Yunnan farmers developed the 'Pu'er' tea production technique—controlled microbial fermentation (like wine) and compressing it into rock-hard bricks that could be stacked on wooden frames.",
+                tech2: "Iron Chain Bridges: To cross mighty rivers like the Mekong and Salween flowing at the bottom of deep gorges, Chinese and Tibetan engineers built massive suspension bridges made of heavy iron chains with wooden planks laid over them (e.g., the famous Luding Bridge).",
+                tech3: "Zip-lines / Sliders: In areas where the river was too turbulent to build a wooden bridge, bamboo ropes were stretched across the abyss, and merchants and goods slid from one side to the other in baskets or via leather harnesses over the roaring water.",
+                techSummary: "These infrastructures demonstrate how trade survived where military forces could not cross.",
+
+                declineTitle: "Decline and Modern History",
+                declineDesc: "The Tea Horse Road is one of the longest-surviving historical routes—it continued to operate in its ancient form (via porters and yaks) until the <strong class='text-green-400'>mid-20th century</strong>! During World War II, when the Japanese blockaded China's ports, this mountainous route served as a lifeline for bringing supplies from India into China. However, the final and absolute decline occurred in the 1950s: with the establishment of the People's Republic of China, the Chinese army paved modern asphalt highways (like the Sichuan-Tibet Highway), rendering the dangerous foot journeys obsolete. Furthermore, the Chinese takeover of Tibet completely altered the power dynamics, and the traditional trade faded into history.",
+
+                footer: "Research written and coded by Gemini & Ram © 2026"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'he' ? 'en' : 'he';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = content[currentLang].dir;
+            renderPage();
+        }
+
+        function renderPage() {
+            const t = content[currentLang];
+            const isEn = currentLang === 'en';
+            
+            const html = `
+                <!-- סרגל ניווט עליון -->
+                <nav class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                        <a href="../index.html" class="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors group">
+                            <svg class="w-5 h-5 transform ${isEn ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span class="font-bold tracking-wide text-sm sm:text-base">${t.navBack}</span>
+                        </a>
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleLanguage()" class="text-sm font-semibold text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-700/60 px-3 py-1.5 rounded-lg border border-slate-700 transition-all">
+                                ${t.langBtn}
+                            </button>
+                            <div class="text-slate-400 font-semibold tracking-widest text-sm uppercase hidden sm:block">
+                                ${t.navTitle}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24 space-y-12">
+                    
+                    <header class="text-center space-y-6">
+                        <div class="inline-block p-6 rounded-full bg-slate-800 border-4 border-slate-700 shadow-2xl mb-4">
+                            <span class="text-7xl">🍵</span>
+                        </div>
+                        <h1 class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-emerald-500 to-teal-600 tracking-tight">
+                            ${t.heroTitle}
+                        </h1>
+                        <div class="flex flex-wrap justify-center gap-3 text-sm sm:text-base font-semibold">
+                            <span class="bg-green-900/40 text-green-300 px-4 py-1.5 rounded-full border border-green-800/50">${t.heroYears}</span>
+                            <span class="bg-teal-900/40 text-teal-300 px-4 py-1.5 rounded-full border border-teal-800/50">${t.heroLength}</span>
+                        </div>
+                        <p class="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed mt-6">
+                            ${t.heroDesc}
+                        </p>
+                    </header>
+
+                    <div class="image-placeholder w-full h-64 sm:h-96 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-green-500 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p>${t.mapPlaceholder}</p>
+                            <p class="text-sm font-normal text-slate-500">${t.mapHint}</p>
+                        </div>
+                    </div>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-green-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">📖</span> ${t.etyTitle}
+                        </h2>
+                        <div class="space-y-6">
+                            <div class="bg-slate-800/60 p-6 rounded-2xl border border-slate-700 space-y-5 shadow-inner">
+                                <div class="border-b border-slate-700/60 pb-4">
+                                    <strong class="text-green-400 text-lg block mb-1">${t.etyAuthor}</strong>
+                                    <p class="text-slate-300 leading-relaxed">${t.etyAuthorDesc}</p>
+                                </div>
+                                <div class="border-b border-slate-700/60 pb-4">
+                                    <strong class="text-green-400 text-lg block mb-1">${t.etyYears}</strong>
+                                    <p class="text-slate-300 leading-relaxed font-semibold">${t.etyYearsDesc}</p>
+                                </div>
+                                <div class="pb-2">
+                                    <p class="text-slate-300 leading-relaxed">${t.etyContext}</p>
+                                </div>
+                                <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 inline-block w-full text-center">
+                                    <strong class="text-green-400">${t.etyOriginal}</strong> <span class="text-xl font-bold text-white tracking-widest font-mono mx-2">Chama Dao (茶马道)</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-slate-800/40 p-5 rounded-2xl border-t-2 border-t-green-400">
+                                    <h4 class="text-green-300 font-bold text-lg mb-2">${t.etyPart1Title}</h4>
+                                    <p class="text-slate-400 text-sm leading-relaxed">${t.etyPart1Desc}</p>
+                                </div>
+                                <div class="bg-slate-800/40 p-5 rounded-2xl border-t-2 border-t-teal-400">
+                                    <h4 class="text-teal-300 font-bold text-lg mb-2">${t.etyPart2Title}</h4>
+                                    <p class="text-slate-400 text-sm leading-relaxed">${t.etyPart2Desc}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-teal-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🏔️</span> ${t.bioTitle}
+                        </h2>
+                        <p class="text-slate-300 text-lg leading-relaxed mb-8">${t.bioIntro}</p>
+
+                        <div class="space-y-10">
+                            <div class="bg-slate-800/40 p-6 sm:p-8 rounded-2xl border border-slate-700/70 shadow-lg hover:border-green-500/50 transition-colors relative overflow-hidden">
+                                <div class="absolute top-0 ${isEn ? 'left-0' : 'right-0'} w-full h-1 bg-gradient-to-${isEn ? 'r' : 'l'} from-green-400 to-transparent"></div>
+                                <h3 class="text-3xl font-bold text-green-300 mb-2">${t.wuTitle}</h3>
+                                <p class="text-sm text-green-200 font-semibold mb-6 px-3 py-1 bg-green-900/30 inline-block rounded-md border border-green-800/50">${t.wuYears}</p>
+                                
+                                <div class="space-y-5 text-slate-300 leading-relaxed text-sm sm:text-base">
+                                    <div><strong class="text-white text-lg border-b border-slate-700 pb-1 mb-2 inline-block">${t.wuSub1}</strong><p>${t.wuDesc1}</p></div>
+                                    <div><strong class="text-white text-lg border-b border-slate-700 pb-1 mb-2 inline-block">${t.wuSub2}</strong><p>${t.wuDesc2}</p></div>
+                                    <div class="bg-slate-800/80 p-6 rounded-xl border border-slate-700 mt-6 shadow-inner">
+                                        <strong class="text-green-300 block mb-4 text-xl flex items-center gap-2"><span class="text-2xl">🎯</span> ${t.wuReasonsTitle}</strong>
+                                        <ul class="space-y-4 list-none">
+                                            <li class="flex gap-3"><span class="text-red-400 mt-1">⚔️</span><div><strong class="text-white">${t.wuReason1Title}</strong> ${t.wuReason1Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-yellow-400 mt-1">🍵</span><div><strong class="text-white">${t.wuReason2Title}</strong> ${t.wuReason2Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-blue-400 mt-1">🤝</span><div><strong class="text-white">${t.wuReason3Title}</strong> ${t.wuReason3Desc}</div></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-green-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🦬</span> ${t.animalsTitle}
+                        </h2>
+                        <p class="text-slate-300 text-lg leading-relaxed mb-8">${t.animalsDesc}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700">
+                                <h4 class="text-green-400 font-bold text-xl mb-4 flex items-center gap-2">🦬 ${t.horseSpecies}</h4>
+                                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">${t.horseDesc}</p>
+                            </div>
+                            <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700">
+                                <h4 class="text-green-400 font-bold text-xl mb-4 flex items-center gap-2">🧗‍♂️ ${t.elephantSpecies}</h4>
+                                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">${t.elephantDesc}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="image-placeholder w-full h-48 sm:h-64 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-12 h-12 mx-auto text-green-400 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            <p>${t.caravanPlaceholder}</p>
+                        </div>
+                    </div>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-teal-600"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">⚖️</span> ${t.strategyTitle}
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50">
+                                <h3 class="text-xl font-bold text-yellow-400 mb-3">${t.economyTitle}</h3>
+                                <p class="text-slate-300 leading-relaxed text-sm sm:text-base">${t.economyDesc}</p>
+                            </div>
+                            <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50">
+                                <h3 class="text-xl font-bold text-red-400 mb-3">${t.milStrategyTitle}</h3>
+                                <p class="text-slate-300 leading-relaxed text-sm sm:text-base">${t.milStrategyDesc}</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800/60 p-6 rounded-2xl border border-slate-700 mt-4">
+                            <h3 class="text-xl font-bold text-green-400 mb-4 border-b border-slate-700 pb-2">${t.goodsOriginTitle}</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🇨🇳</span><p class="text-slate-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.chinaOrigin}</strong> ${t.chinaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🏔️</span><p class="text-slate-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.indiaOrigin}</strong> ${t.indiaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🇮🇳</span><p class="text-slate-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.romeOrigin}</strong> ${t.romeGoods}</p></li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-emerald-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">💡</span> ${t.ideologyTitle}</h3>
+                            <p class="text-slate-300 leading-relaxed">${t.ideologyDesc}</p>
+                        </div>
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-green-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">⚙️</span> ${t.techTitle}</h3>
+                            <p class="text-slate-300 leading-relaxed">${t.techDesc}</p>
+                            <ul class="list-disc list-inside mt-4 text-slate-300 space-y-2 font-semibold">
+                                <li class="text-green-300">${t.tech1}</li>
+                                <li class="text-green-300">${t.tech2}</li>
+                                <li class="text-green-300">${t.tech3}</li>
+                            </ul>
+                            <p class="text-slate-400 text-sm mt-4">${t.techSummary}</p>
+                        </div>
+                    </section>
+                    
+                    <section class="glass-card p-8 rounded-3xl bg-red-900/10 border-red-900/30 text-center">
+                        <h3 class="text-2xl font-bold text-red-400 mb-4">${t.declineTitle}</h3>
+                        <p class="text-slate-300 leading-relaxed max-w-3xl mx-auto">${t.declineDesc}</p>
+                    </section>
+                </main>
+
+                <footer class="mt-auto border-t border-slate-800 bg-slate-900/90 py-6 text-center z-10">
+                    <p class="text-slate-500 text-sm font-semibold tracking-wide">${t.footer}</p>
+                </footer>
+            `;
+            
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        window.onload = renderPage;
+    </script>
+</body>
+</html>
