@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת דרכי האינקה (קאפאק ניאן) - מחקר היסטורי מקיף</title>
+    <!-- שילוב Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* הגדרות גופנים לקריאה מחקרית נוחה על מסכי Samsung S25 Ultra */
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Frank+Ruhl+Libre:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Heebo', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* עיצוב Glassmorphism לפרימיום Dark Mode */
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* עיצוב לתמונות עתידיות (Placeholders) */
+        .image-placeholder {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(31, 41, 55, 0.8),
+                rgba(31, 41, 55, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 10px,
+                rgba(17, 24, 39, 0.8) 20px
+            );
+            border: 2px dashed rgba(34, 197, 94, 0.5); /* צבע ירוק-אנדים */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .image-placeholder:hover {
+            border-color: rgba(34, 197, 94, 1);
+            color: #E5E7EB;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen selection:bg-emerald-500 selection:text-white flex flex-col">
+
+    <!-- קונטיינר ראשי אליו יוזרק התוכן הדינמי -->
+    <div id="app-container" class="flex-grow w-full"></div>
+
+    <script>
+        let currentLang = 'he';
+
+        // מסד הנתונים הדו-לשוני המלא
+        const content = {
+            he: {
+                dir: "rtl",
+                navBack: "חזור לאנציקלופדיה",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "English",
+                heroTitle: "מערכת דרכי האינקה",
+                heroYears: "שנות פעילות מרכזיות: המאה ה-15 – 1532 לספירה",
+                heroLength: "אורך משוער: למעלה מ-30,000 קילומטרים",
+                heroDesc: "פרויקט התשתיות ההנדסי המורכב ביותר של אמריקה הפרה-קולומביאנית. רשת דרכים שחצתה את הרי האנדים הגבוהים, יערות גשם ומדבריות חוף, ונבנתה כולה על ידי כוח אדם אנושי ללא שימוש בגלגל, סוסים או ברזל.",
+                mapPlaceholder: "",
+                mapHint: "הכנס כאן את קובץ המפה (למשל: inca-road-system-map.jpg)",
+                
+                etyTitle: "ניתוח אטימולוגי מלא",
+                etyAuthor: "החוקר והארכאולוג המודרני:",
+                etyAuthorDesc: "חקר הרשת המסועפת הזו ומיפויה המודרני הושפעו עמוקות מעבודתו של הארכאולוג האמריקאי <strong>ג'ון היסלופ (John Hyslop)</strong>, שספרו מ-1984 'The Inka Road System' הפך למחקר המקיף ביותר בנושא.",
+                etyYears: "שנות חייו של ההיסטוריון (היסלופ):",
+                etyYearsDesc: "1931 – 1993.",
+                etyContext: "<strong class='text-emerald-400'>ארץ מוצא ומקום לידה:</strong> ארצות הברית. היסלופ סקר פיזית אלפי קילומטרים של הדרך בהרי האנדים כדי להוכיח שהיא תוכננה בקפידה על ידי מהנדסי האימפריה ולא נכבשה באקראי.",
+                etyOriginal: "מונח המקור (בשפת הקצ'ואה):",
+                etyPart1Title: "חלק א' – Qhapaq (קאפאק)",
+                etyPart1Desc: "המילה משפת הקצ'ואה (Quechua) שמשמעותה 'מלכותי', 'עיקרי', 'אדיר' או 'יפה'. התואר ניתן לדברים הקשורים ישירות לקיסר האינקה (הסאפה אינקה).",
+                etyPart2Title: "חלק ב' – Ñan (ניאן)",
+                etyPart2Desc: "משמעות המילה בקצ'ואה היא 'דרך' או 'שביל'. יחד, המונח 'קאפאק ניאן' מתורגם ל'הדרך המלכותית האדירה', שהיוותה את עמוד השדרה של ארבעת מחוזות האימפריה.",
+
+                bioTitle: "מייסדי הנתיב והרקע ההיסטורי",
+                bioIntro: "רשת הדרכים התבססה בחלקה על תרבויות עתיקות יותר (כמו הווארי והצ'ימו), אך מי שאיחד אותן לרשת אחת מפלצתית, מתוכננת ומרכזית היה הקיסר שהפך את האינקה לאימפריה.",
+                
+                wuTitle: "פאצ'אקוטי אינקה יופאנקי (Pachacuti Inca Yupanqui)",
+                wuYears: "שנות חיים: סביב 1418 – 1471 | תקופת שלטון: 1438 – 1471 לספירה",
+                wuSub1: "ילדות, שורשים ועלייה לשלטון מתוך משבר:",
+                wuDesc1: "פאצ'אקוטי נולד בקוסקו כבנו התשיעי של הקיסר ויראקוצ'ה אינקה. הוא לא נועד לרשת את כס המלוכה. בשנת 1438, כשהעיר קוסקו הותקפה על ידי שבט הצ'אנקה (Chanca) האכזר, אביו ואחיו הבכור נמלטו מן העיר בבהלה. הצעיר נותר מאחור עם קומץ לוחמים, ארגן את ההגנה, הביס את הצ'אנקה בקרב אגדי, והציל את הבירה. בעקבות הניצחון הוא הדיח את אביו, נטל את השלטון, ושינה את שמו ל'פאצ'אקוטי', שמשמעותו 'הופך העולם' או 'מזעזע הארץ'. משבט מקומי קטן, הוא החל במסע כיבושים חסר תקדים.",
+                wuSub2: "אידאולוגיה ותפיסת עולם:",
+                wuDesc2: "האידאולוגיה של פאצ'אקוטי הייתה קוסמית ואימפריאליסטית כאחד. הוא ייסד את אימפריית ה'טאוואנטינסויו' (Tawantinsuyu - 'ממלכת ארבעת המחוזות'). הוא האמין שהאינקה הם בניו של אינטי (Inti - אל השמש), ותפקידם הוא להביא סדר (אור וציוויליזציה) לעולם הברברי. הדרך לא הייתה רק אמצעי תחבורה, אלא כלי אידאולוגי לאיחוד רוחני ולשליטה גיאומטרית בטבע הקשוח של הרי האנדים.",
+                wuReasonsTitle: "הסיבות המדויקות והאסטרטגיות לבניית מערכת הדרכים:",
+                wuReason1Title: "ניידות צבאית והעברת מסרים (Chasqui):",
+                wuReason1Desc: "כדי לשלוט באימפריה באורך 4,000 ק\"מ, פאצ'אקוטי היה חייב לשנע צבאות במהירות. הרשת חצתה את רכסי ההרים וכללה תחנות ממסר, שאפשרו לאינקה לדכא מרידות מיד עם פריצתן. בנוסף, הרשת שימשה את ה'צ'אסקי' (Chasqui) - רצים מיומנים שהעבירו הודעות דרך שרשרת אנושית מהירה במיוחד (הודעה מקוסקו לקיטו עברה תוך ימים ספורים).",
+                wuReason2Title: "כלכלת מס יאלי (Mit'a - מיט'ה):",
+                wuReason2Desc: "אימפריית האינקה התנהלה ללא כסף. המס שולם בצורת עבודת כפיים חובה על ידי האזרחים ('מיט'ה'). דרכי האינקה נסללו בעזרת חובת עבודה זו, ובאותן דרכים הובילו האזרחים את עודפי התבואה, הצמר והנשק למחסני הענק הממשלתיים (Qullqa) שניצבו לאורך הדרך.",
+                wuReason3Title: "מיזוג אידאולוגי ואקולוגי (ארכיפלג אנכי):",
+                wuReason3Desc: "האנדים מאופיינים באזורי אקלים שונים לפי גובה. הדרכים חיברו את מישורי החוף החמים, ההרים הקפואים, ויערות הגשם, מה שאפשר לאינקה לשנע דגים מהחוף, צמר מההרים, ועלי קוקה מהג'ונגלים, ליצירת כלכלה המספקת את עצמה במלואה לכל האוכלוסייה.",
+
+                animalsTitle: "לוגיסטיקה של בעלי חיים: מנוע האנדים",
+                animalsDesc: "לאינקה לא היו סוסים, חמורים או גמלים. הכלכלה, הלוגיסטיקה ובניית הדרכים בהרים נשענו על חיית משא אנדמית אחת בלבד.",
+                horseSpecies: "הלאמה (Llama - Lama glama):",
+                horseDesc: "בעל חיים ממשפחת הגמליים, שבוית באנדים לפני אלפי שנים. הלאמה אינה חזקה מספיק כדי לשאת אדם או למשוך מחרשה, אך היא הייתה בהמת המשא היחידה ביבשת אמריקה כולה. <strong class='text-white mt-2 block'>חשיבות היסטורית ואסטרטגית:</strong> הלאמה שימשה את שיירות האינקה להובלת ציוד ומזון. כל לאמה יכולה לשאת כ-25 עד 30 קילוגרם ולצעוד כ-20 ק\"מ ביום בגבהים קיצוניים של למעלה מ-4,000 מטר, שם סוסים היו מתים מחוסר חמצן. הלאמה ניחנה בכריות רכות בפרסותיה שמנעו את שחיקת מדרגות האבן של הדרכים (בניגוד לפרסות הברזל של סוסי הספרדים בהמשך). היא סיפקה לאינקה הכל: צמר לביגוד, עור לסנדלים, בשר למזון, גללים כחומר בעירה, וכוח הובלה בשיירות של אלפי פרטים. <strong class='text-white mt-2 block'>ארץ מוצא:</strong> הרי האנדים (פרו, בוליביה).",
+                elephantSpecies: "אלפקה ויקוניה (Alpaca & Vicuña):",
+                elephantDesc: "מינים קרובים של גמליים. <strong class='text-white mt-2 block'>חשיבות היסטורית:</strong> לא שימשו כחיות משא, אלא גודלו עבור הצמר. צמר הוויקוניה היה כה עדין ויוקרתי, שרק לקיסר האינקה (הסאפה אינקה) ולמשפחת המלוכה הותר ללבוש בגדים שנארגו ממנו, ואלה שנעו על הדרך המלכותית לבשו אותו כסמל סטטוס אלוהי. <strong class='text-white mt-2 block'>ארץ מוצא:</strong> הרי האנדים.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "מסחר, אסטרטגיה וגיאופוליטיקה",
+                economyTitle: "חשיבות המסחר והכלכלה (העדר הכסף)",
+                economyDesc: "המערכת הכלכלית של האינקה לא כללה כסף או שוקי סחר חופשי. הכלכלה הייתה שלטונית-ריכוזית. המדינה גבתה תוצרת, איחסנה אותה באלפי מבנים (קולקה) לאורך הדרך, וחילקה אותה מחדש לאוכלוסייה בשנות רעב או לצבאות צועדים. הדרך אפשרה לכלכלה ללא שווקים וללא כסף לשגשג ביעילות מדהימה.",
+                milStrategyTitle: "חשיבות אסטרטגית - הנדסת שליטה",
+                milStrategyDesc: "דרך האינקה לא נועדה לנוסע הפשוט; רוב האזרחים נזקקו לאישור כדי לנוע עליה. זו הייתה רשת צבאית מובהקת. הדרכים נסללו בקו ישר ככל האפשר, עם מדרגות אבן חצובות בהרים התלולים, מה שהתאים לחיילי רגלים וללאמות, אך לא לעגלות. השליטה בנקודות המעבר ובגשרי החבלים הבטיחה ששום צבא זר לא יוכל לנוע ללא זיהוי מיידי על ידי הצ'אסקי (רצי הדואר).",
+                goodsOriginTitle: "ארץ המוצא של הסחורות והתוצרת",
+                chinaOrigin: "רכסי האנדים הגבוהים (פרו ובוליביה):",
+                chinaGoods: "<strong class='text-white'>תפוחי אדמה (צ'וניו), קינואה וצמר לאמה:</strong> בגבהים אלו גידלו למעלה מ-200 זנים של תפוחי אדמה. הם פיתחו את טכניקת הליאופיליזציה (ייבוש בהקפאה) הראשונה בעולם - יצירת 'צ'וניו' מתפוחי אדמה קפואים שיכלו להישמר במחסנים לאורך הדרך במשך שנים מבלי להרקב.",
+                indiaOrigin: "אזורי החוף (ליד האוקיינוס השקט):",
+                indiaGoods: "<strong class='text-white'>דגים מיובשים, כותנה וגואנו:</strong> החוף סיפק למרכז האימפריה כותנה איכותית ללבוש, וגואנו (לשלשת ציפורים) ששימש כדשן חקלאי חיוני ששונע על גב הלאמות להרים.",
+                romeOrigin: "יערות הגשם (אגן האמזונס במזרח):",
+                romeGoods: "<strong class='text-white'>עלי קוקה, נוצות זהובות ותרופות:</strong> הג'ונגלים סיפקו את עלי הקוקה - צמח קדוש שנלס כדי להתגבר על מחלת גבהים ועייפות. כמו כן הובאו נוצות תוכים ססגוניות ועצי מרפא טרופיים לשימוש האליטה.",
+
+                ideologyTitle: "אידאולוגיה וטכנולוגיה",
+                ideologyDesc: "ההנדסה של האינקה שיקפה את כיבוד הטבע שלהם. בניגוד לאירופאים שחצבו בטבע, הדרכים והגשרים של האינקה השתלבו הרמונית בטופוגרפיה.",
+                
+                techTitle: "הישגים טכנולוגיים ותשתיות אזרחיות",
+                techDesc: "בניית מערכת כזו ללא ברזל, חומרי נפץ או גלגלים היא פלא טכנולוגי:",
+                tech1: "גשרי חבלים תלויים (Q'eswachaka): כדי לחצות קניונים עמוקים שאבו הרים, טוו המהנדסים גשרים תלויים מסיבי עשב ה'איצ'ו' (Ichu). גשרים אלו יכלו לשאת חיילים ושיירות, ותוחזקו אחת לשנה על ידי הקהילות המקומיות בתהליך טקסי. <strong class='text-white'>ארץ פיתוח:</strong> אימפריית האינקה.",
+                tech2: "מדרגות אבן במקום פיתולים: מכיוון שלא השתמשו בגלגל, לא היה צורך בכבישים מתונים בעלי שיפוע נמוך לעגלות. מהנדסי האינקה חצבו מדרגות אבן ישירות במעלה ההר, מה שקיצר את המרחקים משמעותית עבור הולכי רגל ופרסות הלאמה.",
+                tech3: "הקיפו (Quipu): האינקה לא פיתחו כתב. התקשורת הכתובה, החישבונאות וניהול המלאי במחסני הדרכים נוהלו באמצעות 'קיפו' - מערכת מורכבת של חוטים וקשרים (צבעים, סוגי קשרים ומיקומם) שהעבירו נתונים מספריים וסטטיסטיים על ידי הרצים (הצ'אסקי).",
+                techSummary: "מערכת התשתיות הגיעה לרמות הנדסה כה מדהימות, עד שחלק מדרכי האבן וגשרי החבלים משמשים את תושבי האנדים עד עצם היום הזה.",
+
+                declineTitle: "הדעיכה והקריסה של הנתיב",
+                declineDesc: "מערכת הדרכים המושלמת של האינקה הפכה, למרבה האירוניה, לנשק שהחריב אותה. בשנת <strong class='text-emerald-400'>1532</strong>, הכובש הספרדי (קונקיסטאדור) <strong>פרנסיסקו פיסארו</strong> וכוחותיו נחתו באמריקה. הדרכים הסלולות היטב אפשרו לספרדים על סוסיהם (חיה שהאינקה מעולם לא ראו) לצעוד במהירות אל לב האימפריה - קוסקו וקחמארקה - וללכוד את הקיסר אטאהואלפה. בנוסף, פרסות הברזל של הסוסים הספרדים ועגלות העץ הכבדות פירקו והרסו את אבני הדרך העדינות שתוכננו רק לפרסותיהן הרכות של הלאמות. מכת המחץ הסופית לא הייתה צבאית, אלא ביולוגית (כחלק מהחילופין הקולומביאנים): מחלות כמו אבעבועות שחורות פשטו לאורך דרך המלך במהירות רבה, והשמידו את רוב אוכלוסיית האימפריה תוך עשור.",
+
+                footer: "המחקר נכתב וקודד על ידי ג'מיני ורם © 2026"
+            },
+            en: {
+                dir: "ltr",
+                navBack: "Back to Encyclopedia",
+                navTitle: "Trade Routes Encyclopedia",
+                langBtn: "עברית",
+                heroTitle: "The Inca Road System",
+                heroYears: "Peak Active Years: 15th Century – 1532 CE",
+                heroLength: "Estimated Length: Over 30,000 Kilometers",
+                heroDesc: "The most complex engineering infrastructure project in pre-Columbian America. A road network that crossed the high Andes, rainforests, and coastal deserts, built entirely by human power without the use of wheels, horses, or iron.",
+                mapPlaceholder: "",
+                mapHint: "Insert your map file here (e.g., inca-road-system-map.jpg)",
+                
+                etyTitle: "Complete Etymological Analysis",
+                etyAuthor: "Modern Archaeologist & Researcher:",
+                etyAuthorDesc: "The research and modern mapping of this vast network were deeply influenced by the work of American archaeologist <strong>John Hyslop</strong>, whose 1984 book 'The Inka Road System' became the most comprehensive study on the subject.",
+                etyYears: "Historian's Lifespan (Hyslop):",
+                etyYearsDesc: "1931 – 1993.",
+                etyContext: "<strong class='text-emerald-400'>Country of Origin & Birthplace:</strong> United States. Hyslop physically surveyed thousands of kilometers of the road in the Andes to prove it was meticulously planned by imperial engineers and not conquered haphazardly.",
+                etyOriginal: "Original Term (in Quechua):",
+                etyPart1Title: "Part A – Qhapaq",
+                etyPart1Desc: "A Quechua word meaning 'royal', 'principal', 'mighty', or 'beautiful'. The title was bestowed upon things directly related to the Inca Emperor (the Sapa Inca).",
+                etyPart2Title: "Part B – Ñan",
+                etyPart2Desc: "In Quechua, it means 'road' or 'path'. Together, the term 'Qhapaq Ñan' translates to 'The Great Royal Road', which formed the backbone of the empire's four regions.",
+
+                bioTitle: "Founders and Historical Background",
+                bioIntro: "The road network was partly based on older civilizations (like the Wari and Chimú), but the emperor who unified them into a single, planned, and centralized monstrous network was the one who turned the Inca into an empire.",
+                
+                wuTitle: "Pachacuti Inca Yupanqui",
+                wuYears: "Lifespan: c. 1418 – 1471 | Reign: 1438 – 1471 CE",
+                wuSub1: "Childhood, Roots, and Rise to Power from Crisis:",
+                wuDesc1: "Pachacuti was born in Cusco as the ninth son of Emperor Viracocha Inca. He was not destined to inherit the throne. In 1438, when Cusco was attacked by the fierce Chanca tribe, his father and eldest brother fled the city in panic. The young man remained behind with a handful of warriors, organized the defense, defeated the Chanca in a legendary battle, and saved the capital. Following the victory, he deposed his father, seized power, and changed his name to 'Pachacuti', meaning 'Earth-shaker' or 'He who overturns space and time'. From a small local tribe, he began an unprecedented campaign of conquest.",
+                wuSub2: "Ideology and Worldview:",
+                wuDesc2: "Pachacuti's ideology was both cosmic and imperialistic. He founded the 'Tawantinsuyu' Empire ('Realm of the Four Parts'). He believed the Inca were the children of Inti (the Sun god), tasked with bringing order (light and civilization) to a barbarian world. The road was not merely transport, but an ideological tool for spiritual unification and geometric control over the harsh nature of the Andes.",
+                wuReasonsTitle: "Exact Strategic Reasons for Building the Road System:",
+                wuReason1Title: "Military Mobility and Communication (Chasqui):",
+                wuReason1Desc: "To govern a 4,000 km long empire, Pachacuti had to move armies swiftly. The network crossed mountain ranges and included relay stations, allowing the Inca to crush rebellions immediately. Furthermore, the network was used by the 'Chasqui'—highly trained runners who delivered messages through an incredibly fast human chain (a message from Cusco to Quito arrived in days).",
+                wuReason2Title: "The Mit'a Labor Tax Economy:",
+                wuReason2Desc: "The Inca Empire operated without money. Taxes were paid through mandatory manual labor by citizens ('Mit'a'). The Inca roads were paved using this labor tax, and along these very roads, citizens transported surplus grain, wool, and weapons to massive state storehouses (Qullqa) situated along the route.",
+                wuReason3Title: "Ideological and Ecological Fusion (Vertical Archipelago):",
+                wuReason3Desc: "The Andes feature distinct climate zones based on altitude. The roads connected the hot coastal plains, freezing mountains, and rainforests, allowing the Inca to transport fish from the coast, wool from the mountains, and coca leaves from the jungles, creating a fully self-sustaining economy for the entire population.",
+
+                animalsTitle: "Animal Logistics: The Engine of the Andes",
+                animalsDesc: "The Inca possessed no horses, donkeys, or camels. The economy, logistics, and road building in the mountains relied on a single endemic beast of burden.",
+                horseSpecies: "The Llama (Lama glama):",
+                horseDesc: "A camelid domesticated in the Andes millennia ago. The llama is not strong enough to carry a human or pull a plow, yet it was the only beast of burden in the entire Americas. <strong class='text-white mt-2 block'>Historical and Strategic Importance:</strong> Llamas were used in Inca caravans to transport gear and food. Each llama can carry 25-30 kg and walk ~20 km a day at extreme altitudes over 4,000 meters, where horses would die of oxygen deprivation. Llamas have soft, leathery footpads that prevented the wear and tear of the road's stone steps (unlike the iron horseshoes of the Spanish later on). It provided the Inca with everything: wool for clothing, leather for sandals, meat for food, dung for fuel, and hauling power in caravans of thousands. <strong class='text-white mt-2 block'>Origin:</strong> The Andes (Peru, Bolivia).",
+                elephantSpecies: "Alpaca and Vicuña:",
+                elephantDesc: "Closely related camelid species. <strong class='text-white mt-2 block'>Historical Importance:</strong> Not used as pack animals, but bred for their wool. Vicuña wool was so fine and luxurious that only the Emperor (Sapa Inca) and royalty were permitted to wear garments woven from it, wearing it as a symbol of divine status while traveling the Royal Road. <strong class='text-white mt-2 block'>Origin:</strong> The Andes.",
+
+                caravanPlaceholder: "",
+
+                strategyTitle: "Trade, Strategy, and Geopolitics",
+                economyTitle: "Importance of Trade and Economy (Moneyless System)",
+                economyDesc: "The Inca economic system featured no money or free trade markets. The economy was state-centralized. The state collected produce, stored it in thousands of structures (Qullqa) along the road, and redistributed it to the population during famine years or to marching armies. The road enabled a moneyless, marketless economy to thrive with astonishing efficiency.",
+                milStrategyTitle: "Strategic Importance - Engineering Control",
+                milStrategyDesc: "The Inca road was not for the common traveler; most citizens required permission to use it. It was a distinctly military network. Roads were built as straight as possible, featuring stone steps carved into steep mountains, which suited infantry and llamas, but not wheeled carts. Control over chokepoints and rope bridges ensured that no foreign army could move without immediate detection by the Chasqui.",
+                goodsOriginTitle: "Origin of Commodities and Produce",
+                chinaOrigin: "High Andes Mountain Ranges (Peru and Bolivia):",
+                chinaGoods: "<strong class='text-white'>Potatoes (Chuño), Quinoa, and Llama Wool:</strong> At these altitudes, over 200 varieties of potatoes were grown. They developed the world's first freeze-drying technique—creating 'Chuño' from frozen potatoes that could be kept in roadside storehouses for years without rotting.",
+                indiaOrigin: "Coastal Regions (Pacific Ocean):",
+                indiaGoods: "<strong class='text-white'>Dried Fish, Cotton, and Guano:</strong> The coast supplied the empire's center with fine cotton for clothing, and Guano (bird droppings) used as essential agricultural fertilizer, transported up the mountains on llamas.",
+                romeOrigin: "Rainforests (Amazon Basin in the East):",
+                romeGoods: "<strong class='text-white'>Coca Leaves, Golden Feathers, and Medicines:</strong> The jungles provided Coca leaves—a sacred plant chewed to combat altitude sickness and fatigue. Colorful parrot feathers and tropical medicinal woods were also brought for elite use.",
+
+                ideologyTitle: "Ideology and Technology",
+                ideologyDesc: "Inca engineering reflected their reverence for nature. Unlike Europeans who carved through nature, Inca roads and bridges integrated harmoniously with the topography.",
+                
+                techTitle: "Technological Achievements and Civic Infrastructure",
+                techDesc: "Building such a system without iron, explosives, or wheels is a technological marvel:",
+                tech1: "Suspension Rope Bridges (Q'eswachaka): To cross deep canyons, engineers wove suspension bridges from 'Ichu' grass fibers. These bridges could bear soldiers and caravans, and were ceremonially maintained annually by local communities. <strong class='text-white'>Development Origin:</strong> Inca Empire.",
+                tech2: "Stone Steps Instead of Switchbacks: Lacking the wheel, there was no need for gentle, low-gradient roads for carts. Inca engineers carved stone steps directly up the mountain, significantly shortening distances for pedestrians and llama hooves.",
+                tech3: "The Quipu: The Inca never developed a written script. Written communication, accounting, and inventory management in road storehouses were handled using the 'Quipu'—a complex system of strings and knots (colors, knot types, and placement) that conveyed numerical and statistical data via the Chasqui runners.",
+                techSummary: "The infrastructure reached such incredible levels of engineering that some stone roads and rope bridges are used by Andean inhabitants to this very day.",
+
+                declineTitle: "Decline and Collapse of the Route",
+                declineDesc: "Ironically, the perfect Inca road system became the weapon that destroyed it. In <strong class='text-emerald-400'>1532</strong>, the Spanish Conquistador <strong>Francisco Pizarro</strong> and his forces landed in the Americas. The well-paved roads allowed the Spanish on their horses (an animal the Inca had never seen) to march rapidly into the heart of the empire—Cusco and Cajamarca—and capture Emperor Atahualpa. Furthermore, the iron horseshoes of Spanish steeds and heavy wooden carts shattered and ruined the delicate paving stones designed only for the soft pads of llamas. The final, fatal blow was not military, but biological (as part of the Columbian Exchange): diseases like smallpox spread along the Royal Road with terrifying speed, wiping out the majority of the empire's population within a decade.",
+
+                footer: "Research written and coded by Gemini & Ram © 2026"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'he' ? 'en' : 'he';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = content[currentLang].dir;
+            renderPage();
+        }
+
+        function renderPage() {
+            const t = content[currentLang];
+            const isEn = currentLang === 'en';
+            
+            const html = `
+                <!-- סרגל ניווט עליון -->
+                <nav class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                        <a href="../index.html" class="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors group">
+                            <svg class="w-5 h-5 transform ${isEn ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'} transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <span class="font-bold tracking-wide text-sm sm:text-base">${t.navBack}</span>
+                        </a>
+                        <div class="flex items-center gap-4">
+                            <button onclick="toggleLanguage()" class="text-sm font-semibold text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-700/60 px-3 py-1.5 rounded-lg border border-slate-700 transition-all">
+                                ${t.langBtn}
+                            </button>
+                            <div class="text-slate-400 font-semibold tracking-widest text-sm uppercase hidden sm:block">
+                                ${t.navTitle}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24 space-y-12">
+                    
+                    <header class="text-center space-y-6">
+                        <div class="inline-block p-6 rounded-full bg-slate-800 border-4 border-slate-700 shadow-2xl mb-4">
+                            <span class="text-7xl">🦙</span>
+                        </div>
+                        <h1 class="text-5xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-emerald-500 to-green-600 tracking-tight">
+                            ${t.heroTitle}
+                        </h1>
+                        <div class="flex flex-wrap justify-center gap-3 text-sm sm:text-base font-semibold">
+                            <span class="bg-emerald-900/40 text-emerald-300 px-4 py-1.5 rounded-full border border-emerald-800/50">${t.heroYears}</span>
+                            <span class="bg-green-900/40 text-green-300 px-4 py-1.5 rounded-full border border-green-800/50">${t.heroLength}</span>
+                        </div>
+                        <p class="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed mt-6">
+                            ${t.heroDesc}
+                        </p>
+                    </header>
+
+                    <div class="image-placeholder w-full h-64 sm:h-96 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-10 h-10 mx-auto text-emerald-500 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p>${t.mapPlaceholder}</p>
+                            <p class="text-sm font-normal text-slate-500">${t.mapHint}</p>
+                        </div>
+                    </div>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-emerald-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">📖</span> ${t.etyTitle}
+                        </h2>
+                        <div class="space-y-6">
+                            <div class="bg-slate-800/60 p-6 rounded-2xl border border-slate-700 space-y-5 shadow-inner">
+                                <div class="border-b border-slate-700/60 pb-4">
+                                    <strong class="text-emerald-400 text-lg block mb-1">${t.etyAuthor}</strong>
+                                    <p class="text-slate-300 leading-relaxed">${t.etyAuthorDesc}</p>
+                                </div>
+                                <div class="border-b border-slate-700/60 pb-4">
+                                    <strong class="text-emerald-400 text-lg block mb-1">${t.etyYears}</strong>
+                                    <p class="text-slate-300 leading-relaxed font-semibold">${t.etyYearsDesc}</p>
+                                </div>
+                                <div class="pb-2">
+                                    <p class="text-slate-300 leading-relaxed">${t.etyContext}</p>
+                                </div>
+                                <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 inline-block w-full text-center">
+                                    <strong class="text-emerald-400">${t.etyOriginal}</strong> <span class="text-xl font-bold text-white tracking-widest font-mono mx-2">Qhapaq Ñan</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="bg-slate-800/40 p-5 rounded-2xl border-t-2 border-t-emerald-400">
+                                    <h4 class="text-emerald-300 font-bold text-lg mb-2">${t.etyPart1Title}</h4>
+                                    <p class="text-slate-400 text-sm leading-relaxed">${t.etyPart1Desc}</p>
+                                </div>
+                                <div class="bg-slate-800/40 p-5 rounded-2xl border-t-2 border-t-green-400">
+                                    <h4 class="text-green-300 font-bold text-lg mb-2">${t.etyPart2Title}</h4>
+                                    <p class="text-slate-400 text-sm leading-relaxed">${t.etyPart2Desc}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-green-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🏔️</span> ${t.bioTitle}
+                        </h2>
+                        <p class="text-slate-300 text-lg leading-relaxed mb-8">${t.bioIntro}</p>
+
+                        <div class="space-y-10">
+                            <div class="bg-slate-800/40 p-6 sm:p-8 rounded-2xl border border-slate-700/70 shadow-lg hover:border-emerald-500/50 transition-colors relative overflow-hidden">
+                                <div class="absolute top-0 ${isEn ? 'left-0' : 'right-0'} w-full h-1 bg-gradient-to-${isEn ? 'r' : 'l'} from-emerald-400 to-transparent"></div>
+                                <h3 class="text-3xl font-bold text-emerald-300 mb-2">${t.wuTitle}</h3>
+                                <p class="text-sm text-emerald-200 font-semibold mb-6 px-3 py-1 bg-emerald-900/30 inline-block rounded-md border border-emerald-800/50">${t.wuYears}</p>
+                                
+                                <div class="space-y-5 text-slate-300 leading-relaxed text-sm sm:text-base">
+                                    <div><strong class="text-white text-lg border-b border-slate-700 pb-1 mb-2 inline-block">${t.wuSub1}</strong><p>${t.wuDesc1}</p></div>
+                                    <div><strong class="text-white text-lg border-b border-slate-700 pb-1 mb-2 inline-block">${t.wuSub2}</strong><p>${t.wuDesc2}</p></div>
+                                    <div class="bg-slate-800/80 p-6 rounded-xl border border-slate-700 mt-6 shadow-inner">
+                                        <strong class="text-emerald-300 block mb-4 text-xl flex items-center gap-2"><span class="text-2xl">🎯</span> ${t.wuReasonsTitle}</strong>
+                                        <ul class="space-y-4 list-none">
+                                            <li class="flex gap-3"><span class="text-red-400 mt-1">🏃‍♂️</span><div><strong class="text-white">${t.wuReason1Title}</strong> ${t.wuReason1Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-yellow-400 mt-1">⚒️</span><div><strong class="text-white">${t.wuReason2Title}</strong> ${t.wuReason2Desc}</div></li>
+                                            <li class="flex gap-3"><span class="text-blue-400 mt-1">🌱</span><div><strong class="text-white">${t.wuReason3Title}</strong> ${t.wuReason3Desc}</div></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-emerald-500"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">🦙</span> ${t.animalsTitle}
+                        </h2>
+                        <p class="text-slate-300 text-lg leading-relaxed mb-8">${t.animalsDesc}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700">
+                                <h4 class="text-emerald-400 font-bold text-xl mb-4 flex items-center gap-2">🦙 ${t.horseSpecies}</h4>
+                                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">${t.horseDesc}</p>
+                            </div>
+                            <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700">
+                                <h4 class="text-emerald-400 font-bold text-xl mb-4 flex items-center gap-2">🧶 ${t.elephantSpecies}</h4>
+                                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">${t.elephantDesc}</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="image-placeholder w-full h-48 sm:h-64 rounded-2xl">
+                        <div class="text-center space-y-2">
+                            <svg class="w-12 h-12 mx-auto text-emerald-400 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            <p>${t.caravanPlaceholder}</p>
+                        </div>
+                    </div>
+
+                    <section class="glass-card rounded-3xl p-8 sm:p-10 relative overflow-hidden">
+                        <div class="absolute ${isEn ? 'left-0' : 'right-0'} top-0 w-1.5 h-full bg-green-600"></div>
+                        <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                            <span class="text-3xl">⚖️</span> ${t.strategyTitle}
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50">
+                                <h3 class="text-xl font-bold text-yellow-400 mb-3">${t.economyTitle}</h3>
+                                <p class="text-slate-300 leading-relaxed text-sm sm:text-base">${t.economyDesc}</p>
+                            </div>
+                            <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50">
+                                <h3 class="text-xl font-bold text-red-400 mb-3">${t.milStrategyTitle}</h3>
+                                <p class="text-slate-300 leading-relaxed text-sm sm:text-base">${t.milStrategyDesc}</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800/60 p-6 rounded-2xl border border-slate-700 mt-4">
+                            <h3 class="text-xl font-bold text-emerald-400 mb-4 border-b border-slate-700 pb-2">${t.goodsOriginTitle}</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🥔</span><p class="text-slate-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.chinaOrigin}</strong> ${t.chinaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🐟</span><p class="text-slate-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.indiaOrigin}</strong> ${t.indiaGoods}</p></li>
+                                <li class="flex items-start gap-4"><span class="text-2xl mt-1">🍃</span><p class="text-slate-300 text-sm sm:text-base"><strong class="text-white text-lg block mb-1">${t.romeOrigin}</strong> ${t.romeGoods}</p></li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-emerald-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">💡</span> ${t.ideologyTitle}</h3>
+                            <p class="text-slate-300 leading-relaxed">${t.ideologyDesc}</p>
+                        </div>
+                        <div class="glass-card p-8 rounded-3xl border-t-4 border-t-green-500">
+                            <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2"><span class="text-2xl">⚙️</span> ${t.techTitle}</h3>
+                            <p class="text-slate-300 leading-relaxed">${t.techDesc}</p>
+                            <ul class="list-disc list-inside mt-4 text-slate-300 space-y-2 font-semibold">
+                                <li class="text-emerald-300">${t.tech1}</li>
+                                <li class="text-emerald-300">${t.tech2}</li>
+                                <li class="text-emerald-300">${t.tech3}</li>
+                            </ul>
+                            <p class="text-slate-400 text-sm mt-4">${t.techSummary}</p>
+                        </div>
+                    </section>
+                    
+                    <section class="glass-card p-8 rounded-3xl bg-red-900/10 border-red-900/30 text-center">
+                        <h3 class="text-2xl font-bold text-red-400 mb-4">${t.declineTitle}</h3>
+                        <p class="text-slate-300 leading-relaxed max-w-3xl mx-auto">${t.declineDesc}</p>
+                    </section>
+                </main>
+
+                <footer class="mt-auto border-t border-slate-800 bg-slate-900/90 py-6 text-center z-10">
+                    <p class="text-slate-500 text-sm font-semibold tracking-wide">${t.footer}</p>
+                </footer>
+            `;
+            
+            document.getElementById('app-container').innerHTML = html;
+        }
+
+        window.onload = renderPage;
+    </script>
+</body>
+</html>
